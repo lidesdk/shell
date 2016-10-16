@@ -1,7 +1,7 @@
 lide_installfolder    = '/datos/Proyectos/lide_cmd'
 lide_libraries_folder = '/datos/Proyectos/lide_cmd/libraries'
 
-access_token  = 'ba30a0531c2c53090f89d41f3f8e6f01df8bb297'
+access_token  = ''
 github_path   = 'lidesdk/repos/libraries/lide.http.zip'
 
 local folders = { libraries = '/datos/Proyectos/lide_cmd/libraries' }
