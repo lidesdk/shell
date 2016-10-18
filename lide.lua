@@ -1,47 +1,89 @@
-lide_installfolder    = '/datos/Proyectos/lide_cmd'
-lide_libraries_folder = '/datos/Proyectos/lide_cmd/libraries'
+-- Define paths:
+local access_token  = '59748697161850409f398caca1ba17b07e16af87'
 
-access_token  = ''
-github_path   = 'lidesdk/repos/libraries/lide.http.zip'
+app.folders = { install, libraries, ourclibs, ourlibs }	
 
-local folders = { libraries = '/datos/Proyectos/lide_cmd/libraries' }
 
-package.path = lide_installfolder..'/http/?.lua;' ..
-			   lide_installfolder..'/?.lua;' .. package.path
+if lide.platform.getOSName() == 'Windows' then
+
+	app.folders.install   = 'c:\\lidesdk'
+	app.folders.libraries = 'c:\\lidesdk\\libraries'
+	lide_installfolder = 'C:\\lidesdk\\bin\\libs'
+	app.folders.ourclibs  = '.\\ourclibs'
+
+	package.path  = lide_installfolder..'\\http\\?.lua;' ..
+				    lide_installfolder..'\\?.lua;' .. package.path
+	package.cpath = lide_installfolder..'\\http\\?.dll;' ..
+				    lide_installfolder..'\\?.dll;' .. package.cpath
+
+elseif lide.platform.getOSName() == 'Linux' then
+
+	app.folders.install   = '/home/dariocanoh/Proyectos/lide_testing/lidesdk_bin'
+	app.folders.libraries = '/home/dariocanoh/Proyectos/lide_testing/lidesdk_bin/libraries'
+	app.folders.ourclibs  = './ourclibs'
+
+	package.path = app.folders.install..'/http/?.lua;' ..
+			   	   app.folders.install..'/?.lua;' .. package.path
+end
+
+package.cpath = './?.so;' ..
+				'./ourclibs/?.so;'
+
+package.path  = './?.lua;' ..
+				'./ourlibs/?.lua;'
 
 local sqldatabase = require 'sqldatabase.init'
 local github      = require 'github'
 lide.zip 		  = require 'lide_zip'
 
-local db_content, err = github.get_file ( 'lidesdk/repos/libraries.db', nil, access_token)
+print(package.cpath)
+print(package.path )
 
-if db_content then
-	io.open(folders.libraries..'/repos.db', 'w+b') : write(db_content) : close()
-else
-	print('[lide.github]: ', err)
+local function update_database ( access_token )
+	local db_content, errcode, errmsg  = github.get_file ( 'lidesdk/repos/libraries.db', nil, access_token)
+
+	if db_content then
+		-- if folder doesnt exist create it (todo)
+		local repos_db = io.open(app.folders.libraries..'/repos.db', 'w+b')
+		if repos_db:write(db_content) then
+			repos_db:close()
+			-- OK SUccess
+		else
+			--any error writeing file
+		end
+	else
+		print('[lide.github]: ', errmsg)
+	end
 end
 
-local libraries_stable = sqldatabase:new(folders.libraries..'/repos.db', 'sqlite3')
+local libraries_stable = sqldatabase:new(app.folders.libraries..'/repos.db', 'sqlite3')
 
 if ( arg[1] == 'search' and arg[2] ) then
 	local text_to_search = arg[2]
-	
+		
 	print '> Searching...'
+	
+	update_database ( access_token );
 
-	local libraries_stable = sqldatabase:new('libraries.db', 'sqlite3')
+	--wx.wxSleep(0.01)
+
+	local libraries_stable = sqldatabase:new(app.folders.libraries..'/repos.db', 'sqlite3')
 
 	local tbl = libraries_stable:select('select * from libraries_stable where package_name like "%'..text_to_search..'%"')
 	
 	if #tbl > 0 then
 		for i, row in pairs( tbl ) do
 			if type(row) == 'table' then
-				local local_package_version = io.open(lide_libraries_folder..'/'..row.package_name..'/'..row.package_name..'.manifest'):read('*l')
 				local num_repo_version  = tonumber(tostring(row.package_version:gsub('%.', '')));
-				local num_local_version = tonumber(tostring(local_package_version:gsub('%.', '')));
 				
-				if ( num_repo_version > num_local_version ) then
-					str_tag = '(UPDATE)'
+				if lide.folder.doesExists(app.folders.libraries..'/'..row.package_name) then
+					local local_package_version = io.open(app.folders.libraries..'/'..row.package_name..'/'..row.package_name..'.manifest'):read('*l')
+					local num_local_version = tonumber(tostring(local_package_version:gsub('%.', '')));
+					if ( num_repo_version > num_local_version ) then
+						str_tag = '(UPDATE)'
+					end
 				end
+
 				print(
 					('\n%s [%s] %s\n\t%s\n'):format(row.package_name, row.package_version, str_tag or '', row.package_description)
 				)
@@ -53,25 +95,30 @@ if ( arg[1] == 'search' and arg[2] ) then
 	end
 
 elseif ( arg[1] == 'install' and arg[2] ) then
-	local _package_name    = arg[2]
-	local _query = 'select * from libraries_stable where package_name like "%s" limit 1'
+	local _package_name  = arg[2]
+	local _query_install = 'select * from libraries_stable where package_name like "%s" limit 1'
 	
 	print('> Search '.. _package_name)
 	
-	if # libraries_stable:select ( _query:format(_package_name) ) == 0 then
+	update_database(access_token);
+	
+	wx.wxSleep(0.01)
+
+	if # libraries_stable:select ( _query_install:format(_package_name) ) == 0 then
 		print 'No matches!'
 		return false
 	end
 
-	local _package_name    = libraries_stable:select(_query:format(_package_name))[1].package_name
-	local _package_version = libraries_stable:select(_query:format(_package_name))[1].package_version
-	local _package_file    = lide_libraries_folder..'/'.._package_name..'.zip'
+	local _package_name    = libraries_stable:select(_query_install:format(_package_name))[1].package_name
+	local _package_version = libraries_stable:select(_query_install:format(_package_name))[1].package_version
+	local _package_file    = app.folders.libraries..'/'.._package_name..'.zip'
+
 
 	if # libraries_stable:select('select * from libraries_stable where package_name like "%'.._package_name..'%" limit 1') > 0 then
-		print(('> Found! lide.http %s'):format(_package_version));
+		print(('> Found! %s %s'):format(_package_name, _package_version));
 	end
 	
-	local github_path = libraries_stable:select(_query:format(_package_name))[1].package_url
+	local github_path = libraries_stable:select(_query_install:format(_package_name))[1].package_url
 	
 	local content = github.get_file ( github_path, nil, access_token )
 	
@@ -79,24 +126,33 @@ elseif ( arg[1] == 'install' and arg[2] ) then
 
 	print('\t> Installing...')	
 
-	if lide.folder.doesExists(folders.libraries..'/'.._package_name) then
+	if lide.folder.doesExists(app.folders.libraries..'/'.._package_name) then
 		print (('\t> The package %s is already installed.'):format(_package_name))
 		return false
 	end
 
-	lide.zip.extract(_package_file, lide_libraries_folder ..'/'.._package_name)
+	lide.zip.extract(_package_file, app.folders.libraries ..'/'.._package_name)
 
 	print('\t> All done!')
 	
-	io.popen (('rm -rf "%s"'):format(_package_file));
+	wx.wxSleep(0.01)
+	
+	io.popen ('rm -rf "' .. app.folders.libraries ..'/'.._package_name..'.zip"');
 
-	print(('New library installed lide.http %s'):format(_package_version))
+	print(('New library installed %s %s'):format(_package_name, _package_version))
 
 elseif ( arg[1] == 'remove' and arg[2] ) then
+	local _package_version
 	local _package_name = arg[2]
+	
+	if lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
+		_package_version = io.open(app.folders.libraries ..'/'.._package_name..'/'.._package_name ..'.manifest'):read('*l')
+		
+		print('\t> Deleting files!')
+		
+		io.popen ('rm -rf "' .. app.folders.libraries ..'/'.._package_name..'"');
 
-	if lide.folder.doesExists(lide_libraries_folder ..'/'.._package_name) then
-		io.popen ('rm -rf "' .. lide_libraries_folder ..'/'.._package_name..'"');
+		print(('Library "%s %s" is successfully removed.'):format(_package_name, _package_version))
 	else
 		print (('The package "%s" doesn\'t installed.'):format(_package_name))
 	end

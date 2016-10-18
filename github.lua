@@ -1,14 +1,13 @@
 -- $ lide install 'lide.http'
-lide.http = require 'http.init'
 
 local github = {}
-local http   = lide.http
+local http   = require 'network.http'
 
 --- github.get_file ( 'lidesdk/framework/LICENSE', 'v0.0.01' )
 --- github path: [user]/[repo]/[file_path]
 function github.get_file ( cloud_file_path, ref, access_token )
 	local query_parameters = { 
-		-- ref	string	The name of the commit/branch/tag. Default: the repositoryâ€™s default branch (usually master)
+		-- ref	string	The name of the commit/branch/tag. Default: the repository’s default branch (usually master)
 		ref = ref or nil
 	}
 
@@ -31,7 +30,8 @@ function github.get_file ( cloud_file_path, ref, access_token )
 		headers = headers,
 		query_parameters = query_parameters ,
 
-		url = ('https://api.github.com/repos/%s/%s/contents/%s'):format(_github_user, _github_repo, _github_file),
+		url = tostring(('https://api.github.com/repos/%s/%s/contents/%s'):format(_github_user, _github_repo, _github_file)),
+		--{allow_redirects = false}
 	}	
 	
 	-- 200 Codigo 200 significa que todo va bien:
@@ -39,10 +39,21 @@ function github.get_file ( cloud_file_path, ref, access_token )
 		-- Retornamos el archivo completo:
 		return response.text
 	elseif (response.status_code ~= 200 ) then
-		print ('github error:', response.status_code)
-		return false, response.json().message
+
+		return false, response.status_code, response.status
 --		lide.core.error.lperr()
 	end
 end
 
 return github
+
+
+--if lide.platform.getOSName() == 'Windows' then
+
+--end
+--folders = { 
+--	install   = 'c:\\lidesdk',
+--	libraries = 'c:\\lidesdk\\libraries',
+--}
+--
+--update_database()
