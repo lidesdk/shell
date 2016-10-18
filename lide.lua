@@ -1,3 +1,4 @@
+print('\n > Lide :) ' .. app.getWorkDir(), arg[0])
 -- Define paths:
 local access_token  = nil, '59748697161850409f398caca1ba17b07e16af87'
 
@@ -10,17 +11,16 @@ if lide.platform.getOSName() == 'Windows' then
 	lide_installfolder    = 'C:\\lidesdk\\bin\\libs'
 	app.folders.ourclibs  = '.\\win_clibs'
 
-	package.path  = './?.lua;' ..
-					'./ourlibs/?.lua;' ..
-					'./win_lua/?.lua;'
+	package.path  = '.\\?.lua;' ..
+					'.\\win_lua\\?.lua;'
 
-	package.cpath = './?.dll;' ..
-					'./win_clibs/?.dll;'
+	package.cpath = '.\\?.dll;' ..
+					'.\\win_clibs\\?.dll;'
 
 elseif lide.platform.getOSName() == 'Linux' then
 
-	app.folders.install   = '/home/dariocanoh/Proyectos/lide_testing/lidesdk_bin'
-	app.folders.libraries = '/home/dariocanoh/Proyectos/lide_testing/lidesdk_bin/libraries'
+	app.folders.install   = app.getWorkDir() .. ''
+	app.folders.libraries = app.getWorkDir() .. '/libraries'
 	app.folders.ourclibs  = './lnx_clibs'
 	
 	package.cpath = './?.so;' ..
@@ -28,14 +28,11 @@ elseif lide.platform.getOSName() == 'Linux' then
 
 	package.path  = './?.lua;' ..
 					'./lnx_lua/?.lua;'
-
-
 end
 
 local sqldatabase = require 'sqldatabase.init'
 local github      = require 'github'
 lide.zip 		  = require 'lide_zip'
-
 
 local function update_database ( access_token )
 	local db_content, errcode, errmsg  = github.get_file ( 'lidesdk/repos/libraries.db', nil, access_token)
