@@ -1,43 +1,41 @@
 -- Define paths:
-local access_token  = '59748697161850409f398caca1ba17b07e16af87'
+local access_token  = nil, '59748697161850409f398caca1ba17b07e16af87'
 
 app.folders = { install, libraries, ourclibs, ourlibs }	
-
 
 if lide.platform.getOSName() == 'Windows' then
 
 	app.folders.install   = 'c:\\lidesdk'
 	app.folders.libraries = 'c:\\lidesdk\\libraries'
-	lide_installfolder = 'C:\\lidesdk\\bin\\libs'
-	app.folders.ourclibs  = '.\\ourclibs'
+	lide_installfolder    = 'C:\\lidesdk\\bin\\libs'
+	app.folders.ourclibs  = '.\\win_clibs'
 
-	package.path  = lide_installfolder..'\\http\\?.lua;' ..
-				    lide_installfolder..'\\?.lua;' .. package.path
-	package.cpath = lide_installfolder..'\\http\\?.dll;' ..
-				    lide_installfolder..'\\?.dll;' .. package.cpath
+	package.path  = './?.lua;' ..
+					'./ourlibs/?.lua;' ..
+					'./win_lua/?.lua;'
+
+	package.cpath = './?.dll;' ..
+					'./win_clibs/?.dll;'
 
 elseif lide.platform.getOSName() == 'Linux' then
 
 	app.folders.install   = '/home/dariocanoh/Proyectos/lide_testing/lidesdk_bin'
 	app.folders.libraries = '/home/dariocanoh/Proyectos/lide_testing/lidesdk_bin/libraries'
-	app.folders.ourclibs  = './ourclibs'
+	app.folders.ourclibs  = './lnx_clibs'
+	
+	package.cpath = './?.so;' ..
+					'./lnx_clibs/?.so;'
 
-	package.path = app.folders.install..'/http/?.lua;' ..
-			   	   app.folders.install..'/?.lua;' .. package.path
+	package.path  = './?.lua;' ..
+					'./lnx_lua/?.lua;'
+
+
 end
-
-package.cpath = './?.so;' ..
-				'./ourclibs/?.so;'
-
-package.path  = './?.lua;' ..
-				'./ourlibs/?.lua;'
 
 local sqldatabase = require 'sqldatabase.init'
 local github      = require 'github'
 lide.zip 		  = require 'lide_zip'
 
-print(package.cpath)
-print(package.path )
 
 local function update_database ( access_token )
 	local db_content, errcode, errmsg  = github.get_file ( 'lidesdk/repos/libraries.db', nil, access_token)

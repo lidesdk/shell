@@ -1,4 +1,5 @@
 	if  not luasql then
+		
 		if lide.platform:getOSName() == 'Linux' then
 		   	local openlib = package.loadlib( app.folders.ourclibs .. '/luasql/sqlite3.so' , 'luaopen_luasql_sqlite3')
 		   	luasql = openlib()
