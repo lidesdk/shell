@@ -61,8 +61,6 @@ end
 
 -- lide.new.string ''
 
-require 'lide.core.init'
-
 app = lide.app
 
 -- Define paths:
@@ -79,20 +77,22 @@ if lide.platform.getOSName() == 'Windows' then
 	app.folders.ourclibs  = app.folders.sourcefolder .. '\\win_clibs'
 
 	package.cpath = app.folders.sourcefolder .. '\\?.dll;' ..
-					app.folders.sourcefolder .. '\\win_clibs\\?.dll;'
+					app.folders.sourcefolder .. '\\clibs\\windows\\?.dll;'
 	package.path  = app.folders.sourcefolder .. '\\?.lua;' ..
-					app.folders.sourcefolder .. '\\win_lua\\?.lua;'
+					app.folders.sourcefolder .. '\\lua\\?.lua;' ..
+					app.folders.sourcefolder .. '\\lua\\windows\\?.lua;'
 
 elseif lide.platform.getOSName() == 'Linux' then
 
 	app.folders.install   = app.folders.sourcefolder
 	app.folders.libraries = app.folders.sourcefolder .. '/libraries'
-	app.folders.ourclibs  = app.folders.sourcefolder .. '/lnx_clibs'
+	--app.folders.ourclibs  = app.folders.sourcefolder .. '/lnx_clibs'
 
 	package.cpath = app.folders.sourcefolder .. '/?.so;' ..
-					app.folders.sourcefolder .. '/lnx_clibs/?.so;'
+					app.folders.sourcefolder .. '/clibs/linux/?.so;'
 	package.path  = app.folders.sourcefolder .. '/?.lua;' ..
-					app.folders.sourcefolder .. '/lnx_lua/?.lua;'
+					app.folders.sourcefolder .. '/lua/linux/?.lua;' ..
+					app.folders.sourcefolder .. '/lua/?.lua;'
 end
 
 
