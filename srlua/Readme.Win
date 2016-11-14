@@ -1,0 +1,7 @@
+There are two srlua executables for Windows:
+
+- srlua.exe  : Console subsystem program, runs on cmd (or command)
+               DOS style windows.
+
+- wsrlua.exe : Window subsystem program, opens a native window
+               containing the redirected stdout (if any).

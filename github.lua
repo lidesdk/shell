@@ -1,7 +1,7 @@
 -- $ lide install 'lide.http'
 
 local github = {}
-local http   = require 'network.http'
+local http   = require 'http.init'
 
 --- github.get_file ( 'lidesdk/framework/LICENSE', 'v0.0.01' )
 --- github path: [user]/[repo]/[file_path]

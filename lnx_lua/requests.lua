@@ -1,8 +1,8 @@
 -- Lua Requests library for http ease
 
-package.path  = app.folders.sourcefolder .. '/network/ourlibs/?.lua;' .. 
-                app.folders.sourcefolder .. '/network/ourlibs/?/init.lua;' ..
-                app.folders.sourcefolder .. '/network/?.lua;' ..
+package.path  = app.folders.sourcefolder .. '/http/ourlibs/?.lua;' .. 
+                app.folders.sourcefolder .. '/http/ourlibs/?/init.lua;' ..
+                app.folders.sourcefolder .. '/http/?.lua;' ..
                 package.path
  
 package.cpath = app.folders.sourcefolder ..'/network/ourclibs/?.so;' ..
