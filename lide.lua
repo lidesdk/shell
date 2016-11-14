@@ -1,3 +1,4 @@
+
 local function normalize_path ( path )
 	if lide.platform.getOSName() == 'Windows' then
 		return (path:gsub('/', '\\'));
@@ -191,8 +192,14 @@ local function run_sandbox ( filename, env, req, ... )
 			return chunk (...)
 		end
 
-		--local exec, errm = pcall(run_chunk, ...)
-		local exec, errm = pcall(os.execute, 'lua -l lide.init ' .. filename)
+		local _LIDE_BIN = os.getenv 'LIDE_BIN'
+
+		if lide.platform.getOSName() == 'Linux' then
+			local exec, errm = pcall(os.execute, (_LIDE_BIN or 'lua5.1') .. ' -l lide.init ' .. filename)
+		elseif lide.platform.getOSName() == 'Windows' then
+			local exec, errm = pcall(os.execute, (_LIDE_BIN or 'lua'   ) .. ' -l lide.init ' .. filename)
+		end
+		
 		if not exec then
 			return false, errm
 		else
