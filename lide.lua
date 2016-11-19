@@ -172,38 +172,17 @@ local function run_sandbox ( filename, env, req, ... )
 		os.exit()
 	end
 
-	do  -- Usar una copia separada del Lide que se est√° ejecutando:
-		local function run_chunk ( ... )
-			env._G = env
-			env.lide, errm = require 'lide.init'
-			env.package.path  = app.folders.libraries ..'/?.lua;' ..
-							'./?.lua'
-			
-			if lide.platform.getOSName() == 'Linux' then
-				env.package.cpath = app.folders.libraries ..'/?.so;'
-			elseif lide.platform.getOSName() == 'Windows' then
-				env.package.cpath = app.folders.libraries ..'/?.dll;'
-			end
-			
-			env.app = {}
-			--env.app.modules = {}
-			
-			setfenv(chunk, env);
-			return chunk (...)
-		end
-
+	do  -- Usar una copia separada del Lide que se est· ejecutando:
 		local _LIDE_BIN = os.getenv 'LIDE_BIN'
-
-		if lide.platform.getOSName() == 'Linux' then
-			local exec, errm = pcall(os.execute, (_LIDE_BIN or 'lua5.1') .. ' -l lide.init ' .. filename)
-		elseif lide.platform.getOSName() == 'Windows' then
-			local exec, errm = pcall(os.execute, (_LIDE_BIN or 'lua'   ) .. ' -l lide.init ' .. filename)
-		end
 		
-		if not exec then
-			return false, errm
-		else
-			return true
+		if lide.platform.getOSName() == 'Linux' then
+			local exec, errm = pcall(os.execute, (_LIDE_BIN or 'lua5.1') .. [[ -e 'package.path = package.path ..";"..os.getenv "LIDE_PATH" .."/?.lua;" require "lide.core.init"']].. ' -l lide.init ' .. filename)
+		elseif lide.platform.getOSName() == 'Windows' then
+			--local cmd = (_LIDE_BIN or 'lua') .. [[ -e 'package.path = package.path ..";"..os.getenv "LIDE_PATH" .."\\?.lua;"; require "lide.core.init";'']].. ' -l lide.init ' .. filename
+			local cmd = (_LIDE_BIN or 'lua') .. [[ -e 'package.path = "%s\?.lua"' ]].. ' -l lide.init '  .. filename
+				  cmd = cmd:format (tostring(os.getenv 'LIDE_PATH'))			
+			print(cmd)
+			local exec, errm = pcall(os.execute, cmd)
 		end
 	end
 end
