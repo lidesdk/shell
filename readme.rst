@@ -55,8 +55,8 @@ GNU/Linux Installation
 
 	# Create environment variable named LIDE_PATH
 	$ nano ~/.bashrc
-	 # add this line at the bottom of the file:
-     	export LIDE_PATH=~/.lide/commandline
+	    # add this line at the bottom of the file:
+        export LIDE_PATH=~/.lide/commandline
 
 
 Windows Installation
@@ -74,8 +74,8 @@ Windows Installation
 	
 	set LIDE_PATH=C:\lide\commandline
 
-	You must install LIDE_PATH in your environment variables permanently, please check this article:
-	`https://kb.wisc.edu/cae/page.php?id=24500<https://kb.wisc.edu/cae/page.php?id=24500`_
+You must install LIDE_PATH in your environment variables permanently, please check this article:
+`https://kb.wisc.edu/cae/page.php?id=24500<https://kb.wisc.edu/cae/page.php?id=24500`_
 
 
 Credits and Authors
