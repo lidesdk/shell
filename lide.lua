@@ -120,51 +120,6 @@ end
 local libraries_stable = sqldatabase:new(app.folders.libraries..'/repos.db', 'sqlite3')
 
 local function run_sandbox ( filename, env, req, ... )
-	local env   = env or {
-		rawget = rawget,
-		xpcall = xpcall,
-		next = next,
-		loadfile = loadfile,
-		error = error,
-		rawlen = rawlen,
-		loadstring = loadstring,
-		bit32 = bit32,
-		setmetatable = setmetatable,
-		_VERSION = _VERSION,
-		coroutine = coroutine,
-		select = select,
-		utf8 = utf8,
-		assert = assert,
-		pcall = pcall,
-		arg = arg,
-		pairs = pairs,
-		debug = debug,
-		math = math,
-		type = type,
-		dofile = dofile,
-		os = os,
-		load = load,
-		string = string,
-		tonumber = tonumber,
-		table = table,		
-		require = require,
-		unpack = unpack,
-		getmetatable = getmetatable,
-		module = module,
-		tostring = tostring,
-		rawequal = rawequal,
-		print = print,
-		rawset = rawset,
-		io = io,
-		collectgarbage = collectgarbage,
-		ipairs = ipairs,
-
-		package = {
-			path  = '',
-			cpath = '',
-		},
-	}
-
 	local chunk = loadfile(filename)
 	
 	if not chunk then
@@ -172,34 +127,14 @@ local function run_sandbox ( filename, env, req, ... )
 		os.exit()
 	end
 
-	do  -- Usar una copia separada del Lide que se está ejecutando:
+	do  -- Usar una copia separada del Lide que se est?ejecutando:
 		local _LIDE_BIN = os.getenv 'LIDE_BIN'
 		
 		if lide.platform.getOSName() == 'Linux' then
 			local exec, errm = pcall(os.execute, (_LIDE_BIN or 'lua5.1') .. [[ -e 'package.path = package.path ..";"..os.getenv "LIDE_PATH" .."/?.lua;" require "lide.core.init"']].. ' -l lide.init ' .. filename)
-		elseif lide.platform.getOSName() == 'Windows' then
-			--local cmd = (_LIDE_BIN or 'lua') .. [[ -e 'package.path = package.path ..";"..os.getenv "LIDE_PATH" .."\\?.lua;"; require "lide.core.init";'']].. ' -l lide.init ' .. filename
-			
-			--lua -e "assert(os.getenv 'LIDE_PATH', 'Declare la variable de entorno LIDE_PATH'); package.path = os.getenv 'LIDE_PATH' ..'\\?.lua'; require 'lide.core.init'" %LIDE_PATH%\lide.lua %1 %2 %3
-
-			local cmd = (_LIDE_BIN or 'lua') .. [[ -e 'package.path =  %s	' ]].. ' -l lide.init '  .. filename
-				  cmd = cmd:format (tostring(os.getenv 'LIDE_PATH'))			
-			cmd = [[lua -e "package.path = os.getenv 'LIDE_PATH' ..'\\?.lua'; require 'lide.init'" ]] .. filename
-			print('cmd', cmd)
-			local exec, errm = pcall(os.execute, cmd)
+		elseif lide.platform.getOSName() == 'Windows' then			
+			os.execute (( [[lua -e "package.cpath = os.getenv 'LIDE_PATH' ..'\\libraries\\?.dll' package.path = os.getenv 'LIDE_PATH' ..'\\libraries\\?.lua'; require 'lide.init' " ]] .. filename ))
 		end
-	end
-end
-
-if ( arg[1] == '-l' ) then
-    print '[lide.error] Please import using require inside the lua file.'
-    
-    os.exit()
-
-elseif arg[1] and ( lide.file.doesExists(arg[1]) ) then	
-	local ran, errr = run_sandbox( arg[1] )
-	if not ran then
-		print ('[lide.error: sandbox] '.. tostring((errr)))
 	end
 end
 
@@ -209,8 +144,6 @@ if ( arg[1] == 'search' and arg[2] ) then
 	print '> Searching...'
 	
 	update_database ( access_token );
-
-	--wx.wxSleep(0.01)
 
 	local libraries_stable = sqldatabase:new(app.folders.libraries..'/repos.db', 'sqlite3')
 
@@ -311,6 +244,19 @@ elseif ( arg[1] == 'remove' and arg[2] ) then
 		print(('Library "%s" is successfully removed.'):format(_package_name))
 	else
 		print (('The package "%s" doesn\'t installed.'):format(_package_name))
+	end
+else
+	if ( arg[1] == '-l' ) then
+	    print '[lide.error] Please import using require inside the lua file.'
+	    
+	    os.exit()
+	elseif arg[1] then	
+		if lide.file.doesExists(arg[1]) then
+			run_sandbox( arg[1] )
+		else
+			local src_file = arg[1]
+			printl '[lide.error: ] file $src_file$ doesnt exist.'
+		end
 	end
 end
 
