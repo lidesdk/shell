@@ -1,25 +1,34 @@
 Lide Commandline
 ================
 
-Lide Compiler is a tool that allow you convert lua script files in executables or binary libraries.
-
-The principal goal is have a easy tool for build our self lua scripts.
+Lide Commandline is a tool that allow you to execute lua scripts.
 
 Usage
 *****
 
-============  ======================================================================================
- Option        Description
-============  ======================================================================================
-  -o   	   	    Output filename
-============  ======================================================================================
+Execute lua script:
 
 .. code-block:: bash
 
-	$ lidec <input_file> -o <output_file> 
+	$ lide <input_file>
 
-	$ lidec -o file.exe test_script.lua     >> output is "file.exe"
-	$ lidec test_script.lua                 >> output is "output.out"
+Search a package:
+
+.. code-block:: bash
+
+	$ lide search <package_name>
+
+Install a package:
+
+.. code-block:: bash
+
+	$ lide install <package_name>
+
+Remove a package:
+
+.. code-block:: bash
+
+	$ lide remove <package_name>
 
 
 Installation
@@ -27,35 +36,47 @@ Installation
 
 * Clone this repository:
 * Run the build script 'build_linux.sh' or 'build_windows.bat'
-* Execute './lidec --help' command
+* Execute './lide --help' command
 
 GNU/Linux Installation
 **********************
 
 .. code-block:: bash
 
-	$ git clone https://github.com/lidesdk/compiler.git compiler
-	$ cd compiler
-	$ chmod +x ./build.sh && ./build.sh && ./chmod +x ./lidec
-	> Lide compiler builded successfuly.
-	$ ./lidec --help
+	# Create lide install directory and go to it (~/.lide):
+	$ mkdir ~/.lide && cd ~/.lide
+
+	# Clone git repository and submodules:
+	$ git clone https://github.com/lidesdk/commandline.git --recursive commandline
+	
+	# Add exec perms:
+	$ cd commandline
+	$ chmod +x ./lide.sh
+
+	# Create environment variable named LIDE_PATH
+	$ nano ~/.bashrc
+	 # add this line at the bottom of the file:
+     	export LIDE_PATH=~/.lide/commandline
 
 
 Windows Installation
 ********************
 
 .. code-block:: bash
+	
+	# Create lide install directory and go to it (C:\.lide):
+	$ mkdir C:\lide && cd C:\lide
 
-	$ git clone https://github.com/lidesdk/compiler.git compiler
-	$ cd compiler
-	$ build
-	> Lide compiler builded successfuly.
-	$ lidec --help
+	# Clone git repository and submodules:
+	$ git clone https://github.com/lidesdk/commandline.git --recursive commandline
 
+	Create environment variable named LIDE_PATH:
+	
+	set LIDE_PATH=~C:\lide\commandline
 
 Credits and Authors
 ===================
 
-Lide Compiler is part of (`Lide SDK <https://github.com/lidesdk/framework>`_).
+Lide Commandline is part of (`Lide SDK <https://github.com/lidesdk/framework>`_).
 
 Lide is currently active and developing, today is maintained by (`@dariocanoh <https://github.com/dariocanoh>`_)
