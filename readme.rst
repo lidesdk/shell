@@ -75,7 +75,7 @@ Windows Installation
 	set LIDE_PATH=C:\lide\commandline
 
 You must install LIDE_PATH in your environment variables permanently, please check this article:
-`https://kb.wisc.edu/cae/page.php?id=24500 <https://kb.wisc.edu/cae/page.php?id=24500`_
+`https://kb.wisc.edu/cae/page.php?id=24500 <https://kb.wisc.edu/cae/page.php?id=24500>`_
 
 
 Credits and Authors
