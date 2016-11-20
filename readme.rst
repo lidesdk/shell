@@ -1,7 +1,7 @@
 Lide Commandline
 ================
 
-Lide Commandline is a tool that allow you to execute lua scripts.
+Lide Commandline is a tool that allow you to execute lua scripts and manage lua modules, you can search install and remove modules from lide repository.
 
 Usage
 *****
@@ -11,6 +11,9 @@ Execute lua script:
 .. code-block:: bash
 
 	$ lide <input_file>
+
+Manage modules
+**************
 
 Search a package:
 
