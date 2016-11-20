@@ -35,8 +35,8 @@ Installation
 ============
 
 * Clone this repository:
-* Run the build script 'build_linux.sh' or 'build_windows.bat'
-* Execute './lide --help' command
+* Create environment variable named LIDE_PATH containing the path of your repository copy
+* Execute lide --help' command
 
 GNU/Linux Installation
 **********************
