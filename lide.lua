@@ -179,9 +179,13 @@ local function run_sandbox ( filename, env, req, ... )
 			local exec, errm = pcall(os.execute, (_LIDE_BIN or 'lua5.1') .. [[ -e 'package.path = package.path ..";"..os.getenv "LIDE_PATH" .."/?.lua;" require "lide.core.init"']].. ' -l lide.init ' .. filename)
 		elseif lide.platform.getOSName() == 'Windows' then
 			--local cmd = (_LIDE_BIN or 'lua') .. [[ -e 'package.path = package.path ..";"..os.getenv "LIDE_PATH" .."\\?.lua;"; require "lide.core.init";'']].. ' -l lide.init ' .. filename
-			local cmd = (_LIDE_BIN or 'lua') .. [[ -e 'package.path = "%s\?.lua"' ]].. ' -l lide.init '  .. filename
+			
+			--lua -e "assert(os.getenv 'LIDE_PATH', 'Declare la variable de entorno LIDE_PATH'); package.path = os.getenv 'LIDE_PATH' ..'\\?.lua'; require 'lide.core.init'" %LIDE_PATH%\lide.lua %1 %2 %3
+
+			local cmd = (_LIDE_BIN or 'lua') .. [[ -e 'package.path =  %s	' ]].. ' -l lide.init '  .. filename
 				  cmd = cmd:format (tostring(os.getenv 'LIDE_PATH'))			
-			print(cmd)
+			cmd = [[lua -e "package.path = os.getenv 'LIDE_PATH' ..'\\?.lua'; require 'lide.init'" ]] .. filename
+			print('cmd', cmd)
 			local exec, errm = pcall(os.execute, cmd)
 		end
 	end
