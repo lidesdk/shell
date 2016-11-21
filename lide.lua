@@ -56,6 +56,16 @@ function printl ( str )
 	print( str:sub(1, pr1-1) .. var_value .. str:sub(pr4 +1, #str))
 end
 
+local function file_getline ( filename, nline )
+	local n = 0; for line in io.lines(filename) do
+		n = n+1; 
+		if n == nline then
+			return line
+		end
+	end
+	return false
+end
+
 -- print('\n > Lide :) ' .. app.getWorkDir(), arg[0])
 --lide_cmd_clibs = '/datos/Proyectos/lide/commandline/lnx_clibs'
 
@@ -64,7 +74,7 @@ end
 app = lide.app
 
 -- Define paths:
-local access_token  = nil
+local access_token  = os.getenv 'GITHUB_TOKEN'
 
 app.folders = { install, libraries, ourclibs, ourlibs }	
 
@@ -131,7 +141,10 @@ local function run_sandbox ( filename, env, req, ... )
 		local _LIDE_BIN = os.getenv 'LIDE_BIN'
 		
 		if lide.platform.getOSName() == 'Linux' then
-			local exec, errm = pcall(os.execute, (_LIDE_BIN or 'lua5.1') .. [[ -e 'package.path = package.path ..";"..os.getenv "LIDE_PATH" .."/?.lua;" require "lide.core.init"']].. ' -l lide.init ' .. filename)
+			--local exec, errm = pcall(os.execute, (_LIDE_BIN or 'lua5.1') .. [[ -e 'package.cpath = os.getenv 'LIDE_PATH' ..'/libraries/linux_x86/?.so;' package.path = package.path ..";"..os.getenv "LIDE_PATH" .."/libraries?.lua;" require "lide.core.init"']].. ' -l lide.init ' .. filename)
+			os.execute( [[lua5.1 -e "package.cpath = os.getenv 'LIDE_PATH' ..'/libraries/linux_x86/?.so' package.path = os.getenv 'LIDE_PATH' ..'/libraries/?.lua'; require 'lide.init' " ]] .. filename )
+						
+
 		elseif lide.platform.getOSName() == 'Windows' then			
 			os.execute (( [[lua -e "package.cpath = os.getenv 'LIDE_PATH' ..'\\libraries\\?.dll' package.path = os.getenv 'LIDE_PATH' ..'\\libraries\\?.lua'; require 'lide.init' " ]] .. filename ))
 		end
@@ -153,9 +166,8 @@ if ( arg[1] == 'search' and arg[2] ) then
 		for i, row in pairs( tbl ) do
 			if type(row) == 'table' then
 				local num_repo_version  = tonumber(tostring(row.package_version:gsub('%.', '')));
-				
 				if lide.folder.doesExists(app.folders.libraries..'/'..row.package_name) then
-					local local_package_version = io.open(app.folders.libraries..'/'..row.package_name..'/'..row.package_name..'.manifest'):read('*l')
+					local local_package_version = file_getline(app.folders.libraries..'/'..row.package_name..'/'..row.package_name..'.manifest', 1)
 					local num_local_version = tonumber(tostring(local_package_version:gsub('%.', '')));
 					if ( num_repo_version > num_local_version ) then
 						str_tag = '(UPDATE)'
@@ -175,11 +187,17 @@ if ( arg[1] == 'search' and arg[2] ) then
 elseif ( arg[1] == 'install' and arg[2] ) then
 	local _package_name  = arg[2]
 	local _query_install = 'select * from libraries_stable where package_name like "%s" limit 1'
-	
+
 	print('> Search '.. _package_name)
 	
 	update_database(access_token);
-	
+
+	for _, platform in pairs { 'linux_x86', 'windows_x86'} do
+		if not lide.folder.doesExists(app.folders.libraries ..'/'..platform) then
+			lide.folder.create(app.folders.libraries ..'/'..platform)
+		end
+	end
+
 	--wx.wxSleep(0.01)
 
 	if # libraries_stable:select ( _query_install:format(_package_name) ) == 0 then
@@ -200,21 +218,75 @@ elseif ( arg[1] == 'install' and arg[2] ) then
 		print(('> Found! %s %s'):format(_package_name, _package_version));
 	end
 	
-	local github_path = libraries_stable:select(_query_install:format(_package_name))[1].package_url
+	print('  > Installing...')	
 	
-	local content = github.get_file ( github_path, nil, access_token )
+	local function install_depends ( package_manifest )
+		local depends = file_getline(package_manifest, 2):delim ','
+		for _, _package_name in pairs( depends ) do
+			if lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
+				--> printl '  > Dependencies: $_package_name$ installed'
+			else
+				printl '  > Installing dependencies: $_package_name$...'
+				install_package(_package_name)
+			end
+		end
+	end
 	
-	local zip_file = io.open(normalize_path(_package_file), 'w+b');
+	function file_copy ( src, dest )
+		--local content   = io.open(src, 'rb'):read '*a'
+		--local dest_file = io.open(dest, 'w+b')
+		--dest_file:write(content)
+		--dest_file:flush()
+		--dest_file:close()
+		if not lide.file.doesExists(src) then
+			printl '[lide error] copy: source = $src$ does not exist'
+		end
 
-	if zip_file:write(content) then
-		zip_file:close();
+		os.execute (('cp %s %s'):format(src, dest))
 	end
 
-	print('\t> Installing...')	
+	function install_package( _package_name )
+		local _query_install = 'select * from libraries_stable where package_name like "%s" limit 1'
+		
+		local github_path = libraries_stable:select(_query_install:format(_package_name))[1].package_url
+		
+		local content = github.get_file ( github_path, nil, access_token )
+		
+		local zip_file = io.open(normalize_path(_package_file), 'w+b');
 
-	lide.zip.extract(_package_file, app.folders.libraries ..'/'.._package_name)
+		if zip_file:write(content) then
+			zip_file:close();
+		end
 
-	print('\t> All done!')
+		lide.zip.extract(_package_file, app.folders.libraries ..'/'.._package_name)	
+		local _man_file = app.folders.libraries ..'/'.._package_name..'/'.. _package_name ..'.manifest'
+		
+		if file_getline (_man_file, 3) then 
+			local libs = file_getline (_man_file, 3):delim('|');
+			for k, v in pairs( libs ) do
+				local platform = v:delim ',' [1]
+				
+				if not lide.folder.doesExists(app.folders.libraries ..'/'..platform..'/'.._package_name) then
+					lide.folder.create(app.folders.libraries ..'/'..platform..'/'.._package_name)
+				end
+
+				if v:delim ',' [1] == 'linux_x86' then					
+					for i = 2, # v:delim ',' do
+						local file_src = app.folders.libraries ..'/'.._package_name..'/linux_x86/'..tostring(v:delim ',' [i])
+						file_copy(file_src, app.folders.libraries ..'/linux_x86/'.. tostring(v:delim ',' [i]) )
+					end
+				end
+			end
+		end
+
+		if file_getline (_man_file, 2) then 
+			install_depends(_man_file) 
+		end
+	end
+
+	install_package(_package_name)
+
+	print('  > All done!')
 	
 	--wx.wxSleep(0.01)
 	if lide.platform.getOSName() == 'Linux' then
@@ -223,7 +295,7 @@ elseif ( arg[1] == 'install' and arg[2] ) then
 		--io.popen ('del /Q /S  "' .. normalize_path(app.folders.libraries ..'/'.._package_name..'.zip"'));
 	end
 
-	print(('New library installed %s %s'):format(_package_name, _package_version))
+	print(('\nNew library installed %s %s'):format(_package_name, _package_version))
 
 elseif ( arg[1] == 'remove' and arg[2] ) then
 	local _package_version
@@ -232,16 +304,17 @@ elseif ( arg[1] == 'remove' and arg[2] ) then
 	if lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
 		--_package_version = io.open(app.folders.libraries ..'/'.._package_name..'/'.._package_name ..'.manifest'):read('*l')
 		
-		print('\t> Deleting files!')
+		print('  > Deleting files!')
 		
 		if lide.platform.getOSName() == 'Linux' then
+			io.popen ('rm -rf "' .. app.folders.libraries ..'/linux_x86/'.._package_name..'"');
 			io.popen ('rm -rf "' .. app.folders.libraries ..'/'.._package_name..'"');
 			io.popen ('rm -rf "' .. app.folders.libraries ..'/'.._package_name..'".zip');
 		elseif lide.platform.getOSName() == 'Windows' then
 			io.popen ('rd /Q /S "' .. normalize_path(app.folders.libraries ..'/'.._package_name..'"'));
 			io.popen ('del /F /Q /S "' .. normalize_path(app.folders.libraries ..'/'.._package_name..'".zip'));
 		end
-		print(('Library "%s" is successfully removed.'):format(_package_name))
+		print(('\nLibrary "%s" is successfully removed.'):format(_package_name))
 	else
 		print (('The package "%s" doesn\'t installed.'):format(_package_name))
 	end
@@ -255,7 +328,7 @@ else
 			run_sandbox( arg[1] )
 		else
 			local src_file = arg[1]
-			printl '[lide.error: ] file $src_file$ doesnt exist.'
+			printl '[lide.error: ] "$src_file$" file does not exist.'
 		end
 	end
 end
