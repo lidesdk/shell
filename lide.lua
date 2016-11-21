@@ -153,7 +153,7 @@ end
 
 if ( arg[1] == 'search' and arg[2] ) then
 	local text_to_search = arg[2]
-		
+
 	print '> Searching...'
 	
 	update_database ( access_token );
@@ -193,8 +193,17 @@ elseif ( arg[1] == 'install' and arg[2] ) then
 	update_database(access_token);
 
 	for _, platform in pairs { 'linux_x86', 'windows_x86'} do
-		if not lide.folder.doesExists(app.folders.libraries ..'/'..platform) then
+
+		if not lide.folder.doesExists(app.folders.libraries ..'/'..platform) then 
 			lide.folder.create(app.folders.libraries ..'/'..platform)
+		end
+
+		if not lide.folder.doesExists(app.folders.libraries ..'/'..platform..'/lua') then 
+			lide.folder.create(app.folders.libraries ..'/'..platform..'/lua')
+		end
+
+		if not lide.folder.doesExists(app.folders.libraries ..'/'..platform..'/clibs') then 
+			lide.folder.create(app.folders.libraries ..'/'..platform..'/clibs')
 		end
 	end
 
@@ -233,16 +242,14 @@ elseif ( arg[1] == 'install' and arg[2] ) then
 	end
 	
 	function file_copy ( src, dest )
-		--local content   = io.open(src, 'rb'):read '*a'
-		--local dest_file = io.open(dest, 'w+b')
-		--dest_file:write(content)
-		--dest_file:flush()
-		--dest_file:close()
-		if not lide.file.doesExists(src) then
+		if not lide.file.doesExists(normalize_path(src)) then
 			printl '[lide error] copy: source = $src$ does not exist'
 		end
-
-		os.execute (('cp %s %s'):format(src, dest))
+		if lide.platform.getOSName() =='Linux' then
+			os.execute (('cp -r "%s" "%s"'):format(src, dest))
+		else
+			io.popen (('COPY /B /Y "%s" "%s"'):format(normalize_path(src), normalize_path(dest)))
+		end
 	end
 
 	function install_package( _package_name )
@@ -262,24 +269,67 @@ elseif ( arg[1] == 'install' and arg[2] ) then
 		local _man_file = app.folders.libraries ..'/'.._package_name..'/'.. _package_name ..'.manifest'
 		
 		if file_getline (_man_file, 3) then 
+			
 			local libs = file_getline (_man_file, 3):delim('|');
+			
 			for k, v in pairs( libs ) do
 				local platform = v:delim ',' [1]
 				
-				if not lide.folder.doesExists(app.folders.libraries ..'/'..platform..'/'.._package_name) then
-					lide.folder.create(app.folders.libraries ..'/'..platform..'/'.._package_name)
+				if not lide.folder.doesExists(app.folders.libraries ..'/'..platform..'/lua/'.._package_name) then 
+					lide.folder.create(app.folders.libraries ..'/'..platform..'/lua/'.._package_name)
 				end
 
-				if v:delim ',' [1] == 'linux_x86' then					
+				if not lide.folder.doesExists(app.folders.libraries ..'/'..platform..'/clibs/'.._package_name) then 
+					lide.folder.create(app.folders.libraries ..'/'..platform..'/clibs/'.._package_name)
+				end
+
+				if v:delim ',' [1] == 'linux_x86' then
+
 					for i = 2, # v:delim ',' do
-						local file_src = app.folders.libraries ..'/'.._package_name..'/linux_x86/'..tostring(v:delim ',' [i])
-						file_copy(file_src, app.folders.libraries ..'/linux_x86/'.. tostring(v:delim ',' [i]) )
+						local int_path = tostring(v:delim ',' [i])
+						
+						if int_path:sub(1,6) == 'clibs/' then
+							local clibs_folder = normalize_path(app.folders.libraries ..'/'.._package_name .. '/'..platform);
+							local file_src = normalize_path(clibs_folder .. '/' .. int_path)
+							local file_dst = normalize_path(app.folders.libraries ..'/'..platform..'/'..int_path);
+							
+							file_copy(file_src, file_dst)
+						
+						elseif int_path:sub(1,4) == 'lua/' then
+							local lualibs_folder = normalize_path(app.folders.libraries ..'/'.._package_name..'/'..platform);
+							local file_src = normalize_path(lualibs_folder .. '/' .. int_path)
+							local file_dst = normalize_path(app.folders.libraries ..'/'..platform..'/'..int_path);
+							
+							file_copy(file_src, file_dst)
+						end
+
+					end
+				elseif v:delim ',' [1] == 'windows_x86' then
+					
+					for i = 2, # v:delim ',' do
+						local int_path = tostring(v:delim ',' [i])
+						
+						if int_path:sub(1,6) == 'clibs/' then
+							local clibs_folder = normalize_path(app.folders.libraries ..'/'.._package_name..'/windows_x86');
+							local file_src = normalize_path(clibs_folder .. '/' .. int_path)
+							local file_dst = normalize_path(app.folders.libraries ..'/windows_x86/'..int_path);
+
+							file_copy(file_src, file_dst)
+						
+						elseif int_path:sub(1,4) == 'lua/' then
+							local lualibs_folder = normalize_path(app.folders.libraries ..'/'.._package_name..'/windows_x86');
+							local file_src = normalize_path(lualibs_folder .. '/' .. int_path)
+							local file_dst = normalize_path(app.folders.libraries ..'/windows_x86/'..int_path);
+														
+							file_copy(file_src, file_dst)
+						end
+
 					end
 				end
 			end
 		end
 
-		if file_getline (_man_file, 2) then 
+		if file_getline (_man_file, 2) and file_getline (_man_file, 2) ~= '' then 
 			install_depends(_man_file) 
 		end
 	end
@@ -307,10 +357,14 @@ elseif ( arg[1] == 'remove' and arg[2] ) then
 		print('  > Deleting files!')
 		
 		if lide.platform.getOSName() == 'Linux' then
-			io.popen ('rm -rf "' .. app.folders.libraries ..'/linux_x86/'.._package_name..'"');
+			io.popen ('rm -rf "' .. app.folders.libraries ..'/linux_x86/clibs/'.._package_name..'"');
+			io.popen ('rm -rf "' .. app.folders.libraries ..'/linux_x86/lua/'.._package_name..'"');
 			io.popen ('rm -rf "' .. app.folders.libraries ..'/'.._package_name..'"');
 			io.popen ('rm -rf "' .. app.folders.libraries ..'/'.._package_name..'".zip');
 		elseif lide.platform.getOSName() == 'Windows' then
+			io.popen ('del /Q /S "' .. normalize_path(app.folders.libraries ..'/windows_x86/lua/'.._package_name..'.lua"'));
+			io.popen ('rd /Q /S "' .. normalize_path(app.folders.libraries ..'/windows_x86/lua/'.._package_name..'"'));
+			io.popen ('rd /Q /S "' .. normalize_path(app.folders.libraries ..'/windows_x86/clibs/'.._package_name..'"'));
 			io.popen ('rd /Q /S "' .. normalize_path(app.folders.libraries ..'/'.._package_name..'"'));
 			io.popen ('del /F /Q /S "' .. normalize_path(app.folders.libraries ..'/'.._package_name..'".zip'));
 		end
