@@ -32,7 +32,6 @@ function compare_versions ( ver1, ver2 )
 -- 2  ver1 < ver 2
 end
 
-
 local function file_getline ( filename, nline )
 	local n = 0; for line in io.lines(filename) do
 		n = n+1; 
@@ -65,8 +64,8 @@ elseif package_args[1] then
 				local local_version = file_getline ( app.folders.libraries ..'/'..package_name .. '/' .. package_name ..'.manifest', 1 )
 				local cloud_version = repository.libraries_stable:select(('select * from libraries_stable where package_name like "%s" limit 1'):format(package_name))[1].package_version
 				
-				print('> cloud repo version: ' .. cloud_version)
-				print('> package.manifest version: ' .. local_version)
+				print('> last version: ' .. cloud_version)
+				print('> local version: ' .. local_version)
 
 				if compare_versions(local_version, cloud_version) == 0 then -- up to date
 					print('\npackage is up to date.')
@@ -82,7 +81,7 @@ elseif package_args[1] then
 					print('\nNew library installed '..package_name .. ' '.. cloud_version)
 
 				elseif compare_versions(local_version, cloud_version) == 1 then
-					print 'yout version is major than lide repos'
+					print 'Por que tu version es mayor que la de los repositorios de Lide?'
 				end
 			end		
 		end		

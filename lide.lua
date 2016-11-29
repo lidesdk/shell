@@ -168,22 +168,6 @@ function repository.download ( _package_name, _package_file, access_token )
 end
 
 function repository.install ( _package_name, _package_file )
-		--local _query_install = 'select * from libraries_stable where package_name like "%s" limit 1'
-		--
-		--local github_path = libraries_stable:select(_query_install:format(_package_name))[1].package_url
-		--
-		--local content = github.get_file ( github_path, nil, access_token )
-		--
-		--local zip_file = io.open(normalize_path(_package_file), 'w+b');
-
-		--if zip_file:write(content) then
-		--	zip_file:close();
-		--end
-		--if not _package_file then
-		--	--repository.download ....
-		--end
-
-		
 		local function file_copy ( src, dest )
 			if not lide.file.doesExists(normalize_path(src)) then
 				printl '[lide error] copy: source = $src$ does not exist'
@@ -325,107 +309,25 @@ local function run_sandbox ( filename, env, req, ... )
 end
 
 if ( arg[1] == 'search' and arg[2] ) then
-	local text_to_search = arg[2]
 
-	print '> Searching...'
-	
-	repository.update ( );
-
-	local libraries_stable = sqldatabase:new(app.folders.libraries..'/repos.db', 'sqlite3')
-
-	local tbl = libraries_stable:select('select * from libraries_stable where package_name like "%'..text_to_search..'%"')
-	
-	if #tbl > 0 then
-		for i, row in pairs( tbl ) do
-			if type(row) == 'table' then
-				local num_repo_version  = tonumber(tostring(row.package_version:gsub('%.', '')));
-				if lide.folder.doesExists(app.folders.libraries..'/'..row.package_name) then
-					local local_package_version = file_getline(app.folders.libraries..'/'..row.package_name..'/'..row.package_name..'.manifest', 1)
-					local num_local_version = tonumber(tostring(local_package_version:gsub('%.', '')));
-					if ( num_repo_version > num_local_version ) then
-						str_tag = '(UPDATE)'
-					end
-				end
-
-				print(
-					('\n%s [%s] %s\n\t%s\n'):format(row.package_name, row.package_version, str_tag or '', row.package_description)
-				)
-			end
-		end
-		
-	else
-		print 'No matches!'
-	end
-
-elseif ( arg[1] == 'install' and arg[2] ) then
-	local _package_name  = arg[2]
-	local _query_install = 'select * from libraries_stable where package_name like "%s" limit 1'
-
-	-- print('> Search '.. _package_name)
-	
-	repository.update ();
-
-	for _, platform in pairs { 'linux_x86', 'windows_x86'} do
-
-		if not lide.folder.doesExists(app.folders.libraries ..'/'..platform) then 
-			lide.folder.create(app.folders.libraries ..'/'..platform)
-		end
-
-		if not lide.folder.doesExists(app.folders.libraries ..'/'..platform..'/lua') then 
-			lide.folder.create(app.folders.libraries ..'/'..platform..'/lua')
-		end
-
-		if not lide.folder.doesExists(app.folders.libraries ..'/'..platform..'/clibs') then 
-			lide.folder.create(app.folders.libraries ..'/'..platform..'/clibs')
-		end
-	end
-
-	--wx.wxSleep(0.01)
-
-	if # repository.libraries_stable:select ( _query_install:format(_package_name) ) == 0 then
-		print 'No matches!'
-		return false
-	end
-
-	local _package_name    = repository.libraries_stable:select(_query_install:format(_package_name))[1].package_name
-	local _package_version = repository.libraries_stable:select(_query_install:format(_package_name))[1].package_version
-	local _package_file    = normalize_path(app.folders.libraries..'/'.._package_name..'.zip')
-		
-	if lide.folder.doesExists(normalize_path(app.folders.libraries..'/'.._package_name)) then
-		print (('The package %s is already installed.'):format(_package_name))
-		return false
-	end
-
-	if # repository.libraries_stable:select('select * from libraries_stable where package_name like "%'.._package_name..'%" limit 1') > 0 then
-		print(('> Found! %s %s'):format(_package_name, _package_version));
-	end
-	
-	print('  > Installing...')	
-
-	repository.download(_package_name, app.folders.libraries .. '/'.._package_name..'.zip')
-	repository.install (_package_name, app.folders.libraries .. '/'.._package_name..'.zip')
-
-	print('  > All done!')
-	
-	--wx.wxSleep(0.01)
-	if lide.platform.getOSName() == 'Linux' then
-		io.popen ('rm -rf "' .. normalize_path(app.folders.libraries ..'/'.._package_name..'.zip"'));
-	elseif lide.platform.getOSName() == 'Windows' then
-		--io.popen ('del /Q /S  "' .. normalize_path(app.folders.libraries ..'/'.._package_name..'.zip"'));
-	end
-
-	print(('\nNew library installed %s %s'):format(_package_name, _package_version))
-
-
-elseif ( arg[1] == 'update' ) then
-	package.path = app.folders.sourcefolder .. '/?.lua;' .. package.path
-
-	--package_name = arg[2]
 	package_args = {} 
 	for i= 2, #arg do package_args[#package_args +1] = arg[i] end
-	--print = print_console
+	 
+	dofile ( app.folders.sourcefolder .. '/modules/search.lua' )
+
+elseif ( arg[1] == 'install' and arg[2] ) then
+
+	package_args = {} 
+	for i= 2, #arg do package_args[#package_args +1] = arg[i] end
+	 
+	dofile ( app.folders.sourcefolder .. '/modules/install.lua' )
+
+elseif ( arg[1] == 'update' ) then
+
+	package_args = {} 
+	for i= 2, #arg do package_args[#package_args +1] = arg[i] end
 	
-	require 'modules.update'
+	dofile ( app.folders.sourcefolder .. '/modules/update.lua' )
 
 elseif ( arg[1] == 'remove' and arg[2] ) then
 	local _package_name = arg[2]
