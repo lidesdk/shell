@@ -37,7 +37,7 @@ Remove a package:
 Installation
 ============
 
-* Clone this repository: ``https://github.com/lidesdk/commandline.git``
+* Clone or `download <https://github.com/lidesdk/commandline/archive/master.zip>`_ this repository: ``https://github.com/lidesdk/commandline.git``
 * Create environment variable named ``LIDE_PATH`` containing the path of your repository copy
 * Execute ``lide --help'`` command
 
@@ -79,7 +79,6 @@ Windows Installation
 
 You must declare the ``LIDE_PATH`` environment variable permanently, please check this article:
 `https://kb.wisc.edu/cae/page.php?id=24500 <https://kb.wisc.edu/cae/page.php?id=24500>`_
-
 
 Credits and Authors
 ===================
