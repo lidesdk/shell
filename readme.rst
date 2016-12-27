@@ -92,4 +92,4 @@ Credits and Authors
 
 Lide Commandline is part of (`Lide SDK <https://github.com/lidesdk/framework>`_).
 
-Lide is currently active and developing, today is maintained by (`@dariocanoh <https://github.com/dariocanoh>`_)
+Lide is currently active and developing, today is maintained by (`@dcanoh <https://github.com/dcanoh>`_)
