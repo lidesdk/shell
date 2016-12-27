@@ -90,6 +90,4 @@ You must declare the ``LIDE_PATH`` environment variable permanently, please chec
 Credits and Authors
 ===================
 
-Lide Commandline is part of (`Lide SDK <https://github.com/lidesdk/framework>`_).
-
-Lide is currently active and developing, today is maintained by (`@dcanoh <https://github.com/dcanoh>`_)
+Lide Commandline is part of (`Lide SDK <https://github.com/lidesdk/framework#lide-framework>`_) is currently active and developing, today is maintained by (`@dcanoh <https://github.com/dcanoh>`_)
