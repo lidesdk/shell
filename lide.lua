@@ -1,3 +1,5 @@
+local CURRENT_PLATFORM = lide.platform.getOSName()
+
 function log ( ... )
 	--print(...)
 end
@@ -343,7 +345,10 @@ function repository.remove ( _package_name )
 		return false,  last_error
 	end
 end
-local function run_sandbox ( filename, env, req, ... )
+
+local framework = {}
+
+function framework.run ( filename, env, req, ... )
 	local chunk = loadfile(filename)
 	
 	if not chunk then
@@ -354,14 +359,17 @@ local function run_sandbox ( filename, env, req, ... )
 	do  -- Usar una copia separada del Lide que se est?ejecutando:
 		local _LIDE_BIN = os.getenv 'LIDE_BIN'
 		
-		if lide.platform.getOSName() == 'Linux' then
+		if ( CURRENT_PLATFORM == 'Linux' ) then
 			--local exec, errm = pcall(os.execute, (_LIDE_BIN or 'lua5.1') .. [[ -e 'package.cpath = os.getenv 'LIDE_PATH' ..'/libraries/linux_x86/?.so;' package.path = package.path ..";"..os.getenv "LIDE_PATH" .."/libraries?.lua;" require "lide.core.init"']].. ' -l lide.init ' .. filename)
 			os.execute( [[lua5.1 -e "package.cpath = os.getenv 'LIDE_PATH' ..'/libraries/linux_x86/?.so' package.path = os.getenv 'LIDE_PATH' ..'/libraries/?.lua'; require 'lide.init' " ]] .. filename )
 						
-
-		elseif lide.platform.getOSName() == 'Windows' then			
-			--os.execute (( [[lua -e "package.cpath = os.getenv 'LIDE_PATH' ..'\\libraries\\windows_x86\\clibs\\?.dll' package.path = os.getenv 'LIDE_PATH' ..'\\libraries\\?.lua'; require 'lide.init' " ]] .. filename ))
-			os.execute (( [[lua -e "package.cpath = os.getenv 'LIDE_PATH' ..'\\libraries\\windows_x86\\clibs\\?.dll;' package.path = os.getenv 'LIDE_PATH' .. '\\?.lua;' .. os.getenv 'LIDE_PATH' ..'\\libraries\\?.lua;'; require 'lide.init' " ]] .. filename ))
+		elseif ( CURRENT_PLATFORM == 'Windows' ) then
+			--- Ejecutamos el interprete de lua basado en wxluafreeze:
+			---  bin/gui.exe
+			---
+			--- Este ejecutable contiene todas las librerias necesarias para una correcta ejecucion de
+			--- componentes graficos compatibles con wxLua y Lua.
+			io.popen ( os.getenv('LIDE_PATH') .. '\\bin\\gui.exe ' .. filename)
 		end
 	end
 end
@@ -372,13 +380,6 @@ if ( arg[1] == 'search' and arg[2] ) then
 	for i= 2, #arg do package_args[#package_args +1] = arg[i] end
 	 
 	dofile ( app.folders.sourcefolder .. '/modules/search.lua' )
-
-elseif ( arg[1] == 'run' and arg[2] ) then
-
-	package_args = {} 
-	for i= 2, #arg do package_args[#package_args +1] = arg[i] end
-	 
-	dofile ( app.folders.sourcefolder .. '/modules/run.lua' )
 
 elseif ( arg[1] == 'install' and arg[2] ) then
 
@@ -410,11 +411,10 @@ else
 	    os.exit()
 	elseif arg[1] then	
 		if lide.file.doesExists(arg[1]) then
-			run_sandbox( arg[1] )
+			framework.run ( arg[1] )
 		else
 			local src_file = arg[1]
 			printl '[lide.error: ] "$src_file$" file does not exist.'
 		end
 	end
 end
-
