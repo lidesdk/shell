@@ -2,9 +2,34 @@ require(  'zip' )
 
 lide.zip = {}
 
+local function mktree ( src_file ) -- make only tree of dirs of this file
+	local _path = '' for path in (src_file) : gsub('\\', '/') : delimi '/' do
+		if not path:find '%.' then
+			_path = (_path or '/') .. path .. '/'
+			
+			if _path:find '/' then
+				__pth = _path:sub(1, #_path )
+				
+				if __pth:sub(#__pth-1, #__pth) == ':/' then
+					-- print(__pth) >>> D:/
+				else
+					__pth = normalize_path(__pth:sub(1, #__pth -1))
+				end
+
+				if not lide.folder.doesExists(__pth) then
+					print('create', __pth)
+					lide.folder.create (__pth)
+				end
+			end
+		end
+	end	
+end
+
 function lide.zip.extract ( source, dest )
 	local zfile, err = zip.open(source)
 	
+	mktree (dest)
+
 	if zfile then
 		dest_folder = dest
 		

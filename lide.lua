@@ -1,3 +1,28 @@
+function log ( ... )
+	--print(...)
+end
+
+local function trim ( str )
+	repeat str = str:gsub ('  ', '')
+	until not str:find ' '
+	return str
+end
+
+function lide.mktree ( src_file ) -- make only tree of dirs of this file
+	if not lfs.attributes(src_file) then
+		local _path = '' for path in src_file:delimi '\\' do
+			if _path == '' then
+				_path = _path .. path
+			else
+				_path = _path .. '/' .. path
+				if not lfs.attributes(_path) then
+					lfs.mkdir(_path)
+				end
+			end
+		end
+	end
+end
+
 local function normalize_path ( path )
 	if lide.platform.getOSName() == 'Windows' then
 		return (path:gsub('/', '\\'));
@@ -101,22 +126,29 @@ app.folders = { install, libraries, ourclibs, ourlibs }
 
 app.folders.sourcefolder = arg[0]:sub(1, #arg[0] - 9, #arg[0])
 
+app.folders.libraries =  normalize_path(app.folders.sourcefolder .. '/libraries')
+
 if lide.platform.getOSName() == 'Windows' then
+	
+	arch     = lide.platform.getArch ()         --'x86' -- x64, arm7
+	platform = lide.platform.getOS () : lower() -- linux, macosx
 
-	app.folders.install   = app.folders.sourcefolder
-	app.folders.libraries = app.folders.sourcefolder .. '\\libraries'
-	app.folders.ourclibs  = app.folders.sourcefolder .. '\\win_clibs'
+	lua_dir = (os.getenv 'LIDE_PATH' .. '\\lua\\%s\\%s\\?.lua;'):format(platform, arch) ..
+	          (os.getenv 'LIDE_PATH' .. '\\lua\\%s\\?.lua;'):format(platform) ..
+	          (os.getenv 'LIDE_PATH' .. '\\lua\\?.lua;')  -- Crossplatform: root\lua\package.lua
 
-	package.cpath = app.folders.sourcefolder .. '\\?.dll;' ..
-					app.folders.sourcefolder .. '\\clibs\\windows\\?.dll;'
-	package.path  = app.folders.sourcefolder .. '\\?.lua;' ..
-					app.folders.sourcefolder .. '\\lua\\?.lua;' ..
-					app.folders.sourcefolder .. '\\lua\\windows\\?.lua;'
+	clibs_dir=(os.getenv 'LIDE_PATH' .. '\\clibs\\%s\\%s\\?.dll;'):format(platform, arch) ..
+	          (os.getenv 'LIDE_PATH' .. '\\clibs\\%s\\?.dll;'):format(platform)
 
+	package.path   = lua_dir ..
+					 os.getenv 'LIDE_PATH' .. '\\?.lua'
+
+	package.cpath  = clibs_dir
+	
 elseif lide.platform.getOSName() == 'Linux' then
 
 	app.folders.install   = app.folders.sourcefolder
-	app.folders.libraries = app.folders.sourcefolder .. '/libraries'
+
 	--app.folders.ourclibs  = app.folders.sourcefolder .. '/lnx_clibs'
 
 	package.cpath = app.folders.sourcefolder .. '/?.so;' ..
@@ -125,6 +157,8 @@ elseif lide.platform.getOSName() == 'Linux' then
 					app.folders.sourcefolder .. '/lua/linux/?.lua;' ..
 					app.folders.sourcefolder .. '/lua/?.lua;'
 end
+
+local inifile = require 'inifile'
 
 local sqldatabase = require 'sqldatabase.init'
 local github      = require 'github'
@@ -167,100 +201,120 @@ function repository.download ( _package_name, _package_file, access_token )
 	end
 end
 
+local function ExtractZipAndCopyFiles(zipFilePath, destinationPath)
+    local zfile, err
+    
+    if lide.file.doesExists(zipFilePath) then
+    	zfile, err = zip.open(zipFilePath)
+    else
+    	return false
+    end
+	
+	lide.mktree(destinationPath)
+
+    -- iterate through each file insize the zip file
+    for file in zfile:files() do
+        --print(destinationPath .. file.filename)
+
+        local currFile, err = zfile:open(file.filename)
+        local currFileContents = currFile:read("*a") -- read entire contents of current file
+        local hBinaryOutput = io.open(normalize_path(destinationPath ..'\\'.. file.filename), "w+b")
+        
+        lide.mktree(normalize_path(destinationPath ..'\\'.. file.filename))
+
+        -- write current file inside zip to a file outside zip
+        if(hBinaryOutput)then
+            hBinaryOutput:write(currFileContents)
+            hBinaryOutput:close()
+        end
+    end
+    --zfile:close() !BLOQUEA EL PC
+end
+
 function repository.install ( _package_name, _package_file )
-		local function file_copy ( src, dest )
-			if not lide.file.doesExists(normalize_path(src)) then
-				printl '[lide error] copy: source = $src$ does not exist'
-			end
-			if lide.platform.getOSName() =='Linux' then
-				os.execute (('cp -r "%s" "%s"'):format(src, dest))
-			else
-				io.popen (('COPY /B /Y "%s" "%s"'):format(normalize_path(src), normalize_path(dest)))
-			end
-		end
-
-		lide.zip.extract(_package_file, app.folders.libraries ..'/'.._package_name)	
 		
-		local _man_file = app.folders.libraries ..'/'.._package_name..'/'.. _package_name ..'.manifest'
+		_package_file = normalize_path(_package_file)
+	
+		local _manifest_file = normalize_path(app.folders.libraries ..'/'.._package_name..'/'.. _package_name ..'.manifest')
 		
-		if file_getline (_man_file, 3) then 
-			
-			local libs = file_getline (_man_file, 3):delim('|');
-			
-			for k, v in pairs( libs ) do
-				local platform = v:delim ',' [1]
-				
-				if not lide.folder.doesExists(app.folders.libraries ..'/'..platform..'/lua/'.._package_name) then 
-					lide.folder.create(app.folders.libraries ..'/'..platform..'/lua/'.._package_name)
-				end
-
-				if not lide.folder.doesExists(app.folders.libraries ..'/'..platform..'/clibs/'.._package_name) then 
-					lide.folder.create(app.folders.libraries ..'/'..platform..'/clibs/'.._package_name)
-				end
-
-				if v:delim ',' [1] == 'linux_x86' then
-
-					for i = 2, # v:delim ',' do
-						local int_path = tostring(v:delim ',' [i])
+		lide.zip.extractFile(_package_file, _package_name .. '.manifest', _manifest_file)
+		
+		local package_manifest = inifile.getvalue(_manifest_file, _package_name)
+		
+		if package_manifest then
 						
-						if int_path:sub(1,6) == 'clibs/' then
-							local clibs_folder = normalize_path(app.folders.libraries ..'/'.._package_name .. '/'..platform);
-							local file_src = normalize_path(clibs_folder .. '/' .. int_path)
-							local file_dst = normalize_path(app.folders.libraries ..'/'..platform..'/'..int_path);
-							
-							file_copy(file_src, file_dst)
+			if rawget(package_manifest, 'install') then
+				for arch_line in package_manifest.install : delimi '|' do -- architectures are delimited by |
+					local _files = trim(arch_line) : delim ',' -- files are delimiteed by comma
+
+					for _, int_path in pairs(_files) do -- internal_paths
+						--local file_src = normalize_path(app.folders.libraries .. '/' .. _package_name .. '/' .. int_path)
+						--local file_dst  = normalize_path(app.folders.libraries ..'/'.. int_path)
 						
-						elseif int_path:sub(1,4) == 'lua/' then
-							local lualibs_folder = normalize_path(app.folders.libraries ..'/'.._package_name..'/'..platform);
-							local file_src = normalize_path(lualibs_folder .. '/' .. int_path)
-							local file_dst = normalize_path(app.folders.libraries ..'/'..platform..'/'..int_path);
-							
-							file_copy(file_src, file_dst)
+						-- if open internalpath is possible:
+						if lide.zip.lzip.open(_package_file):open(int_path) then
+							if trim(int_path) ~= '' then
+								local file_dst  = normalize_path(app.folders.libraries ..'/'.. int_path)
+								local a,b       = file_dst:gsub('\\', '/'):reverse():find '/'
+								local _filename = file_dst:reverse():sub(1, b) : reverse()
+								local _foldernm = file_dst:sub(1, file_dst:find(_filename) -1)
+								
+								log ('  > ' .. file_dst)
+
+								lide.mktree(_foldernm)
+								lide.zip.extractFile(_package_file, int_path, file_dst)
+							end
 						end
-
-					end
-				elseif v:delim ',' [1] == 'windows_x86' then
-					
-					for i = 2, # v:delim ',' do
-						local int_path = tostring(v:delim ',' [i])
-						
-						if int_path:sub(1,6) == 'clibs/' then
-							local clibs_folder = normalize_path(app.folders.libraries ..'/'.._package_name..'/windows_x86');
-							local file_src = normalize_path(clibs_folder .. '/' .. int_path)
-							local file_dst = normalize_path(app.folders.libraries ..'/windows_x86/'..int_path);
-
-							file_copy(file_src, file_dst)
-						
-						elseif int_path:sub(1,4) == 'lua/' then
-							local lualibs_folder = normalize_path(app.folders.libraries ..'/'.._package_name..'/windows_x86');
-							local file_src = normalize_path(lualibs_folder .. '/' .. int_path)
-							local file_dst = normalize_path(app.folders.libraries ..'/windows_x86/'..int_path);
-														
-							file_copy(file_src, file_dst)
-						end
-
 					end
 				end
-			end
-		end
 
-		local function install_depends ( package_manifest )
-			local depends = file_getline(package_manifest, 2):delim ','
-			for _, _package_name in pairs( depends ) do
-				if lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
-					--> printl '  > Dependencies: $_package_name$ installed'
-				else
-					print ('  > Installing dependencies: '.. _package_name) 
-					repository.download(_package_name, app.folders.libraries .. '/'.._package_name..'.zip')
-					repository.install (_package_name, app.folders.libraries .. '/'.._package_name..'.zip')
+			elseif rawget(package_manifest, lide.platform.getOS():lower()) then
+				for arch_line in package_manifest.windows : delimi '|' do -- architectures are delimited by |
+					arch_line = arch_line:delim ':' 
+					local _osname = lide.platform.getOS():lower()
+					local _arch   = arch_line[1]
+					local _files  = trim(arch_line[2] or '') : delim ',' -- files are delimiteed by comma					
+
+					--	-- copy file to destination: libraries/windows/x64/luasql/sqlite3.dll
+					for _, int_path in pairs(_files) do -- internal_paths
+						local file_dst = normalize_path(app.folders.libraries ..'/'.. int_path)
+						local a,b       = file_dst:gsub('\\', '/'):reverse():find '/'
+						local _filename = file_dst:reverse():sub(1, b) : reverse()
+						local _foldernm = file_dst:sub(1, file_dst:find(_filename) -1)
+						
+						log ('  > ' .. file_dst)
+
+						lide.mktree(_foldernm)
+						lide.zip.extractFile(_package_file, int_path, file_dst)
+					end
+				end
+			elseif not rawget(package_manifest, lide.platform.getOS():lower()) then
+				print ('! Error: This module is not available on ' .. lide.platform.getOS())
+				os.exit()
+			end
+
+			local function install_depends ( package_manifest )
+				local depends = package_manifest.depends : delim ','
+
+				for _, _package_name in pairs( depends ) do
+					if lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
+						--> printl '  > Dependencies: $_package_name$ installed'
+					else
+						print ('  > Installing dependencies: '.. _package_name) 
+						repository.download(_package_name, app.folders.libraries .. '/'.._package_name..'.zip')
+						repository.install (_package_name, app.folders.libraries .. '/'.._package_name..'.zip')
+					end
 				end
 			end
+
+			if package_manifest.depends and package_manifest.depends ~= '' then 
+				install_depends(package_manifest)
+			end
+
+
 		end
 
-		if file_getline (_man_file, 2) and file_getline (_man_file, 2) ~= '' then 
-			install_depends(_man_file) 
-		end
-	end
+end
 
 function repository.remove ( _package_name )
 	local _package_version
@@ -273,11 +327,14 @@ function repository.remove ( _package_name )
 			io.popen ('rm -rf "' .. app.folders.libraries ..'/'.._package_name..'"');
 			io.popen ('rm -rf "' .. app.folders.libraries ..'/'.._package_name..'".zip');
 		elseif lide.platform.getOSName() == 'Windows' then
-			io.popen ('del /Q /S "' .. normalize_path(app.folders.libraries ..'/windows_x86/lua/'.._package_name..'.lua"'));
-			io.popen ('rd /Q /S "' .. normalize_path(app.folders.libraries ..'/windows_x86/lua/'.._package_name..'"'));
-			io.popen ('rd /Q /S "' .. normalize_path(app.folders.libraries ..'/windows_x86/clibs/'.._package_name..'"'));
-			io.popen ('rd /Q /S "' .. normalize_path(app.folders.libraries ..'/'.._package_name..'"'));
-			io.popen ('del /F /Q /S "' .. normalize_path(app.folders.libraries ..'/'.._package_name..'".zip'));
+			--io.popen ('del /Q /S "' .. normalize_path(app.folders.libraries ..'/windows_x86/lua/'.._package_name..'.lua"'));
+			--io.popen ('rd /Q /S "' .. normalize_path(app.folders.libraries ..'/windows_x86/lua/'.._package_name..'"'));
+			--io.popen ('rd /Q /S "' .. normalize_path(app.folders.libraries ..'/windows_x86/clibs/'.._package_name..'"'));
+			--io.popen ('rd /Q /S "' .. normalize_path(app.folders.libraries ..'/'.._package_name..'"'));
+			--io.popen ('del /F /Q /S "' .. normalize_path(app.folders.libraries ..'/'.._package_name..'".zip'));
+			lide.core.folder.delete(normalize_path(app.folders.libraries .. '/' .. _package_name));
+			lide.core.folder.delete(normalize_path(app.folders.libraries .. '/windows_x86/clibs/' .. _package_name));
+			lide.core.folder.delete(normalize_path(app.folders.libraries .. '/windows_x86/lua/' .. _package_name));
 		end
 
 		return true
@@ -303,7 +360,8 @@ local function run_sandbox ( filename, env, req, ... )
 						
 
 		elseif lide.platform.getOSName() == 'Windows' then			
-			os.execute (( [[lua -e "package.cpath = os.getenv 'LIDE_PATH' ..'\\libraries\\?.dll' package.path = os.getenv 'LIDE_PATH' ..'\\libraries\\?.lua'; require 'lide.init' " ]] .. filename ))
+			--os.execute (( [[lua -e "package.cpath = os.getenv 'LIDE_PATH' ..'\\libraries\\windows_x86\\clibs\\?.dll' package.path = os.getenv 'LIDE_PATH' ..'\\libraries\\?.lua'; require 'lide.init' " ]] .. filename ))
+			os.execute (( [[lua -e "package.cpath = os.getenv 'LIDE_PATH' ..'\\libraries\\windows_x86\\clibs\\?.dll;' package.path = os.getenv 'LIDE_PATH' .. '\\?.lua;' .. os.getenv 'LIDE_PATH' ..'\\libraries\\?.lua;'; require 'lide.init' " ]] .. filename ))
 		end
 	end
 end
@@ -314,6 +372,13 @@ if ( arg[1] == 'search' and arg[2] ) then
 	for i= 2, #arg do package_args[#package_args +1] = arg[i] end
 	 
 	dofile ( app.folders.sourcefolder .. '/modules/search.lua' )
+
+elseif ( arg[1] == 'run' and arg[2] ) then
+
+	package_args = {} 
+	for i= 2, #arg do package_args[#package_args +1] = arg[i] end
+	 
+	dofile ( app.folders.sourcefolder .. '/modules/run.lua' )
 
 elseif ( arg[1] == 'install' and arg[2] ) then
 
@@ -334,6 +399,8 @@ elseif ( arg[1] == 'remove' and arg[2] ) then
 	
 	if repository.remove(_package_name) then
 		print 'Library is successfully removed.'
+	else
+		print ('! Library ' .. arg[2] .. ' isn\'t installed now.')
 	end
 
 else

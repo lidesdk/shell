@@ -1,51 +1,92 @@
-require(  'zip' )
+zip = require(  'zip' )
 
-lide.zip = {}
+lide.zip = { lzip = zip }
 
-function lide.zip.extract ( source, dest )
-	local zfile, err = zip.open(source)
-	
-	if zfile then
-		dest_folder = dest
-		
-		if not lide.folder.doesExists(dest_folder) then
-			-- print('mkdir', dest_folder)
-			lide.folder.create(dest_folder)
-			--wx.wxSleep(0.01)
-		else
-			print 'eeror carpeta eiste'
-			return false
-		end
+local function normalize_path ( path )
+	if lide.platform.getOSName() == 'Windows' then
+		return (path:gsub('/', '\\'));
+	elseif lide.platform.getOSName() == 'Linux' then
+		return (path:gsub('\\', '/'));
+	end
+end
 
-		for file in zfile:files() do
-			if file.filename:sub(#file.filename, #file.filename) == '/' then
-				local internal_folder = file.filename:sub(0, #file.filename-1)
-				local tocreate_folder = dest_folder .. '/'..internal_folder
-				
-				if not lide.folder.doesExists(tocreate_folder) then
-					lide.folder.create(tocreate_folder)
-				end
+
+local function mktree ( src_file ) -- make only tree of dirs of this file
+	if not lfs.attributes(src_file) then
+		local _path = '' for path in src_file:delimi '\\' do
+			if _path == '' then
+				_path = _path .. path
 			else
-				local onzip_content = zfile:open(file.filename, 'rb');
-				local dest_file
-				
-				repeat dest_file = io.open(dest_folder .. '/' .. file.filename, 'w+b');
-				until dest_file
-
-				if dest_file then				
-					dest_file:write(onzip_content:read('*a'));
-					onzip_content:close()
-					dest_file:flush();
-					dest_file:close()
-				else
-					print ('Error opening: ', dest_folder .. '/' .. file.filename)
+				_path = _path .. '/' .. path
+				if not lfs.attributes(_path) then
+					lfs.mkdir(_path)
 				end
 			end
-			--wx.wxSleep(0.1)
 		end
-	else
-		print 'dont zfile'
 	end
+end
+
+function lide.zip.extract ( source, dest )	
+	if not lide.file.doesExists(source) then
+		print ('! Error: el archivo no existe: ' .. source)
+	else
+		local zfile, err = zip.open(normalize_path(source))
+
+		if zfile then
+			dest_folder = dest
+
+			for file in zfile:files() do
+				if file.filename:sub(#file.filename, #file.filename) == '/' then
+					local internal_folder = file.filename:sub(0, #file.filename-1)
+					local tocreate_folder = dest_folder .. '/'..internal_folder
+					print(normalize_path(tocreate_folder))
+					if not lide.folder.doesExists(tocreate_folder) then
+						mktree(tocreate_folder)
+					end
+				else
+
+					local zip_stored_file = zfile:open(file.filename, 'rb');
+					local dest_file_path = normalize_path(dest_folder .. '/' .. file.filename)
+					local dest_file      = io.open(dest_file_path, 'w+b')
+					
+					--mktree(dest_file_path)
+					
+					if dest_file then
+						dest_file:write( zip_stored_file:read '*a' )
+						dest_file:flush()
+						dest_file:close()
+					end
+				end
+			end
+		else
+			print 'dont zfile'
+		end
+	end
+end
+
+function lide.zip.extractFile ( zipFilePath, internalPath, destinationPath)
+    local zfile, err
+    
+    if lide.file.doesExists(zipFilePath) then
+    	zfile, err = zip.open(zipFilePath)
+    else
+    	return false
+    end
+	
+    -- iterate through each file insize the zip file
+    mktree(destinationPath:sub(1, #destinationPath - #internalPath -1))
+        
+    if internalPath:gsub(' ', '') ~= '' then
+    	local currFile, err = zfile:open(internalPath)
+    	local currFileContents = currFile:read("*a") -- read entire contents of current file
+    	local hBinaryOutput = io.open(destinationPath, "w+b")
+
+    	-- write current file inside zip to a file outside zip
+    	if(hBinaryOutput)then
+    	    hBinaryOutput:write(currFileContents)
+    	    hBinaryOutput:close()
+    	end
+    end
 end
 
 return lide.zip

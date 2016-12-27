@@ -20,7 +20,7 @@ if #tbl > 0 then
 			local num_repo_version  = tonumber(tostring(row.package_version:gsub('%.', '')));
 
 			print(
-				('stable/%s %s %s\n    %s'):format(row.package_name, row.package_version, str_tag or '', row.package_description)
+				('stable/%s %s %s\n%s'):format(row.package_name, row.package_version, str_tag or '', row.package_description)
 			)
 		end
 	end
