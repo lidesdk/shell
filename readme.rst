@@ -3,6 +3,8 @@ Lide Commandline
 
 Lide Commandline is a tool that allow you to execute lua scripts and manage lua modules, you can search install and remove modules from lide repository.
 
+![Alt text](https://github.com/lidesdk/commandline/screenshot.png)
+
 Usage
 *****
 

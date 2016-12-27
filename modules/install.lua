@@ -24,8 +24,10 @@ end
 
 print('> installing...')	
 
-repository.download(_package_name, app.folders.libraries .. '/'.._package_name..'.zip')
+lide.mktree ( app.folders.libraries .. '/'.._package_name )
 
-repository.install (_package_name, app.folders.libraries .. '/'.._package_name..'.zip')
+repository.download(_package_name, app.folders.libraries .. '/'.._package_name .. '/'.._package_name .. '.zip')
+
+repository.install (_package_name, app.folders.libraries .. '/'.._package_name .. '/'.._package_name .. '.zip')
 
 print('\n> OK: '.._package_name..' successful installed.')

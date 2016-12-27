@@ -4,6 +4,8 @@ function log ( ... )
 	--print(...)
 end
 
+
+
 local function trim ( str )
 	repeat str = str:gsub ('  ', '')
 	until not str:find ' '
@@ -196,6 +198,11 @@ function repository.download ( _package_name, _package_file, access_token )
 	
 	local content = github.get_file ( github_path, nil, repository.access_token )
 	
+	if not content then
+		print ('!Error: no se pudo descargar el paquete: ' .. github_path)
+		return false
+	end
+
 	local zip_file = io.open(normalize_path(_package_file), 'w+b');
 
 	if zip_file:write(content) then
@@ -234,7 +241,12 @@ local function ExtractZipAndCopyFiles(zipFilePath, destinationPath)
 end
 
 function repository.install ( _package_name, _package_file )
-		
+		if not lide.file.doesExists(_package_file) then
+			print ('! Error: el paquete: ' .. tostring(_package_file) .. 'no se pudo instalar.')
+			return
+
+		end
+
 		_package_file = normalize_path(_package_file)
 	
 		local _manifest_file = normalize_path(app.folders.libraries ..'/'.._package_name..'/'.. _package_name ..'.manifest')
@@ -299,12 +311,15 @@ function repository.install ( _package_name, _package_file )
 				local depends = package_manifest.depends : delim ','
 
 				for _, _package_name in pairs( depends ) do
-					if lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
+					if lide.folder.doesExists(app.folders.libraries ..'/'.._package_name ..'/'.._package_name) then
 						--> printl '  > Dependencies: $_package_name$ installed'
 					else
 						print ('  > Installing dependencies: '.. _package_name) 
-						repository.download(_package_name, app.folders.libraries .. '/'.._package_name..'.zip')
-						repository.install (_package_name, app.folders.libraries .. '/'.._package_name..'.zip')
+						
+						lide.mktree (app.folders.libraries .. '/'.._package_name)
+
+						repository.download(_package_name, app.folders.libraries .. '/'.._package_name .. '/' .._package_name .. '.zip')
+						repository.install (_package_name, app.folders.libraries .. '/'.._package_name .. '/' .._package_name .. '.zip')
 					end
 				end
 			end
@@ -369,10 +384,14 @@ function framework.run ( filename, env, req, ... )
 			---
 			--- Este ejecutable contiene todas las librerias necesarias para una correcta ejecucion de
 			--- componentes graficos compatibles con wxLua y Lua.
-			io.popen ( os.getenv('LIDE_PATH') .. '\\bin\\gui.exe ' .. filename)
+			os.execute ( 
+				os.getenv('LIDE_PATH') .. '\\bin\\gui.exe ' .. filename
+			)
 		end
 	end
 end
+
+--table.print(framework)
 
 if ( arg[1] == 'search' and arg[2] ) then
 

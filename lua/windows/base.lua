@@ -50,6 +50,7 @@ function _G.render (x, open, close, elem, pair, sep, roots)
   if type (x) ~= "table" or metamethod (x, "__tostring") then
     return elem (x)
   else
+    if not strbuf then return '' end -- this line is added for me because when strbuf is nil the app is PAILA!
     local s = strbuf.new ()
     s = s .. open (x)
     roots[x] = elem (x)
