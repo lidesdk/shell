@@ -4,8 +4,6 @@ function log ( ... )
 	--print(...)
 end
 
-
-
 local function trim ( str )
 	repeat str = str:gsub ('  ', '')
 	until not str:find ' '
