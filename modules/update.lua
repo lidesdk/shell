@@ -32,16 +32,6 @@ function compare_versions ( ver1, ver2 )
 -- 2  ver1 < ver 2
 end
 
-local function file_getline ( filename, nline )
-	local n = 0; for line in io.lines(filename) do
-		n = n+1; 
-		if n == nline then
-			return line
-		end
-	end
-	return false
-end
-
 if not package_args[1] then
 	print '! Update all components.'
 elseif package_args[1] then
@@ -61,7 +51,7 @@ elseif package_args[1] then
 				
 				return false
 			else
-				local local_version = file_getline ( app.folders.libraries ..'/'..package_name .. '/' .. package_name ..'.manifest', 1 )
+				local local_version = inifile.getvalues (app.folders.libraries ..'/'..package_name .. '/' .. package_name ..'.manifest', package_name ) ['version'] --file_getline ( app.folders.libraries ..'/'..package_name .. '/' .. package_name ..'.manifest', 1 )
 				local cloud_version = repository.libraries_stable:select(('select * from libraries_stable where package_name like "%s" limit 1'):format(package_name))[1].package_version
 				
 				print('> last version: ' .. cloud_version)

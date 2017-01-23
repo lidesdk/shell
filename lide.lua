@@ -133,7 +133,7 @@ app.folders.libraries =  normalize_path(app.folders.sourcefolder .. '/libraries'
 if lide.platform.getOSName() == 'Windows' then
 	
 	arch     = lide.platform.getArch ()         --'x86' -- x64, arm7
-	platform = lide.platform.getOS () : lower() -- linux, macosx
+	platform = lide.platform.getOS () : lower() -- windows, linux, macosx
 
 	lua_dir = (os.getenv 'LIDE_PATH' .. '\\lua\\%s\\%s\\?.lua;'):format(platform, arch) ..
 	          (os.getenv 'LIDE_PATH' .. '\\lua\\%s\\?.lua;'):format(platform) ..
@@ -160,12 +160,12 @@ elseif lide.platform.getOSName() == 'Linux' then
 					app.folders.sourcefolder .. '/lua/?.lua;'
 end
 
-local inifile = require 'inifile'
-
+inifile = require 'inifile'
+--io.stdout : write (tostring(inifile)..'\n')
 local sqldatabase = require 'sqldatabase.init'
 local github      = require 'github'
 lide.zip 		  = require 'lide_zip'
-
+--print(inifile)
 repository = {}
 
 repository.access_token = access_token
@@ -409,7 +409,9 @@ elseif ( arg[1] == 'update' ) then
 
 	package_args = {} 
 	for i= 2, #arg do package_args[#package_args +1] = arg[i] end
-	
+	-- emulate env sandbox:
+	--inifile = require 'inifile'
+
 	dofile ( app.folders.sourcefolder .. '/modules/update.lua' )
 
 elseif ( arg[1] == 'remove' and arg[2] ) then
@@ -428,7 +430,7 @@ else
 	    os.exit()
 	elseif arg[1] then	
 		if lide.file.doesExists(arg[1]) then
-			framework.run ( arg[1] )
+			framework.run ( arg[1] )--, { inifile = inifile, repository = repository } )
 		else
 			local src_file = arg[1]
 			printl '[lide.error: ] "$src_file$" file does not exist.'

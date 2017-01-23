@@ -20,7 +20,7 @@ function getsections ( file )
 	return _sections
 end
 
-function getvalue( file, section )
+function getvalues ( file, section )
 	local found_section, _values
 	
 
@@ -53,6 +53,6 @@ function getvalue( file, section )
 	return _values
 end
 
-inifile = { getvalue = getvalue, getsections = getsections }
+inifile = { getvalue = getvalues, getvalues = getvalues, getsections = getsections }
 
 return inifile
