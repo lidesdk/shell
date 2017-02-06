@@ -1,9 +1,0 @@
-[submodule "network"]
-	path = network
-	url = git@github.com:lidesdk/network.git
-[submodule "lide"]
-	path = lide
-	url = https://github.com/lidesdk/framework.git
-[submodule "libraries/lide"]
-	path = libraries/lide
-	url = https://github.com/lidesdk/framework.git
