@@ -1,0 +1,3 @@
+[submodule "libraries/lide"]
+	path = libraries/lide
+	url = https://github.com/lidesdk/framework.git
