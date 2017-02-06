@@ -1,0 +1,6 @@
+Proyecto: Lide SDK
+Hosting : buddy
+Host URL: 
+Datos del Hosting {
+	buddy@app.buddy.works:thdkano/lide
+}
