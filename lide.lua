@@ -132,8 +132,8 @@ app.folders.libraries =  normalize_path(app.folders.sourcefolder .. '/libraries'
 
 if lide.platform.getOSName() == 'Windows' then
 	
-	arch     = lide.platform.getArch ()         --'x86' -- x64, arm7
-	platform = lide.platform.getOS () : lower() -- windows, linux, macosx
+	local arch     = lide.platform.getArch ()         --'x86' -- x64, arm7
+	local platform = lide.platform.getOS () : lower() -- windows, linux, macosx
 
 	lua_dir = (os.getenv 'LIDE_PATH' .. '\\lua\\%s\\%s\\?.lua;'):format(platform, arch) ..
 	          (os.getenv 'LIDE_PATH' .. '\\lua\\%s\\?.lua;'):format(platform) ..
@@ -173,7 +173,9 @@ repository.access_token = access_token
 repository.libraries_stable = sqldatabase:new(app.folders.libraries..'/repos.db', 'sqlite3')
 
 function repository.update ( access_token )
-	local db_content, errcode, errmsg  = github.get_file ( 'lidesdk/repos/libraries.db', nil, repository.access_token)
+	--repos inifile.getsections( _file_configfile )
+	--local _db_url = 
+	local db_content, errcode, errmsg  = github.get_file ( 'lidesdk/repos/libraries.db', nil, repository.access_token )
 
 	if db_content then
 		-- if folder doesnt exist create it (todo)

@@ -14,6 +14,7 @@ function github.get_file ( cloud_file_path, ref, access_token )
 	local headers = {
 		['Accept'] = 'application/vnd.github.v3.raw'
 	}
+
 	if access_token then
 		headers['Authorization'] = 'token ' .. access_token
 	end
@@ -34,26 +35,14 @@ function github.get_file ( cloud_file_path, ref, access_token )
 		--{allow_redirects = false}
 	}	
 	
-	-- 200 Codigo 200 significa que todo va bien:
+	-- Code 200: Significa que todo va bien:
 	if (response.status_code == 200) then
 		-- Retornamos el archivo completo:
 		return response.text
-	elseif (response.status_code ~= 200 ) then
-
+	else
+        -- Retornamos false y el archivo de error:
 		return false, response.status_code, response.status
---		lide.core.error.lperr()
 	end
 end
 
 return github
-
-
---if lide.platform.getOSName() == 'Windows' then
-
---end
---folders = { 
---	install   = 'c:\\lidesdk',
---	libraries = 'c:\\lidesdk\\libraries',
---}
---
---update_database()

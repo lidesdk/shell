@@ -5,7 +5,7 @@ end
 local inifile = {}
 
 function getsections ( file )
-	local _inifile = io.open 'config.ini'
+	local _inifile = io.open (file)--'config.ini'
 	local inifile_content = _inifile:read '*a' 
 	local _open = inifile_content : find '%['
 	local _end  = inifile_content : find '%]'
