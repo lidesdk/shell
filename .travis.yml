@@ -1,0 +1,93 @@
+language: c
+
+sudo: false
+
+env:
+  - ARCH=i686
+
+  matrix:
+    - LUA=lua5.1
+    - LUA=lua5.2
+    - LUA=lua5.3
+
+before_install:
+  - pip install --user cpp-coveralls hererocks
+  - hererocks env --$LUA --luarocks latest
+  - export PATH="$PWD/env/bin:$PATH"
+  - chmod +x ./lide.sh
+  #- source .travis/setenv_lua.sh
+  #- luarocks install luacov
+  #- luarocks install tapered
+
+script:
+  #- lua -lluacov awesome-tests.lua
+  ./lide.sh ./github.lua
+
+#            # Example Travis CI configuration for a simple Lua module.
+#            #
+#            # Add the lua-travis repository as a submodule named `.travis`:
+#            #     git submodule add https://github.com/siffiejoe/lua-travis .travis
+#            # Then copy and customize this file as `.travis.yml` to the root
+#            # directory of your repository.
+#            
+#            language: c
+#            
+#            # Select container based VM (no sudo available).
+#            sudo: false
+#            # If you need to install apt packages, you can either choose
+#            # `sudo: required` (and `dist: trusty` if you need more recent
+#            # packages), or use the `apt` addon. Container based VMs should
+#            # be preferred because they start faster and use less resources.
+#            
+#            # Use gcc as the C compiler (clang is also available).
+#            compiler: gcc
+#            
+#            # Specify operating systems to test on (linux and/or osx).
+#            os:
+#              - linux
+#            
+#            # Environment variables for the build.
+#            # The `LUA` and `LUAROCKS` variables are handled by the `install.sh`
+#            # script in this repository. You can choose a LuaRocks version to
+#            # install (optional), and one or more different Lua versions. Your
+#            # module is built and tested with each of them. (And of course you can
+#            # add your own environment variables.)
+#            
+#            env:
+#              - ARCH=i686
+#                LUA="lua 5.1" 
+#            
+#            #env:
+#            #  global:
+#            #    - LUAROCKS=2.2.2
+#            #  matrix:
+#            #    #- LUA=LuaJIT-2.0.4
+#            #    #- LUA=Lua-5.2.4
+#            #    #- LUA=5.3.2
+#            #    - LUA=5.1.4
+#            
+#            # Only test changes to the master branch.
+#            branches:
+#              only:
+#                - master
+#            
+#            # Disable email notifications.
+#            # You usually see the test results in pull requests, and you can add a
+#            # badge to your main README.md. So the emails are just noise.
+#            notifications:
+#              email: false
+#            
+#            # Install dependencies (Lua, Luarocks, ...).
+#            # The `.travis/install.sh` takes care of Lua and LuaRocks. If you need
+#            # anything else, you have to install it on your own.
+#            install:
+#              #- ./lide.sh
+#            
+#            # Build (and test?) your project.
+#            # The extra `CFLAGS` setting is for enabling compiler warnings (which
+#            # LuaRocks by default doesn't do). The installed LuaRocks version is
+#            # in `PATH` (as `luarocks`), `LUA_PATH` and `LUA_CPATH` are configured,
+#            # and the installed Lua interpreter is in `PATH` as `lua`.
+#            script:
+#              - ./lide.sh ./github.lua
+#              #- luarocks make CFLAGS="-Wall -Wextra -O2 -fPIC" && lua tests/test.lua 
