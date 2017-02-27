@@ -1,3 +1,4 @@
+
 local CURRENT_PLATFORM = lide.platform.getOSName()
 
 function log ( ... )
