@@ -1,4 +1,3 @@
-
 local CURRENT_PLATFORM = lide.platform.getOSName()
 
 function log ( ... )
@@ -171,7 +170,7 @@ repository = {}
 
 repository.access_token = access_token
 
-repository.libraries_stable = sqldatabase:new(app.folders.libraries..'/repos.db', 'sqlite3')
+--repository.libraries_stable = sqldatabase:new(app.folders.libraries..'/repos.db', 'sqlite3')
 
 function repository.update ( access_token )
 	--repos inifile.getsections( _file_configfile )
@@ -192,24 +191,24 @@ function repository.update ( access_token )
 	end
 end
 
-function repository.download ( _package_name, _package_file, access_token )
-	local _query_install = 'select * from libraries_stable where package_name like "%s" limit 1'
-	
-	local github_path = repository.libraries_stable:select(_query_install:format(_package_name))[1].package_url
-	
-	local content = github.get_file ( github_path, nil, repository.access_token )
-	
-	if not content then
-		print ('!Error: no se pudo descargar el paquete: ' .. github_path)
-		return false
-	end
-
-	local zip_file = io.open(normalize_path(_package_file), 'w+b');
-
-	if zip_file:write(content) then
-		zip_file:close();
-	end
-end
+---function repository.download ( _package_name, _package_file, access_token )
+---	local _query_install = 'select * from lua_packages where package_name like "%s" limit 1'
+---	
+---	local github_path = repository.libraries_stable:select(_query_install:format(_package_name))[1].package_url
+---	
+---	local content = github.get_file ( github_path, nil, repository.access_token )
+---	
+---	if not content then
+---		print ('!Error: no se pudo descargar el paquete: ' .. github_path)
+---		return false
+---	end
+---
+---	local zip_file = io.open(normalize_path(_package_file), 'w+b');
+---
+---	if zip_file:write(content) then
+---		zip_file:close();
+---	end
+---end
 
 local function ExtractZipAndCopyFiles(zipFilePath, destinationPath)
     local zfile, err
@@ -241,21 +240,25 @@ local function ExtractZipAndCopyFiles(zipFilePath, destinationPath)
     --zfile:close() !BLOQUEA EL PC
 end
 
-function repository.install ( _package_name, _package_file )
+--[[function repository.install ( _package_name, _package_file )
+		_package_file = normalize_path(trim(_package_file))
+
 		if not lide.file.doesExists(_package_file) then
 			print ('! Error: el paquete: ' .. tostring(_package_file) .. 'no se pudo instalar.')
 			return
 
 		end
 
-		_package_file = normalize_path(_package_file)
-	
 		local _manifest_file = normalize_path(app.folders.libraries ..'/'.._package_name..'/'.. _package_name ..'.manifest')
 		
 		lide.zip.extractFile(_package_file, _package_name .. '.manifest', _manifest_file)
 		
-		local package_manifest = inifile.getvalue(_manifest_file, _package_name)
+		local package_manifest = inifile.parse(_manifest_file)[_package_name]
 		
+		
+		table.foreach(package_manifest, print)
+		
+
 		if package_manifest then
 						
 			if rawget(package_manifest, 'install') then
@@ -279,6 +282,24 @@ function repository.install ( _package_name, _package_file )
 								lide.mktree(_foldernm)
 								lide.zip.extractFile(_package_file, int_path, file_dst)
 							end
+						end
+					end
+				end
+
+				local _files = trim(package_manifest.install) : delim ',' -- files are delimiteed by comma
+				for _, int_path in pairs(_files) do -- internal_paths
+					-- if open internalpath is possible:
+					if lide.zip.lzip.open(_package_file):open(int_path) then
+						if trim(int_path) ~= '' then
+							local file_dst  = normalize_path(app.folders.libraries ..'/'.. int_path)
+							local a,b       = file_dst:gsub('\\', '/'):reverse():find '/'
+							local _filename = file_dst:reverse():sub(1, b) : reverse()
+							local _foldernm = file_dst:sub(1, file_dst:find(_filename) -1)
+							
+							log ('  > ' .. file_dst)
+
+							lide.mktree(_foldernm)
+							lide.zip.extractFile(_package_file, int_path, file_dst)
 						end
 					end
 				end
@@ -318,9 +339,12 @@ function repository.install ( _package_name, _package_file )
 						print ('  > Installing dependencies: '.. _package_name) 
 						
 						lide.mktree (app.folders.libraries .. '/'.._package_name)
+						print('_package_name '.._package_name)
+						repository.download_package(_package_name, app.folders.libraries .. '/'.._package_name .. '/'.._package_name .. '.zip')
+						repository.install         (_package_name, app.folders.libraries .. '/'.._package_name .. '/'.._package_name .. '.zip')
 
-						repository.download(_package_name, app.folders.libraries .. '/'.._package_name .. '/' .._package_name .. '.zip')
-						repository.install (_package_name, app.folders.libraries .. '/'.._package_name .. '/' .._package_name .. '.zip')
+						--repository.download(_package_name, app.folders.libraries .. '/'.._package_name .. '/' .._package_name .. '.zip')
+						--repository.install (_package_name, app.folders.libraries .. '/'.._package_name .. '/' .._package_name .. '.zip')
 					end
 				end
 			end
@@ -333,6 +357,7 @@ function repository.install ( _package_name, _package_file )
 		end
 
 end
+]]
 
 function repository.remove ( _package_name )
 	local _package_version
@@ -361,6 +386,252 @@ function repository.remove ( _package_name )
 		return false,  last_error
 	end
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------
+
+--repository.libraries_stable = sqldatabase:new(app.folders.libraries..'/repos.db', 'sqlite3')
+function repository.download_db ( url_db_file, dest_file_path, access_token ) -- repo update
+	local a,b = url_db_file:find 'github.com'
+	local db_content, errcode, errmsg  = github.get_file ( url_db_file:sub(b+2, # url_db_file), file_ref, repository.access_token )
+	local repos_db
+
+	if db_content then
+		if not dest_file_path then
+			repos_db = io.open(normalize_path(app.folders.libraries..'/repos.db'), 'w+b')
+		else
+			repos_db = io.open(normalize_path(dest_file_path), 'w+b')
+		end
+
+		if repos_db:write(db_content) then
+			repos_db:close()
+			-- OK SUccess
+		else
+			--any error writeing file
+		end
+	else
+		print 'There\'s a problem with repo url.\n'
+		print ('[lide.github]: ', errmsg .. ' - ' .. url_db_file )
+	end
+end
+
+---- Update all repos:
+----- repository.update_repos ( lide_repos_config_file, work_download_folder )
+function repository.update_repos ( lide_repos, work_folder )
+	local parsed = inifile.parse(lide_repos, 'io')
+	
+	if parsed then
+		for repo_name, repo in next, parsed do
+			if repo.url then
+				repository.repos[repo_name] = repo
+				repository.repos[repo_name].path = work_folder .. '\\'..repo_name..'.db'
+				repository.repos[repo_name].sqldb = sqldatabase:new(repo.path, 'sqlite3')
+				repository.download_db (repo.url, work_folder .. '\\'..repo_name..'.db')
+			else
+				print 'There\'s a problem with repo url.\n'
+				print ('[lide]: '.. repo_name .. ' ' .. tostring(repo.url))
+			end	
+		end
+		return parsed
+	end
+end
+
+function repository.download_package ( _package_name, _package_file, access_token )
+	local rst = {}
+	local result_repo
+	local loaded_repos = {}
+	local _query_install = 'select * from lua_packages where package_name like "%s" limit 1'
+
+	for repo_name, repo in pairs(repository.repos) do
+	
+		loaded_repos[repo_name] = sqldatabase:new(repo.path, 'sqlite3')
+		
+		--- Si encuentra el paquete en el primer repositorio: ese es
+		if loaded_repos[repo_name]:select(_query_install:format(_package_name))[1] then
+			result_repo = loaded_repos[repo_name]:select(_query_install:format(_package_name))[1]
+			--return first_repo
+			break
+		end
+	end
+	
+	if not result_repo then
+		return false, 'The package doesn\'t exists in any repo'
+	end
+
+	local github_package_path = result_repo.package_url
+
+	local content = github.get_file ( github_package_path, nil, repository.access_token )
+	
+	if not content then
+		print ('!Error: no se pudo descargar el paquete: ' .. github_package_path)
+		return false
+	end
+
+	local zip_file = io.open(normalize_path(_package_file), 'w+b');
+
+	if zip_file:write(content) then
+		zip_file:close();
+	end
+	repository.loaded_repos = loaded_repos
+end
+
+function repository.install_package ( _package_name, _package_file )
+	_package_file = normalize_path(_package_file)
+
+	if not lide.file.doesExists(_package_file) then
+		print ('! Error: el paquete: ' .. tostring(_package_file) .. 'no se pudo instalar.')
+		return
+
+	end
+
+	local _manifest_file = normalize_path(app.folders.libraries ..'/'.._package_name..'/'.. _package_name ..'.manifest')
+	
+	lide.zip.extractFile(_package_file, _package_name .. '.manifest', _manifest_file)
+	
+	local package_manifest = inifile.parse(_manifest_file)[_package_name]
+	
+	if rawget(package_manifest, lide.platform.getOS():lower()) then
+		for arch_line in package_manifest.windows : delimi '|' do -- architectures are delimited by |
+			arch_line = arch_line:delim ':' 
+			local _osname = lide.platform.getOS():lower()
+			local _arch   = arch_line[1]
+			local _files  = trim(arch_line[2] or '') : delim ',' -- files are delimiteed by comma					
+
+			--	-- copy file to destination: libraries/windows/x64/luasql/sqlite3.dll
+			for _, int_path in pairs(_files) do -- internal_paths
+				local file_dst = normalize_path(app.folders.libraries ..'/'.. int_path)
+				local a,b       = file_dst:gsub('\\', '/'):reverse():find '/'
+				local _filename = file_dst:reverse():sub(1, b) : reverse()
+				local _foldernm = file_dst:sub(1, file_dst:find(_filename) -1)
+				
+				log ('  > ' .. file_dst)
+
+				lide.mktree(_foldernm)
+				lide.zip.extractFile(_package_file, int_path, file_dst)
+			end
+		end
+	elseif not rawget(package_manifest, lide.platform.getOS():lower()) then
+		print ('  ! Error: module ' .. _package_name .. ' is not available on ' .. lide.platform.getOS())
+		os.exit()
+	end
+
+	local function install_depends ( package_manifest )
+		local depends = package_manifest.depends : delim ','
+
+		for _, _package_name in pairs( depends ) do
+			local _package_name   = _package_name:gsub(' ', '')
+			
+			if lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
+				--> printl '  > Dependencies: $_package_name$ installed'
+			else
+				print ('  > Installing dependencies: '.. _package_name) 
+				
+				local package_zip_file = (app.folders.libraries .. '\\'.._package_name .. '\\'.._package_name .. '.zip' ):gsub(' ', '')
+				
+				lide.mktree ((app.folders.libraries .. '\\'.._package_name):gsub(' ', ''))
+				
+				repository.download_package(_package_name, package_zip_file)			
+				repository.install_package (_package_name, package_zip_file)
+			end
+		end
+	end
+
+	if package_manifest.depends and package_manifest.depends ~= '' then 
+		install_depends(package_manifest)
+	end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------
 
 local framework = {}
 
