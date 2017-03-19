@@ -4,6 +4,9 @@
 [stable]
 url=http://github.com/lidesdk/repos/stable/libraries.db
 
+[dcanoh]
+url=http://github.com/lidesdk/repos/dcanoh.db
+
 # You can add your own repos here:
 # [example_repo]
 # url=http://github.com/user/repo/file.db

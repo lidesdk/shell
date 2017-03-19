@@ -17,7 +17,7 @@ local text_to_search = tostring(arg[2])
 
 repository.update_repos ( _ReposFile, _SourceFolder .. '\\libraries' )
 
-for repo_name, repo in pairs( repository.repos ) do
+local n = 0; for repo_name, repo in pairs( repository.repos ) do
 	local tbl = repo.sqldb : select('select * from lua_packages where package_name like "%'..text_to_search..'%"') 
 	if #tbl > 0 then
 		for i, row in pairs( tbl ) do
@@ -27,9 +27,10 @@ for repo_name, repo in pairs( repository.repos ) do
 				print(
 					(repo_name..'/%s %s %s\n%s'):format(row.package_name, row.package_version, str_tag or '', row.package_description)
 				)
+				n = n+1
 			end
 		end
-	else
-		print 'No matches.'
 	end
 end
+
+if n <= 0 then print '> No matches.' end

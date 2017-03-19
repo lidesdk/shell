@@ -44,7 +44,7 @@ function http.download ( url, dest )
 	local file, errm = io.open ( dest, 'w+b');
 	if not file then		
 		local msg_error = '[lide.http] File error ' .. (  ':' and errm or 'there is a problem in the path of destination file.')
-		lide.core.error.lperr (msg_error, 2)
+		error (msg_error, 3)
 	end
 
 	local connection, errm = http.test_connection(url);
@@ -58,7 +58,7 @@ function http.download ( url, dest )
 		file:close()
 	else
 		local msg_error = '[lide.http] No connection ' .. (  ':' and errm or 'there is a problem in the url.')
-		lide.core.error.lperr (msg_error, 2)
+		error (msg_error, 2)
 	end
 end
 

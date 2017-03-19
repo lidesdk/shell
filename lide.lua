@@ -172,6 +172,8 @@ inifile = require 'inifile'
 local sqldatabase = require 'sqldatabase.init'
 local github      = require 'github'
 lide.zip 		  = require 'lide_zip'
+local http        = require 'http.init'
+
 --print(inifile)
 repository = {}
 
@@ -346,24 +348,36 @@ function repository.download_package ( _package_name, _package_file, access_toke
 		return false, 'The package doesn\'t exists in any repo'
 	end
 
-	local github_package_path = result_repo.package_url
+	if result_repo.package_url then
+		--app = lide.app	
+		--print(result_repo.package_url)
 
-	local content = github.get_file ( github_package_path, nil, repository.access_token )
-	
-	if not content then
-		print ('!Error: no se pudo descargar el paquete: ' .. github_package_path)
-		return false
+		--https://raw.githubusercontent.com/dcano/repos/master/stable/cjson/cjson-2.1.0.zip
+
+		http.download(result_repo.package_url, normalize_path(_package_file))
+
+--		return true
+	else
+		local github_package_path = result_repo.package_url
+		local content = github.get_file ( github_package_path, nil, repository.access_token )
+		
+		if not content then
+			print ('!Error: no se pudo descargar el paquete: ' .. github_package_path)
+			return false
+		end
+
+		local zip_file = io.open(normalize_path(_package_file), 'w+b');
+
+		if zip_file:write(content) then
+			zip_file:close();
+		end
 	end
 
-	local zip_file = io.open(normalize_path(_package_file), 'w+b');
 
-	if zip_file:write(content) then
-		zip_file:close();
-	end
 	repository.loaded_repos = loaded_repos
 end
 
-function repository.install_package ( _package_name, _package_file )
+function repository.install_package ( _package_name, _package_file, _package_prefix)
 	_package_file = normalize_path(_package_file)
 
 	if not lide.file.doesExists(_package_file) then
@@ -374,7 +388,17 @@ function repository.install_package ( _package_name, _package_file )
 
 	local _manifest_file = normalize_path(app.folders.libraries ..'/'.._package_name..'/'.. _package_name ..'.manifest')
 	
-	lide.zip.extractFile(_package_file, _package_name .. '.manifest', _manifest_file)
+	if _package_prefix and _package_prefix:gsub(' ', '') ~= '' then
+		_package_prefix = _package_prefix ..'/'
+	end
+
+	--print((_package_prefix or '') .. _package_name .. '.manifest')
+	
+
+	if not lide.zip.extractFile(_package_file, (_package_prefix or '') .. _package_name .. '.manifest', _manifest_file) then
+		print	 (('> ERROR: Manifest file "%s" doesn\'t exists into "%s" package'):format((_package_prefix or '') .. _package_name .. '.manifest', _package_file))
+		os.exit()
+	end
 	
 	-- .................
 	
@@ -389,11 +413,14 @@ function repository.install_package ( _package_name, _package_file )
 		local file_src     = io.open(src_file, 'rb')
 		local file_content = file_src : read '*a'
 
-		local file_dst     = io.open(dst_file, 'w+b')
-		file_dst:write(file_content)
-		file_dst:flush()
-		file_src:close()
-		file_dst:close()
+		-- only copy new files if file dooesn exist
+		if not lide.core.file.doesExists( dst_file ) then
+			local file_dst = io.open(dst_file, 'w+b')
+			file_dst:write(file_content)
+			file_dst:flush()
+			file_src:close()
+			file_dst:close()
+		end
 	end
 
 	-- funcion para copiar los archivos de una carpeta recursivamente
@@ -430,7 +457,8 @@ function repository.install_package ( _package_name, _package_file )
 				log ('  > ' .. file_dst)
 
 				lide.mktree(_foldernm)
-				lide.zip.extractFile(_package_file, int_path, file_dst)
+				--print((_package_prefix or '') .. int_path)
+				lide.zip.extractFile(_package_file, (_package_prefix or '') .. int_path, file_dst)
 			end
 		end
 	elseif not rawget(package_manifest, lide.platform.getOS():lower()) then

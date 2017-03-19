@@ -39,7 +39,7 @@ function lide.zip.extract ( source, dest )
 				if file.filename:sub(#file.filename, #file.filename) == '/' then
 					local internal_folder = file.filename:sub(0, #file.filename-1)
 					local tocreate_folder = dest_folder .. '/'..internal_folder
-					print(normalize_path(tocreate_folder))
+					--print(normalize_path(tocreate_folder))
 					if not lide.folder.doesExists(tocreate_folder) then
 						mktree(tocreate_folder)
 					end
@@ -78,6 +78,8 @@ function lide.zip.extractFile ( zipFilePath, internalPath, destinationPath)
         
     if internalPath:gsub(' ', '') ~= '' then
     	local currFile, err = zfile:open(internalPath)
+    	--if not currFile then error 'internalPath file does not exists.' end
+    	if not currFile then return false, 'internalPath file does not exists.' end
     	local currFileContents = currFile:read("*a") -- read entire contents of current file
     	local hBinaryOutput = io.open(destinationPath, "w+b")
 
@@ -87,6 +89,7 @@ function lide.zip.extractFile ( zipFilePath, internalPath, destinationPath)
     	    hBinaryOutput:close()
     	end
     end
+    return true
 end
 
 return lide.zip
