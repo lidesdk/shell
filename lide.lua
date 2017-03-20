@@ -163,19 +163,23 @@ elseif lide.platform.getOSName() == 'Linux' then
 	print ('arch:' .. lide.platform.getArch ())
 
 	package.cpath = app.folders.sourcefolder .. '/?.so;' ..
-					app.folders.sourcefolder .. ('/clibs/linux/%s/?.so;'):format('x64') .. package.cpath
+					app.folders.sourcefolder .. '/env/?.so;' 
+					--app.folders.sourcefolder .. ('/clibs/linux/%s/?.so;'):format('x64') .. package.cpath
 	package.path  = app.folders.sourcefolder .. '/?.lua;' ..
 					app.folders.sourcefolder .. '/lua/linux/?.lua;' ..
 					app.folders.sourcefolder .. '/lua/?.lua;' .. package.path
 end
 
 
+--local luasql  = require 'luasql.sqlite3'
 inifile = require 'inifile'
+--io.stdout : write (tostring(inifile)..'\n')
 local sqldatabase = require 'sqldatabase.init'
 local github      = require 'github'
 lide.zip 		  = require 'lide_zip'
 local http        = require 'http.init'
 
+--print(inifile)
 repository = {}
 
 repository.access_token = access_token
@@ -200,6 +204,25 @@ function repository.update ( access_token )
 		print('[lide.github]: ', errmsg)
 	end
 end
+
+---function repository.download ( _package_name, _package_file, access_token )
+---	local _query_install = 'select * from lua_packages where package_name like "%s" limit 1'
+---	
+---	local github_path = repository.libraries_stable:select(_query_install:format(_package_name))[1].package_url
+---	
+---	local content = github.get_file ( github_path, nil, repository.access_token )
+---	
+---	if not content then
+---		print ('!Error: no se pudo descargar el paquete: ' .. github_path)
+---		return false
+---	end
+---
+---	local zip_file = io.open(normalize_path(_package_file), 'w+b');
+---
+---	if zip_file:write(content) then
+---		zip_file:close();
+---	end
+---end
 
 local function ExtractZipAndCopyFiles(zipFilePath, destinationPath)
     local zfile, err
