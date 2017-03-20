@@ -1,6 +1,5 @@
 	if  not luasql then
 		luasql = require 'luasql.sqlite3'
---		print('luasql: ' .. package.path)
 	end
 	
 --	print('luasql: ' .. package.path)

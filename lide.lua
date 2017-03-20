@@ -159,14 +159,18 @@ elseif lide.platform.getOSName() == 'Linux' then
 	app.folders.install   = app.folders.sourcefolder
 
 	--app.folders.ourclibs  = app.folders.sourcefolder .. '/lnx_clibs'
+	
+	print ('arch:' .. lide.platform.getArch ())
 
 	package.cpath = app.folders.sourcefolder .. '/?.so;' ..
-					app.folders.sourcefolder .. '/clibs/linux/?.so;'
+					app.folders.sourcefolder .. ('/clibs/linux/%s/?.so;'):format('x64') .. package.cpath
 	package.path  = app.folders.sourcefolder .. '/?.lua;' ..
 					app.folders.sourcefolder .. '/lua/linux/?.lua;' ..
-					app.folders.sourcefolder .. '/lua/?.lua;'
+					app.folders.sourcefolder .. '/lua/?.lua;' .. package.path
 end
 
+
+--local luasql  = require 'luasql.sqlite3'
 inifile = require 'inifile'
 --io.stdout : write (tostring(inifile)..'\n')
 local sqldatabase = require 'sqldatabase.init'
