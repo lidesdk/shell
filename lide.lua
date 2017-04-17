@@ -1,4 +1,5 @@
 assert(os.getenv 'LIDE_PATH', 'Declare la variable de entorno LIDE_PATH');
+
 package.path =  os.getenv 'LIDE_PATH' ..'\\?.lua;' 
 			 .. os.getenv 'LIDE_PATH' ..'\\lua\\windows\\?.lua;'
 			 .. os.getenv 'LIDE_PATH' ..'\\libraries\\?.lua;'; 
@@ -138,21 +139,22 @@ app.folders.sourcefolder = arg[0]:sub(1, #arg[0] - 9, #arg[0])
 app.folders.libraries =  normalize_path(app.folders.sourcefolder .. '/libraries')
 
 if lide.platform.getOSName() == 'Windows' then
-	
-	local arch     = lide.platform.getArch ()         --'x86' -- x64, arm7
-	local platform = lide.platform.getOS () : lower() -- windows, linux, macosx
-
-	lua_dir = (os.getenv 'LIDE_PATH' .. '\\lua\\%s\\%s\\?.lua;'):format(platform, arch) ..
-	          (os.getenv 'LIDE_PATH' .. '\\lua\\%s\\?.lua;'):format(platform) ..
-	          (os.getenv 'LIDE_PATH' .. '\\lua\\?.lua;')  -- Crossplatform: root\lua\package.lua
-
-	clibs_dir=(os.getenv 'LIDE_PATH' .. '\\clibs\\%s\\%s\\?.dll;'):format(platform, arch) ..
-	          (os.getenv 'LIDE_PATH' .. '\\clibs\\%s\\?.dll;'):format(platform)
-
-	package.path   = lua_dir ..
-					 os.getenv 'LIDE_PATH' .. '\\?.lua'
-
-	package.cpath  = clibs_dir
+--	
+--	local arch     = lide.platform.getArch ()         --'x86' -- x64, arm7
+--	local platform = lide.platform.getOS () : lower() -- windows, linux, macosx
+--
+--	lua_dir = (os.getenv 'LIDE_PATH' .. '\\lua\\%s\\%s\\?.lua;'):format(platform, arch) ..
+--	          (os.getenv 'LIDE_PATH' .. '\\lua\\%s\\?.lua;'):format(platform) ..
+--	          (os.getenv 'LIDE_PATH' .. '\\lua\\?.lua;')  -- Crossplatform: root\lua\package.lua
+--
+--	clibs_dir=(os.getenv 'LIDE_PATH' .. '\\clibs\\%s\\%s\\?.dll;'):format(platform, arch) ..
+--	          (os.getenv 'LIDE_PATH' .. '\\clibs\\%s\\?.dll;'):format(platform)
+--
+	--package.path   = lua_dir ..
+	package.path = package.path .. ';' .. 'lua\\?.lua'
+					 --os.getenv 'LIDE_PATH' .. '\\?.lua'
+--
+--	package.cpath  = clibs_dir
 	
 elseif lide.platform.getOSName() == 'Linux' then
 
@@ -613,6 +615,8 @@ elseif ( arg[1] == 'remove' and arg[2] ) then
 		print ('! Library ' .. arg[2] .. ' isn\'t installed now.')
 	end
 
+elseif ( arg[1] == '--test' ) then
+    io.stdout:write '[lide test] all ok.'
 else
 	if ( arg[1] == '-l' ) then
 	    print '[lide.error] Please import using require inside the lua file.'
