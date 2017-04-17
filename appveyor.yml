@@ -39,14 +39,6 @@ build_script:
   - luarocks install luafilesystem
 
 test_script:
-- echo "Testing..."
 - set LIDE_FRAMEWORK=%CD%
 - lua tests/exec_test.lua
 - lide search alien
-#- luacheck --std max+buted src spec
-#- busted --verbose --coverage
-
-#after_test:
-#  - if "%LUA_VER:~0,3%"=="5.1" (luarocks show bit32 || luarocks install bit32)
-#  - luarocks show luacov-coveralls || luarocks install luacov-coveralls
-#  - luacov-coveralls -v -e c:\lua -c spec\.luacov
