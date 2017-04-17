@@ -1,10 +1,19 @@
-assert(os.getenv 'LIDE_PATH', '[lide commandline] Declare la variable de entorno LIDE_PATH');
+--assert(os.getenv 'LIDE_PATH', '[lide commandline] Declare la variable de entorno LIDE_PATH');
+--
+--package.path =  os.getenv 'LIDE_PATH' ..'\\?.lua;' 
+--			 .. os.getenv 'LIDE_PATH' ..'\\lua\\windows\\?.lua;'
+--			 .. os.getenv 'LIDE_PATH' ..'\\libraries\\?.lua;'; 
+--
+--local LIDE_PATH = os.getenv 'LIDE_PATH'
 
-package.path =  os.getenv 'LIDE_PATH' ..'\\?.lua;' 
-			 .. os.getenv 'LIDE_PATH' ..'\\lua\\windows\\?.lua;'
-			 .. os.getenv 'LIDE_PATH' ..'\\libraries\\?.lua;'; 
-
-local LIDE_PATH = os.getenv 'LIDE_PATH'
+assert(os.getenv 'LIDE_FRAMEWORK', '[lide commandline] Declare la variable de entorno LIDE_PATH');
+--
+package.path =  os.getenv 'LIDE_FRAMEWORK':gsub('lide', '?') ..'.lua;' 
+			 --.. os.getenv 'LIDE_PATH' ..'\\lua\\windows\\?.lua;'
+--			 .. os.getenv 'LIDE_PATH' ..'\\libraries\\?.lua;'; 
+--
+--local LIDE_PATH = os.getenv 'LIDE_PATH'
+--print('A:'.. os.getenv 'LIDE_FRAMEWORK':gsub('lide', '?') ..'\\.lua;' )
 
 require 'lide.core.init'
 

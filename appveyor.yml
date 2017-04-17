@@ -39,7 +39,8 @@ build_script:
   - luarocks install luafilesystem
 
 test_script:
-- set LIDE_FRAMEWORK=c:\lua\x86\5.1.5\LuaRocks\systree\lib\lua\5.1\lide
+- dir c:\lua\x86\5.1.5\LuaRocks\systree\lib\lua\5.1
+- set LIDE_FRAMEWORK=c:\lua\x86\5.1.5\LuaRocks\systree\share\lua\5.1\lide
 - set LIDE_PATH=%CD%
 - lua tests\exec_test.lua
 - lide search alien
