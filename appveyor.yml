@@ -6,27 +6,12 @@ environment:
   LUAROCKS_VER: 2.4.1
   LUA_VER: 5.1.5
 
-#matrix:
-#  allow_failures:
-#    - configuration: 2010
-#      platform: x64
-    #- configuration: 2008
- #     platform: x64
-    #- configuration: MinGW
-  #    platform: x64
-
 platform:
   - x86
- # - x64
 
 cache:
   - c:\lua -> appveyor.yml
   - c:\external -> appveyor.yml
-
-# Skip unsupported combinations (ie, VS2008 for x64 is not supported)
-#init:
-#- if "%platform%" EQU "x64" ( for %%a in (2008 2010 MinGW) do ( if "%Configuration%"=="%%a" (echo "Skipping unsupported configuration" && exit /b 1 ) ) )
-
 
 install:
 # Make compiler command line tools available
@@ -39,8 +24,6 @@ build_script:
   - luarocks install luafilesystem
 
 test_script:
-- dir c:\lua\%platform%\5.1.5\LuaRocks\systree\share\lua\5.1\lide
 - set LIDE_FRAMEWORK=c:\lua\%platform%\5.1.5\LuaRocks\systree\share\lua\5.1\lide
 - set LIDE_PATH=%CD%
 - lua tests\exec_test.lua
-#- lide search alien
