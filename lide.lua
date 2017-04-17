@@ -1,8 +1,10 @@
-assert(os.getenv 'LIDE_PATH', 'Declare la variable de entorno LIDE_PATH');
+assert(os.getenv 'LIDE_PATH', '[lide commandline] Declare la variable de entorno LIDE_PATH');
 
 package.path =  os.getenv 'LIDE_PATH' ..'\\?.lua;' 
 			 .. os.getenv 'LIDE_PATH' ..'\\lua\\windows\\?.lua;'
 			 .. os.getenv 'LIDE_PATH' ..'\\libraries\\?.lua;'; 
+
+local LIDE_PATH = os.getenv 'LIDE_PATH'
 
 require 'lide.core.init'
 
@@ -151,10 +153,14 @@ if lide.platform.getOSName() == 'Windows' then
 --	          (os.getenv 'LIDE_PATH' .. '\\clibs\\%s\\?.dll;'):format(platform)
 --
 	--package.path   = lua_dir ..
-	package.path = package.path .. ';' .. 'lua\\?.lua'
+	package.path  = package.path .. ';' .. --  .. 'lua\\?.lua' ..
+					 os.getenv 'LIDE_PATH' .. '\\lua\\?.lua;' --..
 					 --os.getenv 'LIDE_PATH' .. '\\?.lua'
 --
---	package.cpath  = clibs_dir
+	--package.cpath  = clibs_dir
+    package.cpath = package.cpath .. ';' ..
+                   os.getenv 'LIDE_PATH' .. '\\clibs\\?.dll;'
+
 	
 elseif lide.platform.getOSName() == 'Linux' then
 
