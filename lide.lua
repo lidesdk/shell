@@ -12,7 +12,8 @@ package.path =  os.getenv 'LIDE_FRAMEWORK':gsub('lide', '?') ..'.lua;'
 			 --.. os.getenv 'LIDE_PATH' ..'\\lua\\windows\\?.lua;'
 --			 .. os.getenv 'LIDE_PATH' ..'\\libraries\\?.lua;'; 
 --
---local LIDE_PATH = os.getenv 'LIDE_PATH'
+local LIDE_PATH      = os.getenv 'LIDE_PATH'
+local LIDE_FRAMEWORK = os.getenv 'LIDE_FRAMEWORK'
 --print('A:'.. os.getenv 'LIDE_FRAMEWORK':gsub('lide', '?') ..'\\.lua;' )
 
 require 'lide.core.init'
@@ -145,9 +146,10 @@ local access_token  = os.getenv 'GITHUB_TOKEN'
 
 app.folders = { install, libraries, ourclibs, ourlibs }	
 
-app.folders.sourcefolder = arg[0]:sub(1, #arg[0] - 9, #arg[0])
-
-app.folders.libraries =  normalize_path(app.folders.sourcefolder .. '/libraries')
+--app.folders.sourcefolder = arg[0]:sub(1, #arg[0] - 9, #arg[0])
+app.folders.sourcefolder = normalize_path( os.getenv 'LIDE_PATH' )
+--app.folders.libraries =  normalize_path(app.folders.sourcefolder .. '/libraries')
+app.folders.libraries =  normalize_path( os.getenv 'LIDE_PATH' .. '/libraries')
 
 if lide.platform.getOSName() == 'Windows' then
 --	
@@ -196,7 +198,7 @@ local github      = require 'github'
 lide.zip 		  = require 'lide_zip'
 local http        = require 'http.init'
 
---print(inifile)
+--print('github:' .. tostring(github.get_file))
 repository = {}
 
 repository.access_token = access_token
@@ -310,9 +312,11 @@ function repository.download_db ( url_db_file, dest_file_path, access_token ) --
 
 	if db_content then
 		if not dest_file_path then
-			repos_db = io.open(normalize_path(app.folders.libraries..'/repos.db'), 'w+b')
+			repos_db, err = io.open(normalize_path(app.folders.libraries..'/repos.db'), 'w+b')
+			print(repos_db, err)
 		else
-			repos_db = io.open(normalize_path(dest_file_path), 'w+b')
+			repos_db, err = io.open(normalize_path(dest_file_path), 'w+b')
+			print(repos_db, err)
 		end
 
 		if repos_db:write(db_content) then
