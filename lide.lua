@@ -313,10 +313,10 @@ function repository.download_db ( url_db_file, dest_file_path, access_token ) --
 	if db_content then
 		if not dest_file_path then
 			repos_db, err = io.open(normalize_path(app.folders.libraries..'/repos.db'), 'w+b')
-			print(repos_db, err)
+--			print(repos_db, err)
 		else
 			repos_db, err = io.open(normalize_path(dest_file_path), 'w+b')
-			print(repos_db, err)
+--			print(repos_db, err)
 		end
 
 		if repos_db:write(db_content) then
