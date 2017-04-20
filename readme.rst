@@ -73,6 +73,7 @@ GNU/Linux Installation
 	$ nano ~/.bashrc
 	    # add this line at the bottom of the file:
         export LIDE_PATH=~/.lide/commandline
+        export LIDE_FRAMEWORK=~/.lide/commandline/libraries/lide
 
 
 Windows Installation
@@ -89,11 +90,19 @@ Windows Installation
 	# Create environment variable named LIDE_PATH:
 	
 	set LIDE_PATH=C:\lide\commandline
+	set LIDE_FRAMEWORK=C:\lide\commandline\libraries\lide
 
-You must declare the ``LIDE_PATH`` environment variable permanently, please check this article:
+You must declare the ``LIDE_PATH`` and ``LIDE_FRAMEWORK`` environment variable permanently, please check this article:
 `https://kb.wisc.edu/cae/page.php?id=24500 <https://kb.wisc.edu/cae/page.php?id=24500>`_
+
 
 Credits and Authors
 ===================
 
 Lide Commandline is part of (`Lide SDK <https://github.com/lidesdk/framework#lide-framework>`_) is currently active and developing, today is maintained by (`@dcanoh <https://github.com/dcanoh>`_)
+
+
+License
+=======
+
+Lide is licensed under (`The GNU General Public License<https://github.com/lidesdk/commandline/blob/master/LICENSE>`_). Copyright © 2016 Hernán Dario Cano.
