@@ -14,6 +14,8 @@ package.path =  os.getenv 'LIDE_FRAMEWORK':gsub('lide', '?') ..'.lua;'
 --
 local LIDE_PATH      = os.getenv 'LIDE_PATH'
 local LIDE_FRAMEWORK = os.getenv 'LIDE_FRAMEWORK'
+local _LIDE_VERSION  = '0.0.01'
+
 --print('A:'.. os.getenv 'LIDE_FRAMEWORK':gsub('lide', '?') ..'\\.lua;' )
 
 require 'lide.core.init'
@@ -636,6 +638,35 @@ elseif ( arg[1] == 'remove' and arg[2] ) then
 
 elseif ( arg[1] == '--test' ) then
     io.stdout:write '[lide test] all ok.'
+
+elseif ( arg[1] == '--version' ) then
+
+    io.stdout:write (('Lide: %s\nLua: %s'):format(_LIDE_VERSION, _VERSION))
+
+elseif ( arg[1] == '--help') then
+	print [[
+Usage: lide [command/option] [arguments]
+
+Possible commands:
+  install <package> 	Install a package to runtime
+  search  <package> 	Search for packages on lide.repos
+  remove  <package>     Remove a package from runtime
+
+Possible options:
+  --version		Display compiler version information
+  --help		Display this help message
+  --test		Execute commandline tests
+
+Examples:
+ To install luasql package:
+  > lide install luasql
+	
+ To search for md5 package:
+  > lide search md5
+
+For bug reporting instructions, please see:
+<https://github.com/lidesdk/commandline/issues>.]]
+
 else
 	if ( arg[1] == '-l' ) then
 	    print '[lide.error] Please import using require inside the lua file.'
