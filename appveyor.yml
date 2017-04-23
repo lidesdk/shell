@@ -20,8 +20,8 @@ install:
 - call .appveyor\install.bat
 
 build_script:
-  - luarocks install https://raw.githubusercontent.com/lidesdk/framework/master/lide-0.0-0.rockspec
-  - luarocks install luafilesystem
+  - luarocks install -- local https://raw.githubusercontent.com/lidesdk/framework/master/lide-0.0-0.rockspec
+  - luarocks install -- local luafilesystem
 
 test_script:
 - set LIDE_FRAMEWORK=c:\lua\%platform%\5.1.5\LuaRocks\systree\share\lua\5.1\lide
