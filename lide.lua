@@ -648,5 +648,9 @@ else
 			local src_file = arg[1]
 			printl '[lide.error: ] "$src_file$" file does not exist.'
 		end
+	elseif # arg == 0 then
+		
+		-- Execute interactive commandline
+		dofile ( app.folders.sourcefolder .. '/modules/interactive.lua' )
 	end
 end
