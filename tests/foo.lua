@@ -1,0 +1,1 @@
+io.stdout:write '[lide test] foo.lua.'
