@@ -577,7 +577,7 @@ local framework = {}
 function framework.run ( filename, env, req, ... )
 	local chunk = loadfile(filename)
 	
-	if not chunk then
+	if not chunk then	
 		print 'syntax error'
 		os.exit()
 	end
@@ -595,8 +595,9 @@ function framework.run ( filename, env, req, ... )
 			---
 			--- Este ejecutable contiene todas las librerias necesarias para una correcta ejecucion de
 			--- componentes graficos compatibles con wxLua y Lua.
+			os.execute 'CLS'
 			os.execute ( 
-				os.getenv('LIDE_PATH') .. '\\bin\\lide51.exe ' .. filename
+				os.getenv('LIDE_PATH') .. '\\bin\\lide51.exe ' .. filename -- execute lide51 interpreter
 			)
 		end
 	end
@@ -680,8 +681,8 @@ else
 			printl '[lide.error: ] "$src_file$" file does not exist.'
 		end
 	elseif # arg == 0 then
-		
+
 		-- Execute interactive commandline
-		dofile ( app.folders.sourcefolder .. '/modules/interactive.lua' )
+		framework.run ( app.folders.sourcefolder .. '/modules/interactive.lua' )
 	end
 end
