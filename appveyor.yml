@@ -1,10 +1,10 @@
-version: 0.0.1.{build}-test
+version: 0.0.0.{build}-test
 
 shallow_clone: true
 
 environment:
   LUAROCKS_VER: 2.4.1
-  LUA_VER: 5.1.5
+  LUA_VER: 5.1.4
 
 platform:
   - x86
@@ -26,6 +26,6 @@ build_script:
 test_script:
 # LOCAL LUAROCKS INSTALLATION: # - set LIDE_FRAMEWORK=C:\Users\appveyor\AppData\Roaming\luarocks\share\lua\5.1\lide
 # global luarocks installation:
-- set LIDE_FRAMEWORK=c:\lua\%platform%\5.1.5\LuaRocks\systree\share\lua\5.1\lide
+- set LIDE_FRAMEWORK=c:\lua\%platform%\%LUA_VER%\LuaRocks\systree\share\lua\5.1\lide
 - set LIDE_PATH=%CD%
 - lua tests\exec_test.lua
