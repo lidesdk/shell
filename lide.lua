@@ -6,14 +6,14 @@
 --
 --local LIDE_PATH = os.getenv 'LIDE_PATH'
 
-assert(os.getenv 'LIDE_FRAMEWORK', '[lide commandline] Declare la variable de entorno LIDE_PATH');
+assert(os.getenv 'LIDE_PATH', '[lide commandline] Declare la variable de entorno LIDE_PATH');
 --
-package.path =  os.getenv 'LIDE_FRAMEWORK':gsub('lide', '?') ..'.lua;' 
+package.path =  os.getenv 'LIDE_PATH'..'/libraries/?.lua;' .. package.path
 			 --.. os.getenv 'LIDE_PATH' ..'\\lua\\windows\\?.lua;'
 --			 .. os.getenv 'LIDE_PATH' ..'\\libraries\\?.lua;'; 
 --
 local LIDE_PATH      = os.getenv 'LIDE_PATH'
-local LIDE_FRAMEWORK = os.getenv 'LIDE_FRAMEWORK'
+--local LIDE_FRAMEWORK = os.getenv 'LIDE_FRAMEWORK'
 local _LIDE_VERSION  = '0.0.01'
 
 --print('A:'.. os.getenv 'LIDE_FRAMEWORK':gsub('lide', '?') ..'\\.lua;' )
@@ -51,7 +51,7 @@ local function normalize_path ( path )
 	if lide.platform.getOSName() == 'Windows' then
 		return (path:gsub('/', '\\'));
 	elseif lide.platform.getOSName() == 'Linux' then
-		return (path:gsub('\\', '/'));
+		return tostring(path:gsub('\\', '/'):gsub('//', '/'));
 	end
 end
 
@@ -177,18 +177,18 @@ if lide.platform.getOSName() == 'Windows' then
 	
 elseif lide.platform.getOSName() == 'Linux' then
 
-	app.folders.install   = app.folders.sourcefolder
+	--app.folders.install   = app.folders.sourcefolder
 
 	--app.folders.ourclibs  = app.folders.sourcefolder .. '/lnx_clibs'
 	
-	print ('arch:' .. lide.platform.getArch ())
+--	print ('arch:' .. lide.platform.getArch ())
 
-	package.cpath = app.folders.sourcefolder .. '/?.so;' ..
+	--[[package.cpath = app.folders.sourcefolder .. '/?.so;' ..
 					app.folders.sourcefolder .. '/env/?.so;' 
 					--app.folders.sourcefolder .. ('/clibs/linux/%s/?.so;'):format('x64') .. package.cpath
 	package.path  = app.folders.sourcefolder .. '/?.lua;' ..
 					app.folders.sourcefolder .. '/lua/linux/?.lua;' ..
-					app.folders.sourcefolder .. '/lua/?.lua;' .. package.path
+					app.folders.sourcefolder .. '/lua/?.lua;' .. package.path]]
 end
 
 
@@ -336,15 +336,18 @@ end
 ---- Update all repos:
 ----- repository.update_repos ( lide_repos_config_file, work_download_folder )
 function repository.update_repos ( lide_repos, work_folder )
-	local parsed = inifile.parse(lide_repos, 'io')
-	
+	work_folder = normalize_path(work_folder)
+	lide_repos  = normalize_path(lide_repos) --:gsub(' ', '')
+
+	local parsed = inifile.parse_file(lide_repos, 'io')
+
 	if parsed then
 		for repo_name, repo in next, parsed do
 			if repo.url then
 				repository.repos[repo_name] = repo
-				repository.repos[repo_name].path = work_folder .. '\\'..repo_name..'.db'
+				repository.repos[repo_name].path = normalize_path(work_folder .. '/'..repo_name..'.db')
 				repository.repos[repo_name].sqldb = sqldatabase:new(repo.path, 'sqlite3')
-				repository.download_db (repo.url, work_folder .. '\\'..repo_name..'.db')
+				repository.download_db (repo.url, normalize_path(work_folder .. '/'..repo_name..'.db'))
 			else
 				print 'There\'s a problem with repo url.\n'
 				print ('[lide]: '.. repo_name .. ' ' .. tostring(repo.url))
@@ -466,7 +469,7 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 	lide_folder_copy(normalize_path(app.folders.libraries..'/'.._osname..'/'.._arch..'/runtime'), _runtimefolder)
 	-- .................
 
-	local package_manifest = inifile.parse(_manifest_file)[_package_name]
+	local package_manifest = inifile.parse_file(_manifest_file)[_package_name]
 	
 	if rawget(package_manifest, lide.platform.getOS():lower()) then
 		for arch_line in package_manifest.windows : delimi '|' do -- architectures are delimited by |
@@ -587,8 +590,12 @@ function framework.run ( filename, env, req, ... )
 		
 		if ( CURRENT_PLATFORM == 'Linux' ) then
 			--local exec, errm = pcall(os.execute, (_LIDE_BIN or 'lua5.1') .. [[ -e 'package.cpath = os.getenv 'LIDE_PATH' ..'/libraries/linux_x86/?.so;' package.path = package.path ..";"..os.getenv "LIDE_PATH" .."/libraries?.lua;" require "lide.core.init"']].. ' -l lide.init ' .. filename)
-			os.execute( [[lua5.1 -e "package.cpath = os.getenv 'LIDE_PATH' ..'/libraries/linux_x86/?.so' package.path = os.getenv 'LIDE_PATH' ..'/libraries/?.lua'; require 'lide.init' " ]] .. filename )
-						
+			--os.execute( [[lua5.1 -e "package.cpath = os.getenv 'LIDE_PATH' ..'/libraries/linux_x86/?.so' package.path = os.getenv 'LIDE_PATH' ..'/libraries/?.lua'; require 'lide.init' " ]] .. filename )
+					--os.execute ('lua5.1 %s'):format(filename)
+					print(filename)
+			os.execute ( 
+				os.getenv('LIDE_PATH') .. '/bin/linux/x64/lua ' .. filename -- execute lide51 interpreter
+			)
 		elseif ( CURRENT_PLATFORM == 'Windows' ) then
 			--- Ejecutamos el interprete de lua basado en wxluafreeze:
 			---  bin/gui.exe
@@ -638,7 +645,7 @@ elseif ( arg[1] == 'remove' and arg[2] ) then
 	end
 
 elseif ( arg[1] == '--test' ) then
-    io.stdout:write '[lide test] all ok.'
+    io.stdout:write '[lide test] all ok.\n'
 
 elseif ( arg[1] == '--version' ) then
 

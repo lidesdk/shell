@@ -1,17 +1,5 @@
-# Lide Team Repository: 
-# https://github.com/lidesdk/repos
-
 [stable]
 url=http://github.com/lidesdk/repos/stable/libraries.db
 
 [dcanoh]
 url=http://github.com/lidesdk/repos/dcanoh.db
-
-# You can add your own repos here:
-# [example_repo]
-# url=http://github.com/user/repo/file.db
-
-#[development]
-#url=http://github.com/lidesdk/repos/libraries.db
-
-# Please only host your lide repos on github.
