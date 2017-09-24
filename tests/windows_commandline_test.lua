@@ -1,4 +1,3 @@
-print 'Despertar'
 -- Run standard internal tests:
 io.stdout : write '[lide commandline] execution tests: '
 
@@ -16,5 +15,4 @@ io.stdout : write '[lide commandline] search tests: '
 
 io.stdout : write '\t[OK]\n'
 
-print 'Dormir'
 --
