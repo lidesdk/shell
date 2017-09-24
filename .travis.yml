@@ -16,7 +16,6 @@ before_install:
   # - luarocks install lua-cjson 
   # - luarocks install luacov
   # - luarocks install luafilesystem
-  - sudo apt-get install libstdc++6
   - sudo apt-get install lua5.1
   # install luacov-coveralls, but avoids installing luafilesystem
   # - luarocks install luacov-coveralls #--server=https://luarocks.org/dev --deps-mode=none
@@ -35,7 +34,8 @@ script:
   # install latest framework version from master repo:
   # - git clone https://github.com/lidesdk/framework.git $PWD/libraries/lide
 
-  - sudo cp /home/travis/build/lidesdk/commandline/clibs/linux/x64/xml/libstdc++.so.6 /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+  # xml necesita libstdc++6 (- sudo apt-get install libstdc++6)
+  - sudo cp /home/travis/build/lidesdk/commandline/clibs/linux/x64/xml/pcaf_libstdc++.so.6 /usr/lib/x86_64-linux-gnu/libstdc++.so.6
   # executing the tool
   - export LIDE_PATH=$PWD && ./lide.sh tests/exec_test.lua
 
