@@ -592,11 +592,11 @@ function framework.run ( filename, env, req, ... )
 			--local exec, errm = pcall(os.execute, (_LIDE_BIN or 'lua5.1') .. [[ -e 'package.cpath = os.getenv 'LIDE_PATH' ..'/libraries/linux_x86/?.so;' package.path = package.path ..";"..os.getenv "LIDE_PATH" .."/libraries?.lua;" require "lide.core.init"']].. ' -l lide.init ' .. filename)
 			--os.execute( [[lua5.1 -e "package.cpath = os.getenv 'LIDE_PATH' ..'/libraries/linux_x86/?.so' package.path = os.getenv 'LIDE_PATH' ..'/libraries/?.lua'; require 'lide.init' " ]] .. filename )
 					--os.execute ('lua5.1 %s'):format(filename)
-					print(filename)
+			
 			os.execute ( 
-				--os.getenv('LIDE_PATH') .. '/bin/linux/x64/lua ' .. filename -- execute lide51 interpreter
-				'lua5.1 ' .. filename -- execute lide51 interpreter
-			)
+				os.getenv('LIDE_PATH') .. '/bin/linux/x64/lua ' .. filename -- execute lide51 interpreter
+			);
+
 		elseif ( CURRENT_PLATFORM == 'Windows' ) then
 			--- Ejecutamos el interprete de lua basado en wxluafreeze:
 			---  bin/gui.exe
