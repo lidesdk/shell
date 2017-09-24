@@ -21,7 +21,7 @@ before_install:
   # - luarocks install lua-cjson 
   # - luarocks install luacov
   # - luarocks install luafilesystem
-
+  - sudo apt-get install libstdc++6
   # install luacov-coveralls, but avoids installing luafilesystem
   # - luarocks install luacov-coveralls #--server=https://luarocks.org/dev --deps-mode=none
 
