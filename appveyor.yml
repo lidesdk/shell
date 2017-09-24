@@ -19,8 +19,8 @@ install:
 # Setup Lua development/build environment
 - call .appveyor\install.bat
 
-build_script:
-  #- luarocks install luafilesystem
+#build_script:
+ # - luarocks install luafilesystem
   #- luarocks install https://raw.githubusercontent.com/lidesdk/framework/master/lide-0.0-0.rockspec
 
 test_script:
