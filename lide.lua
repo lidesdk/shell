@@ -594,7 +594,8 @@ function framework.run ( filename, env, req, ... )
 					--os.execute ('lua5.1 %s'):format(filename)
 					print(filename)
 			os.execute ( 
-				os.getenv('LIDE_PATH') .. '/bin/linux/x64/lua ' .. filename -- execute lide51 interpreter
+				--os.getenv('LIDE_PATH') .. '/bin/linux/x64/lua ' .. filename -- execute lide51 interpreter
+				'lua5.1 ' .. filename -- execute lide51 interpreter
 			)
 		elseif ( CURRENT_PLATFORM == 'Windows' ) then
 			--- Ejecutamos el interprete de lua basado en wxluafreeze:
