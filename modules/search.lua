@@ -14,7 +14,7 @@ local function file_getline ( filename, nline )
 end
 
 local text_to_search = tostring(arg[2])
-print('_ReposFile:' .. tostring(_ReposFile))
+
 repository.update_repos ( _ReposFile, _SourceFolder .. '\\libraries' )
 
 local n = 0; for repo_name, repo in pairs( repository.repos ) do

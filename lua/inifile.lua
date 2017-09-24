@@ -1,182 +1,103 @@
-local inifile = {
-	_VERSION = "inifile 1.0",
-	_DESCRIPTION = "Inifile is a simple, complete ini parser for lua",
-	_URL = "http://docs.bartbes.com/inifile",
-	_LICENSE = [[
-		Copyright 2011-2015 Bart van Strien. All rights reserved.
+-- Copyright (c) 2015 Laurent Zubiaur
 
-		Redistribution and use in source and binary forms, with or without modification, are
-		permitted provided that the following conditions are met:
+-- Permission is hereby granted, free of charge, to any person obtaining a copy
+-- of this software and associated documentation files (the "Software"), to deal
+-- in the Software without restriction, including without limitation the rights
+-- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+-- copies of the Software, and to permit persons to whom the Software is
+-- furnished to do so, subject to the following conditions:
 
-		   1. Redistributions of source code must retain the above copyright notice, this list of
-			  conditions and the following disclaimer.
+-- The above copyright notice and this permission notice shall be included in
+-- all copies or substantial portions of the Software.
 
-		   2. Redistributions in binary form must reproduce the above copyright notice, this list
-			  of conditions and the following disclaimer in the documentation and/or other materials
-			  provided with the distribution.
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+-- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+-- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+-- THE SOFTWARE.
 
-		THIS SOFTWARE IS PROVIDED BY BART VAN STRIEN ''AS IS'' AND ANY EXPRESS OR IMPLIED
-		WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-		FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL BART VAN STRIEN OR
-		CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-		CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-		SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-		ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-		NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-		ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-- See README.md for the documentation and examples
 
-		The views and conclusions contained in the software and documentation are those of the
-		authors and should not be interpreted as representing official policies, either expressed
-		or implied, of Bart van Strien.
-	]] -- The above license is known as the Simplified BSD license.
-}
+local lpeg = require 'lpeg'
+lpeg.locale(lpeg)   -- adds locale entries into 'lpeg' table
 
-local defaultBackend = "io"
+-- The module
+local ini = {}
 
-local backends = {
-	io = {
-		lines = function(name) return assert(io.open(name)):lines() end,
-		write = function(name, contents) assert(io.open(name, "w")):write(contents) end,
-	},
-	memory = {
-		lines = function(text) return text:gmatch("([^\r\n]+)\r?\n") end,
-		write = function(name, contents) return contents end,
-	},
-}
+ini.config = function(t)
+  -- Config parameters
+  local sc = t.separator or '=' -- Separator character
+  local cc = t.comment or ';#' -- Comment characters
+  local trim = t.trim == nil and true or t.trim -- Should capture or trim white spaces
+  local lc = t.lowercase == nil and false or t.lowercase -- Should keys be lowercase?
+  local escape = t.escape == nil and true or t.escape -- Should string literals used escape sequences?
 
-if love then
-	backends.love = {
-		lines = love.filesystem.lines,
-		write = function(name, contents) love.filesystem.write(name, contents) end,
-	}
-	defaultBackend = "love"
+  -- LPeg shortcut
+  local P = lpeg.P    -- Pattern
+  local R = lpeg.R    -- Range
+  local S = lpeg.S    -- String
+  local V = lpeg.V    -- Variable
+  local C = lpeg.C    -- Capture
+  local Cf = lpeg.Cf  -- Capture floding
+  local Cc = lpeg.Cc  -- Constant capture
+  local Ct = lpeg.Ct  -- Table capture
+  local Cg = lpeg.Cg  -- Group capture
+  local Cs = lpeg.Cs  -- Capture String (replace)
+  local space = lpeg.space -- include tab and new line (\n)
+  local alpha = lpeg.alpha
+  local digit = lpeg.digit
+  local any = P(1)
+
+  local _alpha = P('_') + alpha -- underscore or alpha character
+  local keyid = _alpha^1 * (_alpha + digit)^0
+  -- Lua escape sequences (http://www.lua.org/pil/2.4.html)
+  if escape then
+    any = any
+      - P'\\a' + P'\\a'/'\a' -- bell
+      - P'\\n' + P'\\n'/'\n' -- newline
+      - P'\\r' + P'\\r'/'\r' -- carriage return
+      - P'\\t' + P'\\t'/'\t' -- horizontal tab
+      - P'\\f' + P'\\f'/'\f' -- form feed
+      - P'\\b' + P'\\b'/'\b' -- back space
+      - P'\\v' + P'\\v'/'\v' -- vertical tab
+      - P'\\\\' + P'\\\\'/'\\' -- backslash
+  end
+
+  ini.grammar = P{
+    'all';
+    key = not lc and C(keyid) * space^0 or Cs(keyid / function(s) return s:lower() end) * space^0,
+    sep = P(sc),
+    cr = P'\n' + P'\r\n',
+    comment = S(cc)^1 * lpeg.print^0,
+    string = space^0 * P'"' * Cs((any - P'"' + P'""'/'"')^0) * P'"' * space^0,
+    value = trim and space^0 * C(((space - '\n')^0 * (any - space)^1)^1) * space^0 or C((any - P'\n') ^1),
+    set = Cg(V'key' * V'sep' * (V'string' + V'value')),
+    line = space^0 * (V'comment' + V'set'),
+    body = Cf(Ct'' * (V'cr' + V'line')^0, rawset),
+    label = P'[' * space^0 * V'key' * space^0 * P']' * space^0, -- the section label
+    section = space^0 * Cg(V'label' * V'body'),
+    sections = V'section' * (V'cr' + V'section')^0,
+    all = Cf(Ct'' * ((V'cr' + V'line')^0 * V'sections'^0), rawset) * (V'cr' + -1), -- lines followed by a line return or end of string
+  }
 end
 
-function inifile.parse(name, backend)
-	backend = backend or defaultBackend
-	local t = {}
-	local section
-	local comments = {}
-	local sectionorder = {}
-	local cursectionorder
-
-	for line in backends[backend].lines(name) do
-
-		-- Section headers
-		local s = line:match("^%[([^%]]+)%]$")
-		if s then
-			section = s
-			t[section] = t[section] or {}
-			cursectionorder = {name = section}
-			table.insert(sectionorder, cursectionorder)
-		end
-
-		-- Comments
-		s = line:match("^;(.+)$")
-		if s then
-			local commentsection = section or comments
-			comments[commentsection] = comments[commentsection] or {}
-			table.insert(comments[commentsection], s)
-		end
-
-		-- Key-value pairs
-		local key, value = line:match("^([%w_]+)%s-=%s-(.+)$")
-		if tonumber(value) then value = tonumber(value) end
-		if value == "true" then value = true end
-		if value == "false" then value = false end
-		if key and value ~= nil then
-			t[section][key] = value
-			table.insert(cursectionorder, key)
-		end
-	end
-
-	-- Store our metadata in the __inifile field in the metatable
-	return setmetatable(t, {
-		__inifile = {
-			comments = comments,
-			sectionorder = sectionorder,
-		}
-	})
+ini.parse = function(data)
+  if type(data) == 'string' then
+    return lpeg.match(ini.grammar, data)
+  end
+  return {}
 end
 
-function inifile.save(name, t, backend)
-	backend = backend or defaultBackend
-	local contents = {}
-
-	-- Get our metadata if it exists
-	local metadata = getmetatable(t)
-	local comments, sectionorder
-
-	if metadata then metadata = metadata.__inifile end
-	if metadata then
-		comments = metadata.comments
-		sectionorder = metadata.sectionorder
-	end
-
-	-- If there are comments before sections,
-	-- write them out now
-	if comments and comments[comments] then
-		for i, v in ipairs(comments[comments]) do
-			table.insert(contents, (";%s"):format(v))
-		end
-		table.insert(contents, "")
-	end
-
-	local function writevalue(section, key)
-		local value = section[key]
-		-- Discard if it doesn't exist (anymore)
-		if value == nil then return end
-		table.insert(contents, ("%s=%s"):format(key, tostring(value)))
-	end
-
-	local function writesection(section, order)
-		local s = t[section]
-		-- Discard if it doesn't exist (anymore)
-		if not s then return end
-		table.insert(contents, ("[%s]"):format(section))
-
-		-- Write our comments out again, sadly we have only achieved
-		-- section-accuracy so far
-		if comments and comments[section] then
-			for i, v in ipairs(comments[section]) do
-				table.insert(contents, (";%s"):format(v))
-			end
-		end
-
-		-- Write the key-value pairs with optional order
-		local done = {}
-		if order then
-			for _, v in ipairs(order) do
-				done[v] = true
-				writevalue(s, v)
-			end
-		end
-		for i, _ in pairs(s) do
-			if not done[i] then
-				writevalue(s, i)
-			end
-		end
-
-		-- Newline after the section
-		table.insert(contents, "")
-	end
-
-	-- Write the sections, with optional order
-	local done = {}
-	if sectionorder then
-		for _, v in ipairs(sectionorder) do
-			done[v.name] = true
-			writesection(v.name, v)
-		end
-	end
-	-- Write anything that wasn't ordered
-	for i, _ in pairs(t) do
-		if not done[i] then
-			writesection(i)
-		end
-	end
-
-	return backends[backend].write(name, table.concat(contents, "\n"))
+ini.parse_file = function(filename)
+  local f = assert(io.open(filename, "r"))
+  local t = ini.parse(f:read('*all'))
+  f:close()
+  return t
 end
 
-return inifile
+-- Use default settings
+ini.config{}
+
+return ini
