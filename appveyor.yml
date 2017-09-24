@@ -28,4 +28,4 @@ test_script:
 # global luarocks installation:
 - set LIDE_FRAMEWORK=c:\lua\%platform%\%LUA_VER%\LuaRocks\systree\share\lua\5.1\lide
 - set LIDE_PATH=%CD%
-- lua tests\exec_test.lua
+- .\lide.bat tests\[windows]commandline_test.lua
