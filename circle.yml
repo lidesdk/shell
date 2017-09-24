@@ -10,5 +10,4 @@ dependencies:
 test:
   override:
     # executing tests:
-    - export LIDE_PATH="$PWD"
-    - ./lide.sh tests/oop_tests.lua
+    - export LIDE_PATH="$PWD" && ./lide.sh tests/oop_tests.lua
