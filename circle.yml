@@ -10,7 +10,11 @@ dependencies:
 test:
   override:
     # executing tests:
-    - ls libraries/lide/core -a
     - export LIDE_PATH="$PWD" 
     - chmod +x $LIDE_PATH/bin/linux/x64/lua
+
+    # install latest framework version from master repo:
+    - git clone https://github.com/lidesdk/framework.git $LIDE_PATH/libraries/lide
+
+    # executing the tool
     - ./lide.sh tests/exec_test.lua
