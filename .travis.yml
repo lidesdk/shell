@@ -36,6 +36,10 @@ script:
 
   # xml necesita libstdc++6 (- sudo apt-get install libstdc++6)
   - sudo cp /home/travis/build/lidesdk/commandline/clibs/linux/x64/xml/pcaf_libstdc++.so.6 /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+
+  # zip necesita libzzip-0.so.13
+  - sudo cp /home/travis/build/lidesdk/commandline/clibs/linux/x64/pcaf_libzzip-0.so.13 /usr/lib/x86_64-linux-gnu/libzzip-0.so.13
+
   # executing the tool
   - export LIDE_PATH=$PWD && ./lide.sh tests/exec_test.lua
 
