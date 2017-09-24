@@ -28,4 +28,4 @@ test_script:
 # LOCAL LUAROCKS INSTALLATION: # - set LIDE_FRAMEWORK=C:\Users\appveyor\AppData\Roaming\luarocks\share\lua\5.1\lide
 # global luarocks installation:
 #- set LIDE_FRAMEWORK=c:\lua\%platform%\%LUA_VER%\LuaRocks\systree\share\lua\5.1\lide
-- lide.bat tests\[windows]commandline_test.lua
+- .\lide.bat tests\windows_commandline_test.lua

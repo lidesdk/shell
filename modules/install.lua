@@ -37,8 +37,8 @@ local n = 0; for repo_name, repo in pairs( repository.repos ) do
 				end
 				n = n + 1
 				print('> installing...')	
-				
-				lide.mktree ( app.folders.libraries .. '/'.._package_name )
+								
+				lide.folder.create ( app.folders.libraries .. '/'.._package_name )
 
 --				repository.download(_package_name, app.folders.libraries .. '/'.._package_name .. '/'.._package_name .. '.zip')
 				zip_package = app.folders.libraries .. '\\'.._package_name .. '\\'.._package_name .. '.zip'
