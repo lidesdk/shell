@@ -23,7 +23,7 @@ require 'lide.core.init'
 local CURRENT_PLATFORM = lide.platform.getOSName()
 
 function log ( ... )
-	--print(...)
+	--print(...);
 end
 
 local function trim ( str )
