@@ -10,4 +10,5 @@ dependencies:
 test:
   override:
     # executing tests:
+    - chmod +x $PWD/bin/linux/x64/lua
     - export LIDE_PATH="$PWD" && ./lide.sh tests/oop_tests.lua
