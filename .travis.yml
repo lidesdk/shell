@@ -37,7 +37,7 @@ script:
   - chmod +x $PWD/bin/linux/x64/lua
 
   # install latest framework version from master repo:
-  - git clone https://github.com/lidesdk/framework.git $PWD/libraries/lide
+  # - git clone https://github.com/lidesdk/framework.git $PWD/libraries/lide
 
   # executing the tool
   - export LIDE_PATH=$PWD && ./lide.sh tests/exec_test.lua
