@@ -23,4 +23,4 @@ test:
     - git clone https://github.com/lidesdk/framework.git $PWD/libraries/lide
 
     # executing the tool
-    - export LIDE_PATH=$PWD && ./lide.sh tests/exec_test.lua
+    - export LIDE_PATH=$PWD && ./lide.sh tests/[linux]commandline_test.lua
