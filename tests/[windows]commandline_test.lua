@@ -9,7 +9,7 @@ io.stdout : write '\t[OK]\n'
 io.stdout : write '[lide commandline] search tests: '
 	
 	searchline = io.popen '.\\lide.bat search luasql' :read '*l'
-	assert( searchline:sub (1, searchline : find '/' ) == 'stable/')
+	assert( searchline:sub (1, searchline : find '/' ) == 'stable/z')
 	searchline = io.popen '.\\lide.bat search lfs' :read '*l'
 	assert( searchline:sub (1, searchline : find '/' ) == 'stable/')
 
