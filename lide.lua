@@ -347,7 +347,12 @@ function repository.update_repos ( lide_repos, work_folder )
 	work_folder = normalize_path(work_folder)
 	lide_repos  = normalize_path(lide_repos) --:gsub(' ', '')
 
-	local parsed = inifile.parse_file(lide_repos, 'io')
+	if inifile.parse_file then
+		parsed = inifile.parse_file(lide_repos, 'io')
+	elseif inifile.parse then
+		parsed = inifile.parse(lide_repos, 'io')
+	end
+
 
 	if parsed then
 		for repo_name, repo in next, parsed do
