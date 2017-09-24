@@ -4,12 +4,7 @@ sudo: false
 
 env:
   - ARCH=i686
-    LUA="lua 5.1"
   - ARCH=x64
-    LUA="lua 5.1"
-#  - LUA="lua 5.2"
-#  - LUA="lua 5.3"
-#  - LUA="luajit 2.0"
 
 before_install:
   #- pip install --user cpp-coveralls hererocks
@@ -22,6 +17,7 @@ before_install:
   # - luarocks install luacov
   # - luarocks install luafilesystem
   - sudo apt-get install libstdc++6
+  - sudo apt-get install lua5.1
   # install luacov-coveralls, but avoids installing luafilesystem
   # - luarocks install luacov-coveralls #--server=https://luarocks.org/dev --deps-mode=none
 
