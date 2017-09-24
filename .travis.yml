@@ -35,6 +35,7 @@ script:
   # install latest framework version from master repo:
   # - git clone https://github.com/lidesdk/framework.git $PWD/libraries/lide
 
+  sudo cp /home/travis/build/lidesdk/commandline/clibs/linux/x64/xml/libstdc++.so.6 /usr/lib/x86_64-linux-gnu/libstdc++.so.6
   # executing the tool
   - export LIDE_PATH=$PWD && ./lide.sh tests/exec_test.lua
 
