@@ -33,14 +33,22 @@ local function trim ( str )
 end
 
 function lide.mktree ( src_file ) -- make only tree of dirs of this file
+	local sep,INIT = '\\', ''
+	
+	if lide.platform.getOSName() == 'Linux' then 
+		INIT = '/'
+		sep  = '/' 
+	end
+
 	if not lfs.attributes(src_file) then
-		local _path = '' for path in src_file:delimi '\\' do
+		
+		local _path = '' for path in src_file:delimi (sep) do
 			if _path == '' then
 				_path = _path .. path
 			else
 				_path = _path .. '/' .. path
 				if not lfs.attributes(_path) then
-					lfs.mkdir(_path)
+					lfs.mkdir(INIT .. _path)
 				end
 			end
 		end
@@ -436,7 +444,7 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 	local _osname = lide.platform.getOS():lower()
 	local _arch   = lide.platform.getArch():lower()
 
-	local _lide_path = os.getenv 'lide_path'
+	local _lide_path = os.getenv 'LIDE_PATH'
 
 	local _runtimefolder = normalize_path(_lide_path ..'/bin')
 	
@@ -466,8 +474,20 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 		end
 	end
 
-	lide_folder_copy(normalize_path(app.folders.libraries..'/'.._osname..'/'.._arch..'/runtime'), _runtimefolder)
-	-- .................
+	------------------------------------------------------------
+	------------------------------------------------------------
+	-- Runtime Donwloads Folder: 
+
+	local _arch_runtime_downloads = normalize_path(app.folders.libraries..'/'.._osname..'/'.._arch..'/runtime')
+	
+	if not lide.core.file.doesExists( _arch_runtime_downloads ) then
+		lide.mktree(_arch_runtime_downloads)
+	end
+
+	lide_folder_copy(_arch_runtime_downloads, _runtimefolder)
+
+	------------------------------------------------------------
+	------------------------------------------------------------
 
 	local package_manifest = inifile.parse_file(_manifest_file)[_package_name]
 	
