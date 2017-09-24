@@ -4,7 +4,9 @@ sudo: false
 
 env:
   - ARCH=i686
-    LUA="lua 5.1" 
+    LUA="lua 5.1"
+  - ARCH=x86
+    LUA="lua 5.1"
 #  - LUA="lua 5.2"
 #  - LUA="lua 5.3"
 #  - LUA="luajit 2.0"
@@ -29,7 +31,7 @@ install:
 script:
   # - uname -a
   # - lua -lluacov tests/oop_tests.lua
-  - cat ./lide.sh
+  - ./lide.sh tests/exec_test.lua
 
 after_success:
   #- coveralls -b . -i src --dump c.report.json
