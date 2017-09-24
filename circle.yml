@@ -6,7 +6,6 @@ dependencies:
     #- sudo luarocks install https://raw.githubusercontent.com/lidesdk/framework/master/lide-0.0-0.rockspec
     # install lide dependencis with luarocks
     #- sudo luarocks install luafilesystem
-    - sudo apt-get install libstdc++6
 
 test:
   override:
@@ -19,4 +18,4 @@ test:
     - git clone https://github.com/lidesdk/framework.git $PWD/libraries/lide
 
     # executing the tool
-    - export LIDE_PATH=$PWD && ./lide.sh tests/exec_test.lua
+    - sudo apt-get install libstdc++6 && export LIDE_PATH=$PWD && ./lide.sh tests/exec_test.lua
