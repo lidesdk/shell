@@ -1,6 +1,6 @@
 language: c
 
-sudo: false
+sudo: true
 
 env:
   - ARCH=i686
@@ -36,7 +36,7 @@ script:
   # - git clone https://github.com/lidesdk/framework.git $PWD/libraries/lide
 
   # executing the tool
-  - export LIDE_PATH=$PWD && lua5.1 tests/exec_test.lua
+  - export LIDE_PATH=$PWD && ./lide.sh tests/exec_test.lua
 
 after_success:
   #- coveralls -b . -i src --dump c.report.json
