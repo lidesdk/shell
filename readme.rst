@@ -60,21 +60,20 @@ GNU/Linux Installation
 
 .. code-block:: bash
 
-	# Create lide install directory and go to it (~/.lide):
-	$ mkdir ~/.lide && cd ~/.lide
+	# Create lidesdk install directory and go to it (~/.lidesdk):
+	$ mkdir ~/.lidesdk && cd ~/.lidesdk
 
 	# Clone git repository and submodules:
 	$ git clone https://github.com/lidesdk/commandline.git --recursive commandline
 	
-	# Add exec perms:
+	# Add execution permissions:
 	$ cd commandline
 	$ chmod +x ./lide.sh
 
 	# Create environment variable named LIDE_PATH
 	$ nano ~/.bashrc
 	    # add this line at the bottom of the file:
-        export LIDE_PATH=~/.lide/commandline
-        export LIDE_FRAMEWORK=~/.lide/commandline/libraries/lide
+        export LIDE_PATH=~/.lidesdk/commandline
 
 
 Windows Installation
