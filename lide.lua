@@ -1,35 +1,26 @@
---assert(os.getenv 'LIDE_PATH', '[lide commandline] Declare la variable de entorno LIDE_PATH');
---
---package.path =  os.getenv 'LIDE_PATH' ..'\\?.lua;' 
---			 .. os.getenv 'LIDE_PATH' ..'\\lua\\windows\\?.lua;'
---			 .. os.getenv 'LIDE_PATH' ..'\\libraries\\?.lua;'; 
---
---local LIDE_PATH = os.getenv 'LIDE_PATH'
-
 assert(os.getenv 'LIDE_PATH', '[lide commandline] Declare la variable de entorno LIDE_PATH');
---
-package.path =  os.getenv 'LIDE_PATH'..'/libraries/?.lua;' .. package.path
-			 --.. os.getenv 'LIDE_PATH' ..'\\lua\\windows\\?.lua;'
---			 .. os.getenv 'LIDE_PATH' ..'\\libraries\\?.lua;'; 
---
+
 local LIDE_PATH      = os.getenv 'LIDE_PATH'
---local LIDE_FRAMEWORK = os.getenv 'LIDE_FRAMEWORK'
 local _LIDE_VERSION  = '0.0.01'
 
---print('A:'.. os.getenv 'LIDE_FRAMEWORK':gsub('lide', '?') ..'\\.lua;' )
+package.path = LIDE_PATH .. '/libraries/?.lua;' .. package.path
 
-require 'lide.core.init'
+lide = require 'lide.core.init'
 
 local CURRENT_PLATFORM = lide.platform.getOSName()
-
-function log ( ... )
-	--print(...);
-end
 
 local function trim ( str )
 	repeat str = str:gsub ('  ', '')
 	until not str:find ' '
 	return str
+end
+
+local function normalize_path ( path )
+	if lide.platform.getOSName() == 'Windows' then
+		return (path:gsub('/', '\\'));
+	elseif lide.platform.getOSName() == 'Linux' then
+		return tostring(path:gsub('\\', '/'):gsub('//', '/'));
+	end
 end
 
 function lide.mktree ( src_file ) -- make only tree of dirs of this file
@@ -52,14 +43,6 @@ function lide.mktree ( src_file ) -- make only tree of dirs of this file
 				end
 			end
 		end
-	end
-end
-
-local function normalize_path ( path )
-	if lide.platform.getOSName() == 'Windows' then
-		return (path:gsub('/', '\\'));
-	elseif lide.platform.getOSName() == 'Linux' then
-		return tostring(path:gsub('\\', '/'):gsub('//', '/'));
 	end
 end
 
@@ -143,11 +126,6 @@ local function print_console ( str, arg2 )
 		io.stdout:write( str  .. '\n')
 	end
 end
-
--- print('\n > Lide :) ' .. app.getWorkDir(), arg[0])
---lide_cmd_clibs = '/datos/Proyectos/lide/commandline/lnx_clibs'
-
--- lide.new.string ''
 
 app = lide.app
 
@@ -510,7 +488,7 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 				local _filename = file_dst:reverse():sub(1, b) : reverse()
 				local _foldernm = file_dst:sub(1, file_dst:find(_filename) -1)
 				
-				log ('  > ' .. file_dst)
+				--log ('  > ' .. file_dst)
 
 				lide.mktree(_foldernm)
 				--print((_package_prefix or '') .. int_path)
@@ -619,7 +597,9 @@ function framework.run ( filename, env, req, ... )
 					--os.execute ('lua5.1 %s'):format(filename)
 			
 			os.execute ( 
-				os.getenv('LIDE_PATH') .. '/bin/linux/x64/lua ' .. filename -- execute lide51 interpreter
+				--os.getenv('LIDE_PATH') .. '/bin/linux/x64/lua ' .. filename -- execute lide51 interpreter
+				os.getenv('LIDE_PATH') .. '/bin/linux/x64/lua /home/dcanoh/Projects/commandline/bin/lide51_src.lua ' .. filename -- execute lide51 interpreter
+				
 			);
 
 		elseif ( CURRENT_PLATFORM == 'Windows' ) then
