@@ -106,4 +106,5 @@ License
 =======
 
 Lide is licensed under (`The GNU General Public License <https://github.com/lidesdk/commandline/blob/master/LICENSE>`_). 
+
 Copyright © 2016 Hernán Dario Cano.
