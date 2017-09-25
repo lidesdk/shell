@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 -- ///////////////////////////////////////////////////////////////////////////////
 -- // Name:        lide.lua
 -- // Purpose:     Lide commandline tool
@@ -6,6 +7,8 @@
 -- // License:     lide license
 -- ///////////////////////////////////////////////////////////////////////////////
 
+=======
+>>>>>>> 6b01b8a6bc5bcf311337c3c546d1fe8f76a59795
 assert(os.getenv 'LIDE_PATH', '[lide commandline] Declare la variable de entorno LIDE_PATH');
 
 local LIDE_PATH      = os.getenv 'LIDE_PATH'
