@@ -9,7 +9,7 @@ dependencies:
 
 test:
   override:
-    # executing tests:
+    - export LIDE_PATH=$PWD
 
     # xml necesita libstdc++6 (- sudo apt-get install libstdc++6)
     # zip necesita libzzip-0.so.13
@@ -23,4 +23,4 @@ test:
     - git clone https://github.com/lidesdk/framework.git $PWD/libraries/lide
 
     # executing the tool
-    - export LIDE_PATH=$PWD && ./lide.sh tests/[linux]commandline_test.lua
+    - lua5.1 tests/[linux]commandline_test.lua
