@@ -4,7 +4,7 @@ Lide Commandline
 Lide Commandline is a tool that allow you to execute lua scripts and manage lua modules, you can search install and remove modules from lide repository.
 
 ================  ===================  ============================================================  ====================
-  platform          arch                 build log                                                     build status
+  Platform          Architecture         Build log                                                     Build status
 ================  ===================  ============================================================  ====================
   ``Windows``      ``x86``               https://ci.appveyor.com/project/dcanoh/commandline            .. image:: https://ci.appveyor.com/api/projects/status/uvkh9w4e474v5p23?svg=true
   ``GNU/Linux``    ``x64``               https://circleci.com/gh/lidesdk/commandline/tree/testing      .. image:: https://circleci.com/gh/lidesdk/commandline/tree/testing.svg?style=svg
@@ -105,4 +105,5 @@ Lide Commandline is part of (`Lide SDK <https://github.com/lidesdk/framework#lid
 License
 =======
 
-Lide is licensed under (`The GNU General Public License <https://github.com/lidesdk/commandline/blob/master/LICENSE>`_). Copyright © 2016 Hernán Dario Cano.
+Lide is licensed under (`The GNU General Public License <https://github.com/lidesdk/commandline/blob/master/LICENSE>`_). 
+Copyright © 2016 Hernán Dario Cano.
