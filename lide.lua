@@ -489,6 +489,11 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 			local _arch   = arch_line[1]
 			local _files  = trim(arch_line[2] or '') : delim ',' -- files are delimiteed by comma					
 
+			if (_arch ~= lide.platform.getArch():lower()) then
+				print ('  ! Error: module ' .. _package_name .. ' is not available on ' .. lide.platform.getArch():lower() .. ' architecture.')
+				os.exit()		
+			end
+
 			--	-- copy file to destination: libraries/windows/x64/luasql/sqlite3.dll
 			for _, int_path in pairs(_files) do -- internal_paths
 				local file_dst = normalize_path(app.folders.libraries ..'/'.. int_path)
