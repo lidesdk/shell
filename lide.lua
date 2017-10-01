@@ -508,6 +508,7 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 			end
 		end
 	elseif not rawget(package_manifest, lide.platform.getOS():lower()) then
+		lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
 		print ('  ! Error: module ' .. _package_name .. ' is not available on ' .. lide.platform.getOS())
 		os.exit()
 	end
