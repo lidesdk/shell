@@ -28,3 +28,5 @@ test:
         # executing the tests with default lua interpreter:
         # set Lide environment vars
         - export LIDE_PATH=$PWD && lua5.1 tests/[linux]commandline_test.lua
+        - alias lide=$PWD/lide.sh
+        - lide --test
