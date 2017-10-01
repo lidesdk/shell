@@ -53,7 +53,7 @@ Installation
 
 * Clone or `download <https://github.com/lidesdk/commandline/archive/master.zip>`_ this repository: ``https://github.com/lidesdk/commandline.git``
 * Create environment variables named ``LIDE_PATH`` and ``LIDE_FRAMEWORK``
-* Execute ``lide --help'`` command
+* Execute ``lide --help`` command
 
 GNU/Linux Installation
 **********************
