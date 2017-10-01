@@ -480,18 +480,27 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 	------------------------------------------------------------
 	------------------------------------------------------------
 	local package_manifest = inifile.parse_file(_manifest_file)[_package_name]
-	
+		
 	if rawget(package_manifest, lide.platform.getOS():lower()) then
-		for arch_line in package_manifest.windows : delimi '|' do -- architectures are delimited by |
+		local compatible;
+		local architectures = package_manifest[lide.platform.getOS():lower()] : delim '|'
+		
+		for _, arch_line in pairs(architectures) do
+			if not compatible and (tostring(arch_line:sub(1,3)) == lide.platform.getArch()) then
+				compatible = true;
+			end
+		end
+
+		if not compatible then
+			print ('  > ! package.install: "' .. _package_name .. '" is not available on ' .. lide.platform.getArch() .. ' architecture.')
+			os.exit()
+		end 
+
+		for arch_line in package_manifest[lide.platform.getOS():lower()] : delimi '|' do -- architectures are delimited by |
 			arch_line = arch_line:delim ':' 
 			local _osname = lide.platform.getOS():lower()
 			local _arch   = arch_line[1]
 			local _files  = trim(arch_line[2] or '') : delim ',' -- files are delimiteed by comma					
-
-			if (_arch ~= lide.platform.getArch():lower()) then
-				print ('  ! Error: module ' .. _package_name .. ' is not available on ' .. lide.platform.getArch():lower() .. ' architecture.')
-				os.exit()		
-			end
 
 			--	-- copy file to destination: libraries/windows/x64/luasql/sqlite3.dll
 			for _, int_path in pairs(_files) do -- internal_paths
@@ -500,16 +509,14 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 				local _filename = file_dst:reverse():sub(1, b) : reverse()
 				local _foldernm = file_dst:sub(1, file_dst:find(_filename) -1)
 				
-				--log ('  > ' .. file_dst)
-
 				lide.mktree(_foldernm)
-				--print((_package_prefix or '') .. int_path)
+
 				lide.zip.extractFile(_package_file, (_package_prefix or '') .. int_path, file_dst)
 			end
 		end
 	elseif not rawget(package_manifest, lide.platform.getOS():lower()) then
 		lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
-		print ('  ! Error: module ' .. _package_name .. ' is not available on ' .. lide.platform.getOS())
+		print ('  > ! package.install: "' .. _package_name .. '" is not available on ' .. lide.platform.getOS() .. '.')
 		os.exit()
 	end
 
@@ -524,9 +531,9 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 			else
 				print ('  > Installing dependencies: '.. _package_name) 
 				
-				local package_zip_file = (app.folders.libraries .. '\\'.._package_name .. '\\'.._package_name .. '.zip' ):gsub(' ', '')
+				local package_zip_file = normalize_path(app.folders.libraries .. '\\'.._package_name .. '\\'.._package_name .. '.zip' ):gsub(' ', '')
 				
-				lide.mktree ((app.folders.libraries .. '\\'.._package_name):gsub(' ', ''))
+				lide.mktree (normalize_path(app.folders.libraries .. '\\'.._package_name):gsub(' ', ''))
 				
 				repository.download_package(_package_name, package_zip_file)			
 				repository.install_package (_package_name, package_zip_file)
