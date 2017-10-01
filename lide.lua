@@ -389,7 +389,7 @@ function repository.download_package ( _package_name, _package_file, access_toke
 --		return true
 	else
 		local github_package_path = result_repo.package_url
-		local content = github.get_file ( github_package_path, nil, repository.access_token )
+		local content = github.get_file ( github_package_path, ('package.lide'), repository.access_token )
 		
 		if not content then
 			print ('!Error: no se pudo descargar el paquete: ' .. github_package_path)
@@ -479,7 +479,6 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 
 	------------------------------------------------------------
 	------------------------------------------------------------
-
 	local package_manifest = inifile.parse_file(_manifest_file)[_package_name]
 	
 	if rawget(package_manifest, lide.platform.getOS():lower()) then
