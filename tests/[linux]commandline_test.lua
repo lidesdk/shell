@@ -8,10 +8,9 @@ io.stdout : write '[lide commandline] execution tests: '
 io.stdout : write '\t[OK]\n'
 
 -- Test if luasql, lfs are on stable repo with search:
-io.stdout : write '[lide commandline] search tests: '
+io.stdout : write '[lide commandline] package search: '
 	
 	searchline = io.popen ('./lide.sh search lanes') :read '*l'
-	print(searchline:sub (1, searchline : find '/' ))
 	assert( searchline:sub (1, searchline : find '/' ) == 'stable/')
 	searchline = io.popen ('./lide.sh search lanes') :read '*l'
 	assert( searchline:sub (1, searchline : find '/' ) == 'stable/')
@@ -20,10 +19,13 @@ io.stdout : write '\t[OK]\n'
 
 --
 
-io.stdout : write '[lide commandline] package install tests: '
+io.stdout : write '[lide commandline] package install: '
 
-	installline = io.popen ('./lide.sh install lanes') :read '*a'
-	
     assert(type(io.open(LIDE_PATH .. '/libraries/linux/x64/clibs/lanes/core.so', 'rb')) == 'userdata')
 
 io.stdout : write '\t[OK]\n'
+
+
+execline = io.popen('./lide.sh tests/[linux]package_test.lua'):read'*a'
+    
+print(execline)
