@@ -11,7 +11,8 @@ USERDATA = { assert_type = 'userdata',
 	'cancel_error', 'timer_lane'
 }
 
-local results = --package.loadlib (LIDE_PATH .. '/libraries/linux/x64/clibs/lanes/core.so', 'luaopen_lanes_core') () --. configure { demote_full_userdata = true }
+local results = require 'lanes' . configure { demote_full_userdata = true }
+--package.loadlib (LIDE_PATH .. '/libraries/linux/x64/clibs/lanes/core.so', 'luaopen_lanes_core') () --
 
 function assertfields ( TYPE, PACKAGE, LOADED )
 	local assert_msg  = "Error %s %s doesn't exists"
