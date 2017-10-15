@@ -27,6 +27,7 @@ io.stdout : write '\t[OK]\n'
 
 install_package = io.popen ('./lide.sh ./tests/[linux]package_test.lua') :read '*a'
 
+print(install_package)
 --io.stdout : write '\t[OK]\n'
 
 -- /home/dcanoh/Projects/commandline/tests/[linux]package_test.lua
