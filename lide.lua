@@ -618,7 +618,7 @@ function framework.run ( filename, env, req, ... )
 			
 			os.execute ( 
 				--os.getenv('LIDE_PATH') .. '/bin/linux/x64/lua ' .. filename -- execute lide51 interpreter
-				os.getenv('LIDE_PATH') .. '/bin/linux/x64/lua /home/dcanoh/Projects/commandline/bin/lide51_src.lua ' .. filename -- execute lide51 interpreter
+				os.getenv('LIDE_PATH') .. '/bin/linux/x64/lua '..os.getenv('LIDE_PATH')..'/bin/lide51_src.lua ' .. filename -- execute lide51 interpreter
 				
 			);
 
