@@ -411,7 +411,7 @@ function repository.download_package ( _package_name, _package_file, access_toke
 		
 		if not content then
 			print ('!Error: no se pudo descargar el paquete: ' .. github_package_path)
-			return false
+			return false, '!Error: no se pudo descargar el paquete: ' .. github_package_path
 		end
 
 		local zip_file = io.open(normalize_path(_package_file), 'w+b');
@@ -429,9 +429,8 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 	_package_file = normalize_path(_package_file)
 
 	if not lide.file.doesExists(_package_file) then
-		print ('! Error: el paquete: ' .. tostring(_package_file) .. 'no se pudo instalar.')
-		return
-
+		lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
+		return false, '! Error: The package: ' .. tostring(_package_file) .. ' is not downloaded now.'
 	end
 
 	local _manifest_file = normalize_path(app.folders.libraries ..'/'.._package_name..'/'.. _package_name ..'.manifest')
@@ -444,8 +443,9 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 	
 
 	if not lide.zip.extractFile(_package_file, (_package_prefix or '') .. _package_name .. '.manifest', _manifest_file) then
-		print	 (('> ERROR: Manifest file "%s" doesn\'t exists into "%s" package'):format((_package_prefix or '') .. _package_name .. '.manifest', _package_file))
-		os.exit()
+		lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
+
+		return false, ('> ERROR: Manifest file "%s" doesn\'t exists into "%s" package'):format((_package_prefix or '') .. _package_name .. '.manifest', _package_file)
 	end
 	
 	-- .................
@@ -510,8 +510,10 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 		end
 
 		if not compatible then
-			print ('  > ! package.install: "' .. _package_name .. '" is not available on ' .. lide.platform.getArch() .. ' architecture.')
-			os.exit()
+--			print ('  > ! package.install: "' .. _package_name .. '" is not available on ' .. lide.platform.getArch() .. ' architecture.')
+--			os.exit()
+			lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
+			return false, '"' .. _package_name .. '" is not available on ' .. lide.platform.getArch() .. ' architecture.'
 		end 
 
 		for arch_line in package_manifest[lide.platform.getOS():lower()] : delimi '|' do -- architectures are delimited by |
@@ -532,36 +534,57 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 				lide.zip.extractFile(_package_file, (_package_prefix or '') .. int_path, file_dst)
 			end
 		end
+
+		
 	elseif not rawget(package_manifest, lide.platform.getOS():lower()) then
 		lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
-		print ('  > ! package.install: "' .. _package_name .. '" is not available on ' .. lide.platform.getOS() .. '.')
-		os.exit()
+
+		return false, '"' .. _package_name .. '" is not available on ' .. lide.platform.getOS() .. '.'
 	end
 
-	local function install_depends ( package_manifest )
+	local function install_depends ( package_manifest, _package_name )
 		local depends = package_manifest.depends : delim ','
-
+				
+		printl '  > installing dependencies for $_package_name$:'
+	
 		for _, _package_name in pairs( depends ) do
-			local _package_name   = _package_name:gsub(' ', '')
-			
+
 			if lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
-				--> printl '  > Dependencies: $_package_name$ installed'
+				printl '  > $_package_name$ is installed now.'
 			else
-				print ('  > Installing dependencies: '.. _package_name) 
+				printl '  > installing $_package_name$' 
 				
 				local package_zip_file = normalize_path(app.folders.libraries .. '\\'.._package_name .. '\\'.._package_name .. '.zip' ):gsub(' ', '')
 				
 				lide.mktree (normalize_path(app.folders.libraries .. '\\'.._package_name):gsub(' ', ''))
 				
 				repository.download_package(_package_name, package_zip_file)			
-				repository.install_package (_package_name, package_zip_file)
+				
+				local install_depend, last_error = repository.install_package (_package_name, package_zip_file)
+				
+				if not install_depend then
+					if lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
+						lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
+					end
+
+					return false, last_error or 'Dependencies not satisfied: ' .. _package_name
+				end
 			end
 		end
+
+		return true;
 	end
 
 	if package_manifest.depends and package_manifest.depends ~= '' then 
-		install_depends(package_manifest)
+		local install_deps, last_error = install_depends(package_manifest, _package_name)
+		
+		if not install_deps then
+			lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
+			return false, last_error
+		end
 	end
+
+	return true;
 end
 
 
@@ -689,9 +712,6 @@ elseif ( arg[1] == 'remove' and arg[2] ) then
 		print(last_error)
 	end
 
-elseif ( arg[1] == '--test' ) then
-    io.stdout:write '[lide test] all ok.\n'
-
 elseif ( arg[1] == '--version' ) then
 
     io.stdout:write (('Lide: %s\nLua: %s'):format(_LIDE_VERSION, _VERSION))
@@ -720,6 +740,8 @@ Examples:
 For bug reporting instructions, please see:
 <https://github.com/lidesdk/commandline/issues>.]]
 
+elseif ( arg[1] == '--test' ) then
+    io.stdout:write '[lide test] all ok.\n'
 else
 	if ( arg[1] == '-l' ) then
 	    print '[lide.error] Please import using require inside the lua file.'

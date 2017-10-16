@@ -36,6 +36,7 @@ local n = 0; for repo_name, repo in pairs( repository.repos ) do
 					print(('> Found! %s %s'):format(_package_name, _package_version));
 				end
 				n = n + 1
+				
 				print('> installing...')	
 								
 				lide.folder.create ( app.folders.libraries .. '/'.._package_name )
@@ -43,10 +44,15 @@ local n = 0; for repo_name, repo in pairs( repository.repos ) do
 				zip_package = app.folders.libraries .. '/'.._package_name .. '/'.._package_name .. '.zip'
 				
 				repository.download_package(_package_name, zip_package)
-				repository.install_package (_package_name, zip_package, _package_prefix)
-
-				print('> OK: '.._package_name..' successful installed.')
-
+				
+				local _install_package, lasterror = repository.install_package (_package_name, zip_package, _package_prefix)
+				
+				if _install_package then
+					print('> OK: '.._package_name..' successful installed.')
+				else
+					print('> [package.install]: ' .. lasterror)
+					print('> ERROR: '.._package_name..' not installed.')
+				end
 				break
 			end
 		end
