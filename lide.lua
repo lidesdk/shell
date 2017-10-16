@@ -269,34 +269,52 @@ local function ExtractZipAndCopyFiles(zipFilePath, destinationPath)
     --zfile:close() !BLOQUEA EL PC
 end
 
+-- 
 function repository.remove ( _package_name )
 	local _package_version
-	if lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
-		--_package_version = io.open(app.folders.libraries ..'/'.._package_name..'/'.._package_name ..'.manifest'):read('*l')
+	--local os_arch = lide.platform.getArch():lower();
+	local os_name = lide.platform.getOSName():lower();
+
+	local _manifest_file = ('%s/%s/%s.manifest'):format(app.folders.libraries, _package_name, _package_name)
+
+	if lide.file.doesExists(_manifest_file)
+	and lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
+		
+		local package_manifest = inifile.parse_file(_manifest_file)[_package_name]
+
+			for arch_line in package_manifest[os_name] : delimi '|' do -- architectures are delimited by |
+				arch_line = arch_line:delim ':' 
+				--local _osname = lide.platform.getOS():lower()
+				--local _arch   = arch_line[1]
+				local _files  = trim(arch_line[2] or '') : delim ',' -- files are delimiteed by comma					
 				
-		if lide.platform.getOSName() == 'Linux' then
-			io.popen ('rm -rf "' .. app.folders.libraries ..'/linux_x86/clibs/'.._package_name..'"');
-			io.popen ('rm -rf "' .. app.folders.libraries ..'/linux_x86/lua/'.._package_name..'"');
-			io.popen ('rm -rf "' .. app.folders.libraries ..'/'.._package_name..'"');
-			io.popen ('rm -rf "' .. app.folders.libraries ..'/'.._package_name..'".zip');
-		elseif lide.platform.getOSName() == 'Windows' then
-			--io.popen ('del /Q /S "' .. normalize_path(app.folders.libraries ..'/windows_x86/lua/'.._package_name..'.lua"'));
-			--io.popen ('rd /Q /S "' .. normalize_path(app.folders.libraries ..'/windows_x86/lua/'.._package_name..'"'));
-			--io.popen ('rd /Q /S "' .. normalize_path(app.folders.libraries ..'/windows_x86/clibs/'.._package_name..'"'));
-			--io.popen ('rd /Q /S "' .. normalize_path(app.folders.libraries ..'/'.._package_name..'"'));
-			--io.popen ('del /F /Q /S "' .. normalize_path(app.folders.libraries ..'/'.._package_name..'".zip'));
-			lide.core.folder.delete(normalize_path(app.folders.libraries .. '/' .. _package_name));
-			lide.core.folder.delete(normalize_path(app.folders.libraries .. '/windows_x86/clibs/' .. _package_name));
-			lide.core.folder.delete(normalize_path(app.folders.libraries .. '/windows_x86/lua/' .. _package_name));
-		end
+				local todel_files = {}
+				-- copy file to destination: libraries/windows/x64/luasql/sqlite3.dll
+				for _, int_path in pairs(_files) do -- internal_paths
+					local file_dst = normalize_path(app.folders.libraries ..'/'.. int_path)					--local a,b       = file_dst:gsub('\\', '/'):reverse():find '/'
+					--local _filename = file_dst:reverse():sub(1, b) : reverse()
+					--local _foldernm = file_dst:sub(1, file_dst:find(_filename) -1)
+					
+					if lide.file.doesExists(file_dst) then
+						io.popen ('rm -rf "'..file_dst..'"');		
+						todel_files[#todel_files] = file_dst
+					end
+				end
+
+				for _, file in pairs(todel_files) do
+					if lide.file.doesExists(file) then
+						return false, ('File %s wasn\'t removed'):format(file)
+					end
+				end
+				end
+		
+		lide.core.folder.delete(normalize_path(app.folders.libraries .. '/' .. _package_name));	
 
 		return true
 	else
-		last_error = ('The package "%s" doesn\'t installed.'):format(_package_name)
-		return false,  last_error
+		return false, ('Error: Package %s is not installed.'):format(_package_name)
 	end
 end
-
 
 ---------------------------------------------------------------------------------------------------
 
@@ -663,11 +681,12 @@ elseif ( arg[1] == 'update' ) then
 
 elseif ( arg[1] == 'remove' and arg[2] ) then
 	local _package_name = arg[2]
+	local repo_rem, last_error = repository.remove(_package_name)
 	
-	if repository.remove(_package_name) then
+	if repo_rem then
 		print 'Library is successfully removed.'
 	else
-		print ('! Library ' .. arg[2] .. ' isn\'t installed now.')
+		print(last_error)
 	end
 
 elseif ( arg[1] == '--test' ) then
