@@ -3,11 +3,12 @@ Lide Commandline
 
 Lide Commandline is a tool that allow you to execute lua scripts and manage lua modules, you can search install and remove modules from lide repository.
 
-================  =================  ======================================================  ================
-  platform          arch               buil log                                               build status
-================  =================  ======================================================  ================
-  ``Windows``      ``x86``             https://ci.appveyor.com/project/dcanoh/commandline     .. image:: https://ci.appveyor.com/api/projects/status/uvkh9w4e474v5p23/branch/master?svg=true
-================  =================  ======================================================  ================
+================  ===================  ============================================================  ====================
+  Platform          Architecture         Build log                                                     Build status
+================  ===================  ============================================================  ====================
+  ``Windows``      ``x86``               https://ci.appveyor.com/project/dcanoh/commandline            .. image:: https://ci.appveyor.com/api/projects/status/uvkh9w4e474v5p23?svg=true
+  ``GNU/Linux``    ``x64``               https://circleci.com/gh/lidesdk/commandline/tree/testing      .. image:: https://circleci.com/gh/lidesdk/commandline/tree/testing.svg?style=svg
+================  ===================  ============================================================  ====================
 
 .. image:: https://github.com/lidesdk/commandline/raw/master/screenshot.png
    :height: 393px
@@ -52,28 +53,27 @@ Installation
 
 * Clone or `download <https://github.com/lidesdk/commandline/archive/master.zip>`_ this repository: ``https://github.com/lidesdk/commandline.git``
 * Create environment variables named ``LIDE_PATH`` and ``LIDE_FRAMEWORK``
-* Execute ``lide --help'`` command
+* Execute ``lide --help`` command
 
 GNU/Linux Installation
 **********************
 
 .. code-block:: bash
 
-	# Create lide install directory and go to it (~/.lide):
-	$ mkdir ~/.lide && cd ~/.lide
+	# Create lidesdk install directory and go to it (~/.lidesdk):
+	$ mkdir ~/.lidesdk && cd ~/.lidesdk
 
 	# Clone git repository and submodules:
 	$ git clone https://github.com/lidesdk/commandline.git --recursive commandline
 	
-	# Add exec perms:
+	# Add execution permissions:
 	$ cd commandline
 	$ chmod +x ./lide.sh
 
 	# Create environment variable named LIDE_PATH
 	$ nano ~/.bashrc
 	    # add this line at the bottom of the file:
-        export LIDE_PATH=~/.lide/commandline
-        export LIDE_FRAMEWORK=~/.lide/commandline/libraries/lide
+        export LIDE_PATH=~/.lidesdk/commandline
 
 
 Windows Installation
@@ -105,4 +105,6 @@ Lide Commandline is part of (`Lide SDK <https://github.com/lidesdk/framework#lid
 License
 =======
 
-Lide is licensed under (`The GNU General Public License <https://github.com/lidesdk/commandline/blob/master/LICENSE>`_). Copyright © 2016 Hernán Dario Cano.
+Lide is licensed under (`The GNU General Public License <https://github.com/lidesdk/commandline/blob/master/LICENSE>`_). 
+
+Copyright © 2016 Hernán Dario Cano.

@@ -1,4 +1,4 @@
-	if  not luasql then
+	if  not lide.luasql then
 		luasql = require 'luasql.sqlite3'
 	end
 	
