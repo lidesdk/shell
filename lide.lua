@@ -19,10 +19,10 @@ local CURRENT_PLATFORM = lide.platform.getOSName();
 local CURRENT_ARCH     = lide.platform.getOSArch();
 
 if CURRENT_PLATFORM == 'linux' then
-   	package.cpath = LIDE_PATH .. ('/clibs/linux/%s/?.so;'):format(CURRENT_ARCH);
+   	package.cpath = LIDE_PATH .. ('/clibs/linux/%s/?.so;'):format(CURRENT_ARCH) .. package.cpath;
 	package.path  = LIDE_PATH .. ('/lua/linux/%s/?.lua;' ):format(CURRENT_ARCH) .. package.path;
 elseif CURRENT_PLATFORM == 'windows' then
-	package.cpath = LIDE_PATH .. ('/clibs/windows/%s/?.dll;'):format(CURRENT_ARCH);
+	package.cpath = LIDE_PATH .. ('/clibs/windows/%s/?.dll;'):format(CURRENT_ARCH) .. package.cpath;
 	package.path  = LIDE_PATH .. ('/lua/windows/%s/?.lua;'  ):format(CURRENT_ARCH) .. package.path;
 end
 
