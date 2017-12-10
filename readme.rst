@@ -58,6 +58,15 @@ Installation
 GNU/Linux Installation
 **********************
 
+- Install dependencies:
+
+.. code-block:: bash
+
+	# Ubuntu:
+	$ sudo apt-get install libwxgtk-media3.0-dev
+
+- Install lide shell:
+
 .. code-block:: bash
 
 	# Create lidesdk install directory and go to it (~/.lidesdk):

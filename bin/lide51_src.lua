@@ -4,11 +4,11 @@
 --- string getOSVersion( nil )
 function lide_platform_getOSName( ... )
 	if (package.config:sub(1,1) == '\\') and os.getenv 'OS' == 'Windows_NT' then
-		return 'Windows';
+		return 'windows';
 	elseif (package.config:sub(1,1) == '/') and io.popen 'uname -s':read '*l' == 'Linux' then
-		return 'Linux';
+		return 'linux';
 	else
-		return 'Other';
+		return 'other';
 	end
 end
 
@@ -24,9 +24,9 @@ function lide_platform_getArch ()
 end
 
 local function normalize_path ( path )
-	if lide_platform_getOSName() == 'Windows' then
+	if lide_platform_getOSName() == 'windows' then
 		return (path:gsub('/', '\\'));
-	elseif lide_platform_getOSName() == 'Linux' then
+	elseif lide_platform_getOSName() == 'linux' then
 		return tostring(path:gsub('\\', '/'):gsub('//', '/'));
 	end
 end
@@ -42,12 +42,14 @@ do
 
 	package.path  = lide_path .. '\\libraries\\lua\\?.lua;' ..
 	lide_path .. '\\libraries\\lua\\?\\init.lua;' ..
+	lide_path .. '\\libraries\\?.lua;' ..
 
 	lide_path .. '\\libraries\\'.._currentOSName..'\\'.._currentArch..'\\lua\\?.lua;' .. 
 	lide_path .. '\\libraries\\'.._currentOSName..'\\'.._currentArch..'\\lua\\?\\init.lua;'
 	
 	--dofile(file)
-	--lide = lide_path .. '\\libraries\\?.lua'
+	
+
 
 	----------------------------------------------------------------------------------------
 	----------------------------------------------------------------------------------------
@@ -57,18 +59,24 @@ do
 	-- clibs/?.dll
 
 	--package.cpath = lide_path .. '\\libraries\\?.dll;' .. package.cpath
-	package.path  = lide_path .. '\\libraries\\?.lua;' .. package.path
+	--package.path  = lide_path .. '\\libraries\\?.lua;' .. package.path
 	
 	if _currentOSName == 'linux' then
-		package.cpath  = lide_path .. '\\libraries\\' .._currentOSName.. '\\'.._currentArch..'\\clibs\\?.so;'
-	else
-		package.cpath  = lide_path .. '\\libraries\\' .._currentOSName.. '\\'.._currentArch..'\\clibs\\?.dll;'
+		local LIDE_PATH = os.getenv 'LIDE_PATH'
+
+		package.cpath = LIDE_PATH .. '/clibs/linux/x64/?.so;' .. 
+						LIDE_PATH .. '\\libraries\\'.._currentOSName.. '\\'.._currentArch..'\\clibs\\?.so;' .. 
+						LIDE_PATH .. '\\libraries\\'.._currentOSName..'\\'.._currentArch..'\\clibs\\?\\core.so;' .. package.cpath 
+	
+	--else
+	--	package.cpath  = lide_path .. '\\libraries\\' .._currentOSName.. '\\'.._currentArch..'\\clibs\\?.dll;'
 	end
 
 	package.path  = normalize_path(package.path);
 	package.cpath = normalize_path(package.cpath);
 
-	lide = require 'lide.init'
+	--print('a')
+	--lide = require 'lide.base.init'
 	----------------------------------------------------------------------------------------
 	----------------------------------------------------------------------------------------
 

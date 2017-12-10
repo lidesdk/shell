@@ -8,14 +8,25 @@
 
 assert(os.getenv 'LIDE_PATH', '[lide commandline] Declare la variable de entorno LIDE_PATH');
 
-local LIDE_PATH      = os.getenv 'LIDE_PATH'
-local _LIDE_VERSION  = '0.0.01'
+local LIDE_PATH        = os.getenv('LIDE_PATH')
+local _LIDE_VERSION    = '0.0.01'
 
-package.path = LIDE_PATH .. '/libraries/?.lua;' .. package.path
+package.path  = LIDE_PATH .. '/libraries/?.lua;' --..
 
 lide = require 'lide.core.init'
 
-local CURRENT_PLATFORM = lide.platform.getOSName()
+local CURRENT_PLATFORM = lide.platform.getOSName();
+local CURRENT_ARCH     = lide.platform.getOSArch();
+
+if CURRENT_PLATFORM == 'linux' then
+   	package.cpath = LIDE_PATH .. ('/clibs/linux/%s/?.so;'):format(CURRENT_ARCH);
+	package.path  = LIDE_PATH .. ('/lua/linux/%s/?.lua;' ):format(CURRENT_ARCH) .. package.path;
+elseif CURRENT_PLATFORM == 'windows' then
+	package.cpath = LIDE_PATH .. ('/clibs/windows/%s/?.dll;'):format(CURRENT_ARCH);
+	package.path  = LIDE_PATH .. ('/lua/windows/%s/?.lua;'  ):format(CURRENT_ARCH) .. package.path;
+end
+
+lide = require 'lide.base.init'
 
 local function trim ( str )
 	repeat str = str:gsub ('  ', '')
@@ -24,9 +35,9 @@ local function trim ( str )
 end
 
 local function normalize_path ( path )
-	if lide.platform.getOSName() == 'Windows' then
+	if lide.platform.getOSName() == 'windows' then
 		return (path:gsub('/', '\\'));
-	elseif lide.platform.getOSName() == 'Linux' then
+	elseif lide.platform.getOSName() == 'linux' then
 		return tostring(path:gsub('\\', '/'):gsub('//', '/'));
 	end
 end
@@ -34,7 +45,7 @@ end
 function lide.mktree ( src_file ) -- make only tree of dirs of this file
 	local sep,INIT = '\\', ''
 	
-	if lide.platform.getOSName() == 'Linux' then 
+	if lide.platform.getOSName() == 'linux' then 
 		INIT = '/'
 		sep  = '/' 
 	end
@@ -66,6 +77,7 @@ function locals(lvel)
     	end
     	idx = 1 + idx
   	end
+  	
   	return variables
 end
 
@@ -78,7 +90,6 @@ function upvalues()
     	local ln, lv = debug.getupvalue(func, idx)
     	if ln ~= nil then
     		variables[ln] = lv
-    	else
     		break
     	end
     	idx = 1 + idx
@@ -219,25 +230,6 @@ function repository.update ( access_token )
 		print('[lide.github]: ', errmsg)
 	end
 end
-
----function repository.download ( _package_name, _package_file, access_token )
----	local _query_install = 'select * from lua_packages where package_name like "%s" limit 1'
----	
----	local github_path = repository.libraries_stable:select(_query_install:format(_package_name))[1].package_url
----	
----	local content = github.get_file ( github_path, nil, repository.access_token )
----	
----	if not content then
----		print ('!Error: no se pudo descargar el paquete: ' .. github_path)
----		return false
----	end
----
----	local zip_file = io.open(normalize_path(_package_file), 'w+b');
----
----	if zip_file:write(content) then
----		zip_file:close();
----	end
----end
 
 local function ExtractZipAndCopyFiles(zipFilePath, destinationPath)
     local zfile, err
@@ -650,20 +642,17 @@ function framework.run ( filename, env, req, ... )
 	end
 
 	do  -- Usar una copia separada del Lide que se est?ejecutando:
-		local _LIDE_BIN = os.getenv 'LIDE_BIN'
 		
-		if ( CURRENT_PLATFORM == 'Linux' ) then
-			--local exec, errm = pcall(os.execute, (_LIDE_BIN or 'lua5.1') .. [[ -e 'package.cpath = os.getenv 'LIDE_PATH' ..'/libraries/linux_x86/?.so;' package.path = package.path ..";"..os.getenv "LIDE_PATH" .."/libraries?.lua;" require "lide.core.init"']].. ' -l lide.init ' .. filename)
-			--os.execute( [[lua5.1 -e "package.cpath = os.getenv 'LIDE_PATH' ..'/libraries/linux_x86/?.so' package.path = os.getenv 'LIDE_PATH' ..'/libraries/?.lua'; require 'lide.init' " ]] .. filename )
-					--os.execute ('lua5.1 %s'):format(filename)
-			
+		-- Ejecutar el interprete apropiado:
+		if ( CURRENT_PLATFORM == 'linux' ) then
+			local _exec_str  = '%s/bin/%s/%s/lua %s/bin/lide51_src.lua %s'
+
 			os.execute ( 
-				--os.getenv('LIDE_PATH') .. '/bin/linux/x64/lua ' .. filename -- execute lide51 interpreter
-				os.getenv('LIDE_PATH') .. '/bin/linux/x64/lua '..os.getenv('LIDE_PATH')..'/bin/lide51_src.lua ' .. filename -- execute lide51 interpreter
+				_exec_str:format(LIDE_PATH, CURRENT_PLATFORM, CURRENT_ARCH, LIDE_PATH, filename)
 				
 			);
 
-		elseif ( CURRENT_PLATFORM == 'Windows' ) then
+		elseif ( CURRENT_PLATFORM == 'windows' ) then
 			--- Ejecutamos el interprete de lua basado en wxluafreeze:
 			---  bin/gui.exe
 			---

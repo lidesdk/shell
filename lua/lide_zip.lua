@@ -3,9 +3,9 @@ zip = require(  'zip' )
 lide.zip = { lzip = zip }
 
 local function normalize_path ( path )
-	if lide.platform.getOSName() == 'Windows' then
+	if lide.platform.getOSName() == 'windows' then
 		return (path:gsub('/', '\\'));
-	elseif lide.platform.getOSName() == 'Linux' then
+	elseif lide.platform.getOSName() == 'linux' then
 		return (path:gsub('\\', '/'));
 	end
 end

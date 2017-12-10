@@ -1,6 +1,6 @@
 	if  not luasql then
 		
-		if lide.platform:getOSName() == 'Linux' then
+		if lide.platform:getOSName() == 'linux' then
 		   	
 		   	luasql = require 'luasql.sqlite3'
 		else
