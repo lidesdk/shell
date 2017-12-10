@@ -7,7 +7,7 @@ Lide Commandline is a tool that allow you to execute lua scripts and manage lua 
   Platform          Architecture         Build log                                                     Build status
 ================  ===================  ============================================================  ====================
   ``Windows``      ``x86``               https://ci.appveyor.com/project/dcanoh/commandline            .. image:: https://ci.appveyor.com/api/projects/status/uvkh9w4e474v5p23?svg=true
-  ``GNU/Linux``    ``x64``               https://circleci.com/gh/lidesdk/commandline/tree/testing      .. image:: https://circleci.com/gh/lidesdk/commandline/tree/testing.svg?style=svg
+  ``GNU/Linux``    ``x64``               https://circleci.com/gh/lidesdk/commandline/tree/develop      .. image:: https://circleci.com/gh/lidesdk/commandline/tree/develop.svg?style=svg
 ================  ===================  ============================================================  ====================
 
 .. image:: https://github.com/lidesdk/commandline/raw/master/screenshot.png
@@ -62,7 +62,7 @@ GNU/Linux Installation
 
 .. code-block:: bash
 
-	# Ubuntu:
+	# Ubuntu Xenial Xerus:
 	$ sudo apt-get install libwxgtk-media3.0-dev
 
 - Install lide shell:
