@@ -11,7 +11,7 @@ assert(os.getenv 'LIDE_PATH', '[lide commandline] Declare la variable de entorno
 local LIDE_PATH        = os.getenv('LIDE_PATH')
 local _LIDE_VERSION    = '0.0.01'
 
-//package.path  = LIDE_PATH .. '/libraries/?.lua;' .. package.path
+package.path  = LIDE_PATH .. '/libraries/?.lua;' .. package.path
 
 lide = require 'lide.core.init'
 
