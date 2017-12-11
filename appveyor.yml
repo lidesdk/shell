@@ -1,10 +1,10 @@
-version: 0.0.01-{build}
+version: 0.0-{build}
 
 shallow_clone: true
 
 environment:
   LUAROCKS_VER: 2.4.1
-  LUA_VER: 5.1.4
+  LUA_VER: 5.1.5
 
 platform:
   - x86
@@ -21,7 +21,7 @@ install:
 
 build_script:
   - luarocks install luafilesystem
-  - luarocks install https://raw.githubusercontent.com/lidesdk/framework/master/lide-0.0-0.rockspec
+  - luarocks install https://raw.githubusercontent.com/lidesdk/framework/master/lide-0.0-1.rockspec
   - set LIDE_PATH=%CD%
 
 test_script:
