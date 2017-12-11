@@ -1,4 +1,3 @@
-
 LIDE_PATH = (os.getenv 'LIDE_PATH')
 
 -- Run standard internal tests:
