@@ -2,6 +2,8 @@ LIDE_PATH = (os.getenv 'LIDE_PATH')
 
 -- Run standard internal tests:
 io.stdout : write '[lide commandline] execution tests: '
+	
+	assert(io.popen 'chmod +x ./lide.sh')
 
 	assert(io.popen (LIDE_PATH .. '/lide.sh --test') :read '*a':sub(1,19) == '[lide test] all ok.')
 

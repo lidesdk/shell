@@ -3,12 +3,14 @@ Lide Commandline
 
 Lide Commandline is a tool that allow you to execute lua scripts and manage lua modules, you can search install and remove modules from lide repository.
 
-================  ===================  ============================================================  ====================
-  Platform          Architecture         Build log                                                     Build status
-================  ===================  ============================================================  ====================
-  ``Windows``      ``x86``               https://ci.appveyor.com/project/dcanoh/commandline            .. image:: https://ci.appveyor.com/api/projects/status/uvkh9w4e474v5p23?svg=true
-  ``GNU/Linux``    ``x64``               https://circleci.com/gh/lidesdk/commandline/tree/testing      .. image:: https://circleci.com/gh/lidesdk/commandline/tree/testing.svg?style=svg
-================  ===================  ============================================================  ====================
+========================================================= ==================================================================================
+ git branch: ``develop``                                     build status
+========================================================= ==================================================================================
+ Tests executed in **Windows 10** x64 and x86 machines      .. image:: https://ci.appveyor.com/api/projects/status/uvkh9w4e474v5p23?svg=true
+                                                               :target: https://ci.appveyor.com/project/dcanoh/framework/branch/develop
+ Tests executed in **Ubuntu 14.04** Trusty x64 machine      .. image:: https://circleci.com/gh/lidesdk/commandline/tree/develop.svg?style=svg
+                                                               :target: https://circleci.com/gh/lidesdk/commandline/tree/develop
+========================================================= ==================================================================================
 
 .. image:: https://github.com/lidesdk/commandline/raw/master/screenshot.png
    :height: 393px
@@ -57,6 +59,15 @@ Installation
 
 GNU/Linux Installation
 **********************
+
+- Install dependencies:
+
+.. code-block:: bash
+
+	# Ubuntu Xenial Xerus:
+	$ sudo apt-get install libwxgtk-media3.0-dev
+
+- Install lide shell:
 
 .. code-block:: bash
 
