@@ -19,7 +19,8 @@ test:
 
         # install latest framework version from master repo:
         - git clone https://github.com/lidesdk/framework.git $PWD/libraries/lide
-
+        - git checkout develop
+            
         # authorize x64 lua interpreter:
         - chmod +x $PWD/bin/linux/x64/lua
 
