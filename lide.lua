@@ -157,8 +157,8 @@ app.folders = { install, libraries, ourclibs, ourlibs }
 app.folders.sourcefolder = normalize_path( os.getenv 'LIDE_PATH' )
 --app.folders.libraries =  normalize_path(app.folders.sourcefolder .. '/libraries')
 app.folders.libraries =  normalize_path( os.getenv 'LIDE_PATH' .. '/libraries')
-
-if lide.platform.getOSName() == 'Windows' then
+--[[
+if lide.platform.getOSName() == 'windows' then
 --	
 --	local arch     = lide.platform.getArch ()         --'x86' -- x64, arm7
 --	local platform = lide.platform.getOS () : lower() -- windows, linux, macosx
@@ -188,17 +188,18 @@ elseif lide.platform.getOSName() == 'Linux' then
 	
 --	print ('arch:' .. lide.platform.getArch ())
 
-	--[[package.cpath = app.folders.sourcefolder .. '/?.so;' ..
+package.cpath = app.folders.sourcefolder .. '/?.so;' ..
 					app.folders.sourcefolder .. '/env/?.so;' 
 					--app.folders.sourcefolder .. ('/clibs/linux/%s/?.so;'):format('x64') .. package.cpath
 	package.path  = app.folders.sourcefolder .. '/?.lua;' ..
 					app.folders.sourcefolder .. '/lua/linux/?.lua;' ..
-					app.folders.sourcefolder .. '/lua/?.lua;' .. package.path]]
-end
+					app.folders.sourcefolder .. '/lua/?.lua;' .. package.path
 
+end
+]]
 
 --local luasql  = require 'luasql.sqlite3'
-inifile = require 'inifile'
+inifile 		  = require 'inifile'
 --io.stdout : write (tostring(inifile)..'\n')
 local sqldatabase = require 'sqldatabase.init'
 local github      = require 'github'
@@ -452,7 +453,7 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 	function lide_file_copy ( src_file, dst_file )
 		local file_src     = io.open(src_file, 'rb')
 		local file_content = file_src : read '*a'
-
+		--lide.lfs.lock(file_src)
 		-- only copy new files if file dooesn exist
 		if not lide.core.file.doesExists( dst_file ) then
 			local file_dst = io.open(dst_file, 'w+b')
@@ -461,6 +462,7 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 			file_src:close()
 			file_dst:close()
 		end
+		--lide.lfs.unlock(file_src)
 	end
 
 	-- funcion para copiar los archivos de una carpeta recursivamente
@@ -496,6 +498,9 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 		local architectures = package_manifest[lide.platform.getOS():lower()] : delim '|'
 		
 		for _, arch_line in pairs(architectures) do
+			
+			arch_line = arch_line:gsub(' ', '');
+
 			if not compatible and (tostring(arch_line:sub(1,3)) == lide.platform.getArch()) then
 				compatible = true;
 			end
@@ -511,8 +516,8 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 		for arch_line in package_manifest[lide.platform.getOS():lower()] : delimi '|' do -- architectures are delimited by |
 			arch_line = arch_line:delim ':' 
 			local _osname = lide.platform.getOS():lower()
-			local _arch   = arch_line[1]
-			local _files  = trim(arch_line[2] or '') : delim ',' -- files are delimiteed by comma					
+			local _arch   = (arch_line[1] or ''):gsub(' ', '')
+			local _files  = (arch_line[2] or ''):gsub(' ', '') : delim ',' -- files are delimiteed by comma					
 
 			--	-- copy file to destination: libraries/windows/x64/luasql/sqlite3.dll
 			for _, int_path in pairs(_files) do -- internal_paths
