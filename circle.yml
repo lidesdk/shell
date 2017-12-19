@@ -13,6 +13,7 @@ test:
   override:
 
     # Installation process:
+
         # install latest framework version from master repo:
         - git clone https://github.com/lidesdk/framework.git $PWD/libraries/lide && cd $PWD/libraries/lide && git checkout master
 
