@@ -21,9 +21,13 @@ local CURRENT_ARCH     = lide.platform.getOSArch();
 if CURRENT_PLATFORM == 'linux' then
    	package.cpath = LIDE_PATH .. ('/clibs/linux/%s/?.so;'):format(CURRENT_ARCH) .. package.cpath;
 	package.path  = LIDE_PATH .. ('/lua/linux/%s/?.lua;' ):format(CURRENT_ARCH) .. package.path;
+
 elseif CURRENT_PLATFORM == 'windows' then
-	package.cpath = LIDE_PATH .. ('/clibs/windows/%s/?.dll;'):format(CURRENT_ARCH) .. package.cpath;
-	package.path  = LIDE_PATH .. ('/lua/windows/%s/?.lua;'  ):format(CURRENT_ARCH) .. package.path;
+	package.cpath = LIDE_PATH .. ('/clibs/windows/%s/?.dll;'):format(CURRENT_ARCH) ..
+					LIDE_PATH .. ('/clibs/windows/?.dll;') .. package.cpath;
+	
+	package.path  = LIDE_PATH .. ('/lua/windows/%s/?.lua;'  ):format(CURRENT_ARCH) ..
+					LIDE_PATH .. ('/lua/?.lua;') .. package.path
 end
 
 lide = require 'lide.base.init'
@@ -157,46 +161,7 @@ app.folders = { install, libraries, ourclibs, ourlibs }
 app.folders.sourcefolder = normalize_path( os.getenv 'LIDE_PATH' )
 --app.folders.libraries =  normalize_path(app.folders.sourcefolder .. '/libraries')
 app.folders.libraries =  normalize_path( os.getenv 'LIDE_PATH' .. '/libraries')
---[[
-if lide.platform.getOSName() == 'windows' then
---	
---	local arch     = lide.platform.getArch ()         --'x86' -- x64, arm7
---	local platform = lide.platform.getOS () : lower() -- windows, linux, macosx
---
---	lua_dir = (os.getenv 'LIDE_PATH' .. '\\lua\\%s\\%s\\?.lua;'):format(platform, arch) ..
---	          (os.getenv 'LIDE_PATH' .. '\\lua\\%s\\?.lua;'):format(platform) ..
---	          (os.getenv 'LIDE_PATH' .. '\\lua\\?.lua;')  -- Crossplatform: root\lua\package.lua
---
---	clibs_dir=(os.getenv 'LIDE_PATH' .. '\\clibs\\%s\\%s\\?.dll;'):format(platform, arch) ..
---	          (os.getenv 'LIDE_PATH' .. '\\clibs\\%s\\?.dll;'):format(platform)
---
-	--package.path   = lua_dir ..
-	package.path  = package.path .. ';' .. --  .. 'lua\\?.lua' ..
-					 os.getenv 'LIDE_PATH' .. '\\lua\\?.lua;' --..
-					 --os.getenv 'LIDE_PATH' .. '\\?.lua'
---
-	--package.cpath  = clibs_dir
-    package.cpath = package.cpath .. ';' ..
-                   os.getenv 'LIDE_PATH' .. '\\clibs\\?.dll;'
 
-	
-elseif lide.platform.getOSName() == 'Linux' then
-
-	--app.folders.install   = app.folders.sourcefolder
-
-	--app.folders.ourclibs  = app.folders.sourcefolder .. '/lnx_clibs'
-	
---	print ('arch:' .. lide.platform.getArch ())
-
-package.cpath = app.folders.sourcefolder .. '/?.so;' ..
-					app.folders.sourcefolder .. '/env/?.so;' 
-					--app.folders.sourcefolder .. ('/clibs/linux/%s/?.so;'):format('x64') .. package.cpath
-	package.path  = app.folders.sourcefolder .. '/?.lua;' ..
-					app.folders.sourcefolder .. '/lua/linux/?.lua;' ..
-					app.folders.sourcefolder .. '/lua/?.lua;' .. package.path
-
-end
-]]
 
 --local luasql  = require 'luasql.sqlite3'
 inifile 		  = require 'inifile'

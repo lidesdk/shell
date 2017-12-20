@@ -10,14 +10,14 @@
 -- GNU/Linux Lua version:   5.1.5
 -- Windows x86 Lua version: 5.1.4
 
-if lide.platform.getOSName() == 'linux' then
-	package.path  = os.getenv 'LIDE_PATH' .. '/lua/?.lua;' ..
-				    os.getenv 'LIDE_PATH' .. '/lua/linux/?.lua;' 
-	package.cpath = os.getenv 'LIDE_PATH' .. '/clibs/linux/?.so;'  
-else
-	package.path  = os.getenv 'LIDE_PATH' .. '\\lua\\?.lua;' .. package.path
-	package.cpath = os.getenv 'LIDE_PATH' .. '\\clibs\\windows\\?.dll;'  .. package.cpath
-end
+--if lide.platform.getOSName() == 'linux' then
+	--package.path  = os.getenv 'LIDE_PATH' .. '/lua/?.lua;' ..
+	--			    os.getenv 'LIDE_PATH' .. '/lua/linux/?.lua;' 
+	--package.cpath = os.getenv 'LIDE_PATH' .. '/clibs/linux/?.so;'  
+--else
+	--package.path  = os.getenv 'LIDE_PATH' .. '\\lua\\?.lua;' .. package.path
+	--package.cpath = os.getenv 'LIDE_PATH' .. '\\clibs\\windows\\?.dll;'  .. package.cpath
+--end
 
 local isString = lide.core.base.isstring
 local requests = require 'requests' 
