@@ -289,7 +289,7 @@ function repository.remove ( _package_name )
 					--local _foldernm = file_dst:sub(1, file_dst:find(_filename) -1)
 					
 					if lide.file.doesExists(file_dst) then
-						io.popen ('rm -rf "'..file_dst..'"');		
+						os.remove(file_dst)
 						todel_files[#todel_files] = file_dst
 					end
 				end
@@ -422,7 +422,7 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 	_package_file = normalize_path(_package_file)
 
 	if not lide.file.doesExists(_package_file) then
-		lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
+		--lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
 		return false, '! Error: The package: ' .. tostring(_package_file) .. ' is not downloaded now.'
 	end
 
@@ -436,7 +436,7 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 	
 
 	if not lide.zip.extractFile(_package_file, (_package_prefix or '') .. _package_name .. '.manifest', _manifest_file) then
-		lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
+		--lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
 
 		return false, ('> ERROR: Manifest file "%s" doesn\'t exists into "%s" package'):format((_package_prefix or '') .. _package_name .. '.manifest', _package_file)
 	end
@@ -509,7 +509,7 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 		if not compatible then
 --			print ('  > ! package.install: "' .. _package_name .. '" is not available on ' .. lide.platform.getArch() .. ' architecture.')
 --			os.exit()
-			lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
+			--lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
 			return false, '"' .. _package_name .. '" is not available on ' .. lide.platform.getArch() .. ' architecture.'
 		end 
 
@@ -534,7 +534,7 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 
 		
 	elseif not rawget(package_manifest, lide.platform.getOS():lower()) then
-		lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
+		--lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
 
 		return false, '"' .. _package_name .. '" is not available on ' .. lide.platform.getOS() .. '.'
 	end
@@ -560,9 +560,9 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 				local install_depend, last_error = repository.install_package (_package_name, package_zip_file)
 				
 				if not install_depend then
-					if lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
-						lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
-					end
+					--if lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
+					--	lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
+					--end
 
 					return false, last_error or 'Dependencies not satisfied: ' .. _package_name
 				end

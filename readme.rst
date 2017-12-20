@@ -4,15 +4,15 @@ Lide Commandline
 Lide Commandline is a tool that allow you to execute lua scripts and manage lua modules, you can search install and remove modules from lide repository.
 
 ========================================================= ==================================================================================
- git branch: ``master``                                     build status
+ git branch: ``develop``                                     build status
 ========================================================= ==================================================================================
  Tests executed in **Windows 10** x64 and x86 machines      .. image:: https://ci.appveyor.com/api/projects/status/uvkh9w4e474v5p23?svg=true
-                                                               :target: https://ci.appveyor.com/project/dcanoh/framework/branch/master
- Tests executed in **Ubuntu 14.04** Trusty x64 machine      .. image:: https://circleci.com/gh/lidesdk/commandline/tree/master.svg?style=svg
-                                                               :target: https://circleci.com/gh/lidesdk/commandline/tree/master
+                                                               :target: https://ci.appveyor.com/project/dcanoh/framework/branch/develop
+ Tests executed in **Ubuntu 14.04** Trusty x64 machine      .. image:: https://circleci.com/gh/lidesdk/commandline/tree/develop.svg?style=svg
+                                                               :target: https://circleci.com/gh/lidesdk/commandline/tree/develop
 ========================================================= ==================================================================================
 
-.. image:: https://github.com/lidesdk/commandline/raw/master/screenshot.png
+.. image:: https://github.com/lidesdk/commandline/raw/develop/screenshot.png
    :height: 393px
    :width: 677px
    :scale: 90 %
@@ -53,7 +53,7 @@ Remove a package:
 Installation
 ============
 
-* Clone or `download <https://github.com/lidesdk/commandline/archive/master.zip>`_ this repository: ``https://github.com/lidesdk/commandline.git``
+* Clone or `download <https://github.com/lidesdk/commandline/archive/develop.zip>`_ this repository: ``https://github.com/lidesdk/commandline.git``
 * Create environment variables named ``LIDE_PATH`` and ``LIDE_FRAMEWORK``
 * Execute ``lide --help`` command
 
@@ -116,6 +116,6 @@ Lide Commandline is part of (`Lide SDK <https://github.com/lidesdk/framework#lid
 License
 =======
 
-Lide is licensed under (`The GNU General Public License <https://github.com/lidesdk/commandline/blob/master/LICENSE>`_). 
+Lide is licensed under (`The GNU General Public License <https://github.com/lidesdk/commandline/blob/develop/LICENSE>`_). 
 
 Copyright © 2016 Hernán Dario Cano.

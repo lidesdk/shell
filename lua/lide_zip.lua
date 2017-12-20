@@ -56,12 +56,15 @@ function lide.zip.extract ( source, dest )
 						dest_file:flush()
 						dest_file:close()
 					end
+					zip_stored_file:close()
 				end
 			end
+			zfile:close()
 		else
 			print 'dont zfile'
 		end
 	end
+
 end
 
 function lide.zip.extractFile ( zipFilePath, internalPath, destinationPath)
@@ -88,7 +91,9 @@ function lide.zip.extractFile ( zipFilePath, internalPath, destinationPath)
     	    hBinaryOutput:write(currFileContents)
     	    hBinaryOutput:close()
     	end
+    	currFile:close()
     end
+    zfile:close();
     return true
 end
 
