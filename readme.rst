@@ -54,7 +54,7 @@ Installation
 ============
 
 * Clone or `download <https://github.com/lidesdk/commandline/archive/develop.zip>`_ this repository: ``https://github.com/lidesdk/commandline.git``
-* Create environment variables named ``LIDE_PATH`` and ``LIDE_FRAMEWORK``
+* Create environment variables named ``LIDE_PATH``
 * Execute ``lide --help`` command
 
 GNU/Linux Installation
@@ -101,7 +101,7 @@ Windows Installation
 	# Create environment variable named LIDE_PATH:
 	
 	set LIDE_PATH=C:\lide\commandline
-	set LIDE_FRAMEWORK=C:\lide\commandline\libraries\lide
+
 
 You must declare the ``LIDE_PATH`` and ``LIDE_FRAMEWORK`` environment variable permanently, please check this article:
 `https://kb.wisc.edu/cae/page.php?id=24500 <https://kb.wisc.edu/cae/page.php?id=24500>`_
@@ -118,4 +118,4 @@ License
 
 Lide is licensed under (`The GNU General Public License <https://github.com/lidesdk/commandline/blob/develop/LICENSE>`_). 
 
-Copyright © 2016 Hernán Dario Cano.
+Copyright © 2018 Hernán Dario Cano.
