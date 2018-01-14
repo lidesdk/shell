@@ -4,11 +4,11 @@ Lide Commandline
 Lide Commandline is a tool that allow you to execute lua scripts and manage lua modules, you can search install and remove modules from lide repository.
 
 ========================================================= ==================================================================================
- git branch: ``develop``                                     build status
+   git branch: ``develop``                                   build status
 ========================================================= ==================================================================================
- Tests executed in **Windows 10** x64 and x86 machines      .. image:: https://ci.appveyor.com/api/projects/status/uvkh9w4e474v5p23?svg=true
+ Tests executed in **Windows 10** x86 binaries			    .. image:: https://ci.appveyor.com/api/projects/status/uvkh9w4e474v5p23?svg=true
                                                                :target: https://ci.appveyor.com/project/dcanoh/framework/branch/develop
- Tests executed in **Ubuntu 14.04** Trusty x64 machine      .. image:: https://circleci.com/gh/lidesdk/commandline/tree/develop.svg?style=svg
+ Tests executed in **Ubuntu 14.04** x64 binaries     		.. image:: https://circleci.com/gh/lidesdk/commandline/tree/develop.svg?style=svg
                                                                :target: https://circleci.com/gh/lidesdk/commandline/tree/develop
 ========================================================= ==================================================================================
 
@@ -16,7 +16,6 @@ Lide Commandline is a tool that allow you to execute lua scripts and manage lua 
    :height: 393px
    :width: 677px
    :scale: 90 %
-   :alt: alternate text
    :align: center
 
 Usage
@@ -102,11 +101,10 @@ Windows Installation
 	
 	set LIDE_PATH=C:\lide\commandline
 
-
-You must declare the ``LIDE_PATH`` and ``LIDE_FRAMEWORK`` environment variable permanently, please check this article:
+You must declare the ``LIDE_PATH`` environment variable permanently, please check this article:
 `https://kb.wisc.edu/cae/page.php?id=24500 <https://kb.wisc.edu/cae/page.php?id=24500>`_
 
-
+ 
 Credits and Authors
 ===================
 
