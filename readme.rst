@@ -6,15 +6,13 @@ Lide Commandline is a tool that allow you to execute lua scripts and manage lua 
 ========================================================= ==================================================================================
    git branch: ``develop``                                   build status
 ========================================================= ==================================================================================
- Tests executed in **Windows 10** x86 binaries			    .. image:: https://ci.appveyor.com/api/projects/status/uvkh9w4e474v5p23?svg=true
+ Tests executed with **Windows 10** x86 binaries		    .. image:: https://ci.appveyor.com/api/projects/status/uvkh9w4e474v5p23?svg=true
                                                                :target: https://ci.appveyor.com/project/dcanoh/framework/branch/develop
- Tests executed in **Ubuntu 14.04** x64 binaries     		.. image:: https://circleci.com/gh/lidesdk/commandline/tree/develop.svg?style=svg
+ Tests executed with **Ubuntu 14.04** x64 binaries     		.. image:: https://circleci.com/gh/lidesdk/commandline/tree/develop.svg?style=svg
                                                                :target: https://circleci.com/gh/lidesdk/commandline/tree/develop
 ========================================================= ==================================================================================
 
 .. image:: https://github.com/lidesdk/commandline/raw/develop/screenshot.png
-   :height: 393px
-   :width: 677px
    :scale: 90 %
    :align: center
 
