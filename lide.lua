@@ -177,27 +177,6 @@ repository = {}
 
 repository.access_token = access_token
 
---repository.libraries_stable = sqldatabase:new(app.folders.libraries..'/repos.db', 'sqlite3')
-
-function repository.update ( access_token )
-	--repos inifile.getsections( _file_configfile )
-	--local _db_url = 
-	local db_content, errcode, errmsg  = github.get_file ( 'lidesdk/repos/libraries.db', nil, repository.access_token )
-
-	if db_content then
-		-- if folder doesnt exist create it (todo)
-		local repos_db = io.open(normalize_path(app.folders.libraries..'/repos.db'), 'w+b')
-		if repos_db:write(db_content) then
-			repos_db:close()
-			-- OK SUccess
-		else
-			--any error writeing file
-		end
-	else
-		print('[lide.github]: ', errmsg)
-	end
-end
-
 local function ExtractZipAndCopyFiles(zipFilePath, destinationPath)
     local zfile, err
     
@@ -231,8 +210,8 @@ end
 -- 
 function repository.remove ( _package_name )
 	local _package_version
-	--local os_arch = lide.platform.getArch():lower();
-	local os_name = lide.platform.getOSName():lower();
+	--local _osarch = lide.platform.getArch():lower();
+	local _osname = lide.platform.getOSName():lower();
 
 	local _manifest_file = ('%s/%s/%s.manifest'):format(app.folders.libraries, _package_name, _package_name)
 
@@ -241,18 +220,14 @@ function repository.remove ( _package_name )
 		
 		local package_manifest = inifile.parse_file(_manifest_file)[_package_name]
 
-			for arch_line in package_manifest[os_name] : delimi '|' do -- architectures are delimited by |
-				arch_line = arch_line:delim ':' 
-				--local _osname = lide.platform.getOS():lower()
-				--local _arch   = arch_line[1]
-				local _files  = trim(arch_line[2] or '') : delim ',' -- files are delimiteed by comma					
-				
+			for arch_line in package_manifest[_osname] : delimi '|' do -- architectures are delimited by |
+				local arch_line = arch_line:delim ':'
+				local _files    = trim(arch_line[2] or '') : delim ',' -- files are delimiteed by comma					
 				local todel_files = {}
+
 				-- copy file to destination: libraries/windows/x64/luasql/sqlite3.dll
 				for _, int_path in pairs(_files) do -- internal_paths
-					local file_dst = normalize_path(app.folders.libraries ..'/'.. int_path)					--local a,b       = file_dst:gsub('\\', '/'):reverse():find '/'
-					--local _filename = file_dst:reverse():sub(1, b) : reverse()
-					--local _foldernm = file_dst:sub(1, file_dst:find(_filename) -1)
+					local file_dst = normalize_path(app.folders.libraries ..'/'.. int_path);
 					
 					if lide.file.doesExists(file_dst) then
 						os.remove(file_dst)
@@ -265,7 +240,7 @@ function repository.remove ( _package_name )
 						return false, ('File %s wasn\'t removed'):format(file)
 					end
 				end
-				end
+			end
 		
 		lide.core.folder.delete(normalize_path(app.folders.libraries .. '/' .. _package_name));	
 
@@ -388,7 +363,6 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 	_package_file = normalize_path(_package_file)
 
 	if not lide.file.doesExists(_package_file) then
-		--lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
 		return false, '! Error: The package: ' .. tostring(_package_file) .. ' is not downloaded now.'
 	end
 
@@ -398,19 +372,12 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 		_package_prefix = _package_prefix ..'/'
 	end
 
-	--print((_package_prefix or '') .. _package_name .. '.manifest')
-	
-
 	if not lide.zip.extractFile(_package_file, (_package_prefix or '') .. _package_name .. '.manifest', _manifest_file) then
-		--lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
-
 		return false, ('> ERROR: Manifest file "%s" doesn\'t exists into "%s" package'):format((_package_prefix or '') .. _package_name .. '.manifest', _package_file)
 	end
 	
-	-- .................
-	
 	local _osname = lide.platform.getOS():lower()
-	local _arch   = lide.platform.getArch():lower()
+	local _osarch = lide.platform.getArch():lower()
 
 	local _lide_path = os.getenv 'LIDE_PATH'
 
@@ -426,6 +393,7 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 			file_dst:write(file_content)
 			file_dst:flush()
 			file_src:close()
+
 			file_dst:close()
 		end
 		--lide.lfs.unlock(file_src)
@@ -447,7 +415,7 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 	------------------------------------------------------------
 	-- Runtime Donwloads Folder: 
 
-	local _arch_runtime_downloads = normalize_path(app.folders.libraries..'/'.._osname..'/'.._arch..'/runtime')
+	local _arch_runtime_downloads = normalize_path(app.folders.libraries..'/'.._osname..'/'.._osarch..'/runtime')
 	
 	if not lide.core.file.doesExists( _arch_runtime_downloads ) then
 		lide.mktree(_arch_runtime_downloads)
@@ -459,33 +427,30 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 	------------------------------------------------------------
 	local package_manifest = inifile.parse_file(_manifest_file)[_package_name]
 		
-	if rawget(package_manifest, lide.platform.getOS():lower()) then
+	if rawget(package_manifest, _osname) then
 		local compatible;
-		local architectures = package_manifest[lide.platform.getOS():lower()] : delim '|'
+		local architectures = package_manifest[_osname] : delim '|'
 		
 		for _, arch_line in pairs(architectures) do
 			
 			arch_line = arch_line:gsub(' ', '');
 
-			if not compatible and (tostring(arch_line:sub(1,3)) == lide.platform.getArch()) then
+			if not compatible and (tostring(arch_line:sub(1,3)) == _osarch) then
 				compatible = true;
 			end
 		end
 
 		if not compatible then
---			print ('  > ! package.install: "' .. _package_name .. '" is not available on ' .. lide.platform.getArch() .. ' architecture.')
---			os.exit()
-			--lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
-			return false, '"' .. _package_name .. '" is not available on ' .. lide.platform.getArch() .. ' architecture.'
+			return false, '"' .. _package_name .. '" is not available on ' .. _osarch .. ' architecture.'
 		end 
 
-		for arch_line in package_manifest[lide.platform.getOS():lower()] : delimi '|' do -- architectures are delimited by |
+		for arch_line in package_manifest[_osname] : delimi '|' do -- architectures are delimited by |
 			arch_line = arch_line:delim ':' 
-			local _osname = lide.platform.getOS():lower()
-			local _arch   = (arch_line[1] or ''):gsub(' ', '')
+			--local _osname = _osname
+			--local _arch   = (arch_line[1] or ''):gsub(' ', '')
 			local _files  = (arch_line[2] or ''):gsub(' ', '') : delim ',' -- files are delimiteed by comma					
 
-			--	-- copy file to destination: libraries/windows/x64/luasql/sqlite3.dll
+			-- This step copy file to destination: libraries/windows/x64/luasql/sqlite3.dll
 			for _, int_path in pairs(_files) do -- internal_paths
 				local file_dst = normalize_path(app.folders.libraries ..'/'.. int_path)
 				local a,b       = file_dst:gsub('\\', '/'):reverse():find '/'
@@ -494,15 +459,14 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 				
 				lide.mktree(_foldernm)
 
+
 				lide.zip.extractFile(_package_file, (_package_prefix or '') .. int_path, file_dst)
 			end
 		end
 
 		
-	elseif not rawget(package_manifest, lide.platform.getOS():lower()) then
-		--lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
-
-		return false, '"' .. _package_name .. '" is not available on ' .. lide.platform.getOS() .. '.'
+	elseif not rawget(package_manifest, _osname) then
+		return false, '"' .. _package_name .. '" is not available on ' .. _osname .. '.'
 	end
 
 	local function install_depends ( package_manifest, _package_name )
@@ -526,10 +490,6 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 				local install_depend, last_error = repository.install_package (_package_name, package_zip_file)
 				
 				if not install_depend then
-					--if lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
-					--	lide.folder.deleteTree(app.folders.libraries ..'/'.._package_name)
-					--end
-
 					return false, last_error or 'Dependencies not satisfied: ' .. _package_name
 				end
 			end
@@ -549,56 +509,6 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 
 	return true;
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ---------------------------------------------------------------------------------------------
 
@@ -629,15 +539,19 @@ function framework.run ( filename, env, req, ... )
 			---
 			--- Este ejecutable contiene todas las librerias necesarias para una correcta ejecucion de
 			--- componentes graficos compatibles con wxLua y Lua.
-			os.execute 'CLS'
+--			os.execute 'CLS'
+--			os.execute ( 
+--				os.getenv('LIDE_PATH') .. '\\bin\\lide51.exe ' .. filename -- execute lide51 interpreter
+--			)
+			local _exec_str  = '%s/bin/%s/%s/lua5.1 %s/bin/lide51_src.lua %s'
+
 			os.execute ( 
-				os.getenv('LIDE_PATH') .. '\\bin\\lide51.exe ' .. filename -- execute lide51 interpreter
-			)
+				_exec_str:format(LIDE_PATH, CURRENT_PLATFORM, CURRENT_ARCH, LIDE_PATH, filename)
+				
+			);
 		end
 	end
 end
-
---table.print(framework)
 
 if ( arg[1] == 'search' and arg[2] ) then
 

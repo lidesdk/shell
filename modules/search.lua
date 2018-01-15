@@ -23,7 +23,7 @@ local n = 0; for repo_name, repo in pairs( repository.repos ) do
 		for i, row in pairs( tbl ) do
 			if type(row) == 'table' then
 				local num_repo_version  = tonumber(tostring(row.package_version:gsub('%.', '')));
-	
+				
 				print(
 					(repo_name..'/%s %s %s\n%s'):format(row.package_name, row.package_version, str_tag or '', row.package_description)
 				)

@@ -17,7 +17,7 @@ end
 function lide_platform_getArch ()
 	local _osname = lide_platform_getOSName():lower()
 	if (_osname == 'windows') then
-		return os.getenv 'PROCESSOR_ARCHITECTURE' 
+		return tostring(os.getenv 'PROCESSOR_ARCHITECTURE' : gsub ('AMD64', 'x64')):sub(1,3);
 	elseif (_osname == 'linux') then
 		return io.popen 'uname -m' : read '*a' : gsub ('x86_64', 'x64') : gsub ( 'i686', 'x86' ):sub(1,3);
 	end
@@ -47,29 +47,19 @@ do
 	lide_path .. '\\libraries\\'.._currentOSName..'\\'.._currentArch..'\\lua\\?.lua;' .. 
 	lide_path .. '\\libraries\\'.._currentOSName..'\\'.._currentArch..'\\lua\\?\\init.lua;'
 	
-	--dofile(file)
-	
-
-
-	----------------------------------------------------------------------------------------
-	----------------------------------------------------------------------------------------
-	-- ?.lua;?/init.lua
-	-- lua/?.lua;lua/?/init.lua
-	-- ?.dll
-	-- clibs/?.dll
-
-	--package.cpath = lide_path .. '\\libraries\\?.dll;' .. package.cpath
-	--package.path  = lide_path .. '\\libraries\\?.lua;' .. package.path
-	
 	if _currentOSName == 'linux' then
 		local LIDE_PATH = os.getenv 'LIDE_PATH'
 
 		package.cpath = LIDE_PATH .. '/clibs/linux/x64/?.so;' .. 
 						LIDE_PATH .. '\\libraries\\'.._currentOSName.. '\\'.._currentArch..'\\clibs\\?.so;' .. 
 						LIDE_PATH .. '\\libraries\\'.._currentOSName..'\\'.._currentArch..'\\clibs\\?\\core.so;' .. package.cpath 
-	
-	--else
-	--	package.cpath  = lide_path .. '\\libraries\\' .._currentOSName.. '\\'.._currentArch..'\\clibs\\?.dll;'
+	else
+		--	package.cpath  = lide_path .. '\\libraries\\' .._currentOSName.. '\\'.._currentArch..'\\clibs\\?.dll;'
+		local LIDE_PATH = os.getenv 'LIDE_PATH'
+
+		package.cpath = LIDE_PATH .. '\\libs\\linux\\x64\\?.dll;' .. 
+						LIDE_PATH .. '\\libraries\\'.._currentOSName.. '\\'.._currentArch..'\\clibs\\?.dll;' .. 
+						LIDE_PATH .. '\\libraries\\'.._currentOSName..'\\'.._currentArch..'\\clibs\\?\\core.dll;' .. package.cpath
 	end
 
 	package.path  = normalize_path(package.path);
