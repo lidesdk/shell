@@ -14,6 +14,7 @@ cache:
   - c:\external -> appveyor.yml
 
 install:
+- git clone https://github.com/lidesdk/appveyor_lua.git .appveyor
 # Make compiler command line tools available
 - call .appveyor\set_compiler_env.bat
 # Setup Lua development/build environment
