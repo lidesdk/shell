@@ -3,14 +3,14 @@ Lide Commandline
 
 Lide Commandline is a tool that allow you to execute lua scripts and manage lua modules, you can search install and remove modules from lide repository.
 
-========================================================= ==================================================================================
-   git branch: ``develop``                                   build status
-========================================================= ==================================================================================
+========================================================= ====================================================================================
+   git branch: ``develop``                                  build status
+========================================================= ====================================================================================
  Tests executed with **Windows 10** x86 binaries		    .. image:: https://ci.appveyor.com/api/projects/status/uvkh9w4e474v5p23?svg=true
-                                                               :target: https://ci.appveyor.com/project/dcanoh/framework/branch/develop
- Tests executed with **Ubuntu 14.04** x64 binaries     		.. image:: https://circleci.com/gh/lidesdk/commandline/tree/develop.svg?style=svg
-                                                               :target: https://circleci.com/gh/lidesdk/commandline/tree/develop
-========================================================= ==================================================================================
+                                                                     :target: https://ci.appveyor.com/project/dcanoh/framework/branch/develop
+ Tests executed with **Ubuntu 14.04** x64 binaries     	    .. image:: https://circleci.com/gh/lidesdk/commandline/tree/develop.svg?style=svg
+                                                                     :target: https://circleci.com/gh/lidesdk/commandline/tree/develop
+========================================================= ====================================================================================
 
 .. image:: https://github.com/lidesdk/commandline/raw/develop/screenshot.png
    :scale: 90 %
@@ -69,19 +69,19 @@ GNU/Linux Installation
 .. code-block:: bash
 
 	# Create lidesdk install directory and go to it (~/.lidesdk):
-	$ mkdir ~/.lidesdk && cd ~/.lidesdk
+	$ mkdir ~/.lidesdk && cd ~/.lidesdk 
 
 	# Clone git repository and submodules:
 	$ git clone https://github.com/lidesdk/commandline.git --recursive commandline
 	
 	# Add execution permissions:
-	$ cd commandline
+	$ cd shell
 	$ chmod +x ./lide.sh
 
 	# Create environment variable named LIDE_PATH
 	$ nano ~/.bashrc
 	    # add this line at the bottom of the file:
-        export LIDE_PATH=~/.lidesdk/commandline
+        export LIDE_PATH=~/.lidesdk/shell
 
 
 Windows Installation
@@ -89,15 +89,15 @@ Windows Installation
 
 .. code-block:: bash
 	
-	# Create lide install directory and go to it (C:\.lide):
+	# Create lide install directory and go to it (C:\lide):
 	$ mkdir C:\lide && cd C:\lide
 
 	# Clone git repository and submodules:
-	$ git clone https://github.com/lidesdk/commandline.git --recursive commandline
+	$ git clone https://github.com/lidesdk/commandline.git --recursive shell
 
 	# Create environment variable named LIDE_PATH:
 	
-	set LIDE_PATH=C:\lide\commandline
+	set LIDE_PATH=C:\lide\shell
 
 You must declare the ``LIDE_PATH`` environment variable permanently, please check this article:
 `https://kb.wisc.edu/cae/page.php?id=24500 <https://kb.wisc.edu/cae/page.php?id=24500>`_
