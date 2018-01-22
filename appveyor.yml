@@ -22,7 +22,7 @@ install:
 
 build_script:
   - luarocks install luafilesystem
-  - luarocks install https://raw.githubusercontent.com/lidesdk/framework/master/lide-0.0-1.rockspec
+  - luarocks install https://raw.githubusercontent.com/lidesdk/framework/develop/lide-0.0-1.rockspec
   - set LIDE_PATH=%CD%
 
 test_script:
