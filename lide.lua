@@ -1,15 +1,15 @@
 -- ///////////////////////////////////////////////////////////////////////////////
 -- // Name:        lide.lua
--- // Purpose:     Lide commandline tool
+-- // Purpose:     Lua interpreter with lide framework integrated
 -- // Created:     2017/09/24
--- // Copyright:   (c) 2017 Dario Cano [dcanohdev@gmail.com]
--- // License:     lide license
+-- // Copyright:   (c) 2017 Hernan Dario Cano [dcanohdev@gmail.com]
+-- // License:     GNU GENERAL PUBLIC LICENSE
 -- ///////////////////////////////////////////////////////////////////////////////
 
 assert(os.getenv 'LIDE_PATH', '[lide commandline] Declare la variable de entorno LIDE_PATH');
 
 local LIDE_PATH        = os.getenv('LIDE_PATH')
-local _LIDE_VERSION    = '0.0.01'
+local _LIDE_VERSION    = '0.1'
 
 package.path  = LIDE_PATH .. '/libraries/?.lua;' .. package.path
 
@@ -39,13 +39,7 @@ local function trim ( str )
 	return str
 end
 
-local function normalize_path ( path )
-	if lide.platform.getOSName() == 'windows' then
-		return (path:gsub('/', '\\'));
-	elseif lide.platform.getOSName() == 'linux' then
-		return tostring(path:gsub('\\', '/'):gsub('//', '/'));
-	end
-end
+local normalize_path = lide.platform.normalize_path
 
 function lide.mktree ( src_file ) -- make only tree of dirs of this file
 	local sep,INIT = '\\', ''
@@ -177,7 +171,7 @@ repository = {}
 
 repository.access_token = access_token
 
-local function ExtractZipAndCopyFiles(zipFilePath, destinationPath)
+--[[local function ExtractZipAndCopyFiles(zipFilePath, destinationPath)
     local zfile, err
     
     if lide.file.doesExists(zipFilePath) then
@@ -202,10 +196,13 @@ local function ExtractZipAndCopyFiles(zipFilePath, destinationPath)
         if(hBinaryOutput)then
             hBinaryOutput:write(currFileContents)
             hBinaryOutput:close()
+            currFile:close()
+            print 'currFile:close()'
         end
     end
     --zfile:close() !BLOQUEA EL PC
 end
+]]--
 
 -- 
 function repository.remove ( _package_name )
@@ -255,28 +252,8 @@ end
 --repository.libraries_stable = sqldatabase:new(app.folders.libraries..'/repos.db', 'sqlite3')
 function repository.download_db ( url_db_file, dest_file_path, access_token ) -- repo update
 	local a,b = url_db_file:find 'github.com'
-	local db_content, errcode, errmsg  = github.get_file ( url_db_file:sub(b+2, # url_db_file), file_ref, repository.access_token )
-	local repos_db
-
-	if db_content then
-		if not dest_file_path then
-			repos_db, err = io.open(normalize_path(app.folders.libraries..'/repos.db'), 'w+b')
---			print(repos_db, err)
-		else
-			repos_db, err = io.open(normalize_path(dest_file_path), 'w+b')
---			print(repos_db, err)
-		end
-
-		if repos_db:write(db_content) then
-			repos_db:close()
-			-- OK SUccess
-		else
-			--any error writeing file
-		end
-	else
-		print 'There\'s a problem with repo url.\n'
-		print ('[lide.github]: ', errmsg .. ' - ' .. url_db_file )
-	end
+	
+	github.download_file ( url_db_file:sub(b+2, # url_db_file), dest_file_path, file_ref, repository.access_token )
 end
 
 ---- Update all repos:
