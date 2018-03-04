@@ -23,7 +23,7 @@ function lide_platform_getArch ()
 	end
 end
 
-local function normalize_path ( path )
+local function localnormalizePath ( path )
 	if lide_platform_getOSName() == 'windows' then
 		return (path:gsub('/', '\\'));
 	elseif lide_platform_getOSName() == 'linux' then
@@ -62,8 +62,8 @@ do
 						LIDE_PATH .. '\\libraries\\'.._currentOSName..'\\'.._currentArch..'\\clibs\\?\\core.dll;' .. package.cpath
 	end
 
-	package.path  = normalize_path(package.path);
-	package.cpath = normalize_path(package.cpath);
+	package.path  = localnormalizePath(package.path);
+	package.cpath = localnormalizePath(package.cpath);
 
 	--print('a')
 	--lide = require 'lide.base.init'

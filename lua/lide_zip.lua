@@ -2,14 +2,7 @@ zip = require(  'zip' )
 
 lide.zip = { lzip = zip }
 
-local function normalize_path ( path )
-	if lide.platform.getOSName() == 'windows' then
-		return (path:gsub('/', '\\'));
-	elseif lide.platform.getOSName() == 'linux' then
-		return (path:gsub('\\', '/'));
-	end
-end
-
+local normalize_path = lide.platform.normalize_path
 
 local function mktree ( src_file ) -- make only tree of dirs of this file
 	if not lfs.attributes(src_file) then
