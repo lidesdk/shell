@@ -15,8 +15,7 @@ test:
     # Installation process:
 
         # install latest framework version from master repo:
-        - git clone https://github.com/lidesdk/framework.git $PWD/libraries/lide && cd $PWD/libraries/lide && git checkout develop
-        - echo $CIRCLE_BRANCH
+        - git clone https://github.com/lidesdk/framework.git $PWD/libraries/lide && cd $PWD/libraries/lide && git checkout $CIRCLE_BRANCH
         # authorize x64 lua interpreter:
         - chmod +x $PWD/bin/linux/x64/lua
         - chmod +x ./lide.sh

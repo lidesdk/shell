@@ -15,6 +15,8 @@ package.path  = LIDE_PATH .. '/libraries/?.lua;' .. package.path
 
 lide = require 'lide.core.init'
 
+normalize_path = lide.platform.normalize_path
+
 local CURRENT_PLATFORM = lide.platform.getOSName();
 local CURRENT_ARCH     = lide.platform.getOSArch();
 
@@ -39,7 +41,7 @@ local function trim ( str )
 	return str
 end
 
-local normalize_path = lide.platform.normalize_path
+
 
 function lide.mktree ( src_file ) -- make only tree of dirs of this file
 	local sep,INIT = '\\', ''
