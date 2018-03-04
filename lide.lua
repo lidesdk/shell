@@ -33,6 +33,8 @@ elseif CURRENT_PLATFORM == 'windows' then
 					LIDE_PATH .. ('/lua/?.lua;') .. package.path
 end
 
+package.path = "?.lua;".. package.path
+
 lide = require 'lide.base.init'
 
 local function trim ( str )
@@ -605,7 +607,9 @@ else
 			framework.run ( arg[1] )--, { inifile = inifile, repository = repository } )
 		else
 			local src_file = arg[1]
-			printl '[lide.error: ] "$src_file$" file does not exist.'
+			
+			io.stderr:write '[lide.error: ] "$src_file$" file does not exist.'
+			error()
 		end
 	elseif # arg == 0 then
 

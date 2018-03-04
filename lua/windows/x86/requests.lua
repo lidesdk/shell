@@ -1,13 +1,5 @@
 -- Lua Requests library for http ease
---[[
-package.path  = os.getenv 'LIDE_PATH' .. '/network/ourlibs/?.lua;' .. 
-                os.getenv 'LIDE_PATH' .. '/network/ourlibs/?/init.lua;' ..
-                os.getenv 'LIDE_PATH' .. '/network/?.lua;' ..
-                package.path
- 
-package.cpath = os.getenv 'LIDE_PATH' ..'/network/ourclibs/?.so;' ..
-                package.cpath
-]]
+
 local http_socket = require('socket.http')
 local https_socket = require('ssl.https')
 local url_parser = require('socket.url')

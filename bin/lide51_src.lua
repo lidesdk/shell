@@ -50,19 +50,19 @@ do
 	if _currentOSName == 'linux' then
 		local LIDE_PATH = os.getenv 'LIDE_PATH'
 
-		package.cpath = LIDE_PATH .. '/clibs/linux/x64/?.so;' .. 
+		package.cpath = LIDE_PATH .. '/clibs/linux/x64/?.so;' .. ';?.so;' ..
 						LIDE_PATH .. '\\libraries\\'.._currentOSName.. '\\'.._currentArch..'\\clibs\\?.so;' .. 
 						LIDE_PATH .. '\\libraries\\'.._currentOSName..'\\'.._currentArch..'\\clibs\\?\\core.so;' .. package.cpath 
 	else
 		--	package.cpath  = lide_path .. '\\libraries\\' .._currentOSName.. '\\'.._currentArch..'\\clibs\\?.dll;'
 		local LIDE_PATH = os.getenv 'LIDE_PATH'
 
-		package.cpath = LIDE_PATH .. '\\libs\\linux\\x64\\?.dll;' .. 
+		package.cpath = LIDE_PATH .. '\\libs\\linux\\x64\\?.dll;' .. ';?.so;' ..
 						LIDE_PATH .. '\\libraries\\'.._currentOSName.. '\\'.._currentArch..'\\clibs\\?.dll;' .. 
 						LIDE_PATH .. '\\libraries\\'.._currentOSName..'\\'.._currentArch..'\\clibs\\?\\core.dll;' .. package.cpath
 	end
 
-	package.path  = localnormalizePath(package.path);
+	package.path  = localnormalizePath(package.path).. ';?.lua;';
 	package.cpath = localnormalizePath(package.cpath);
 
 	--print('a')
