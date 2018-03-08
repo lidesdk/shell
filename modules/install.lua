@@ -50,8 +50,9 @@ local n = 0; for repo_name, repo in pairs( repository.repos ) do
 				if _install_package then
 					print('> OK: '.._package_name..' successful installed.')
 				else
-					print('> [package.install]: ' .. lasterror)
-					print('> ERROR: '.._package_name..' not installed.')
+					print('> [package.install] ERROR: ' .. lasterror)
+					--print('> ERROR: '.._package_name..' not installed.')
+					repository.remove(_package_name)
 				end
 				break
 			end

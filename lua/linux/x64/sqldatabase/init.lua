@@ -1,8 +1,7 @@
 	if  not lide.luasql then
 		luasql = require 'luasql.sqlite3'
 	end
-	
---	print('luasql: ' .. package.path)
+
 
 	local env = luasql.sqlite3()
 

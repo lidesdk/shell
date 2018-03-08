@@ -2,14 +2,7 @@ zip = require(  'zip' )
 
 lide.zip = { lzip = zip }
 
-local function normalize_path ( path )
-	if lide.platform.getOSName() == 'windows' then
-		return (path:gsub('/', '\\'));
-	elseif lide.platform.getOSName() == 'linux' then
-		return (path:gsub('\\', '/'));
-	end
-end
-
+local normalize_path = lide.platform.normalize_path
 
 local function mktree ( src_file ) -- make only tree of dirs of this file
 	if not lfs.attributes(src_file) then
@@ -56,12 +49,15 @@ function lide.zip.extract ( source, dest )
 						dest_file:flush()
 						dest_file:close()
 					end
+					zip_stored_file:close()
 				end
 			end
+			zfile:close()
 		else
 			print 'dont zfile'
 		end
 	end
+
 end
 
 function lide.zip.extractFile ( zipFilePath, internalPath, destinationPath)
@@ -88,7 +84,9 @@ function lide.zip.extractFile ( zipFilePath, internalPath, destinationPath)
     	    hBinaryOutput:write(currFileContents)
     	    hBinaryOutput:close()
     	end
+    	currFile:close()
     end
+    zfile:close();
     return true
 end
 
