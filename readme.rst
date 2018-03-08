@@ -1,121 +1,112 @@
-Lide Commandline
-================
+Lide Framework
+==============
 
-Lide Commandline is a tool that allow you to execute lua scripts and manage lua modules, you can search install and remove modules from lide repository.
+Lide Framework is a library that allows you to create multiplatform 
+graphical interfaces from Lua language.
+Lide uses wxWidgets to build controls and windows, this ensures the 
+integration of your applications with GTK+ on Linux and really native 
+controls in Windows.
 
-========================================================= ==================================================================================
- git branch: ``master``                                     build status
-========================================================= ==================================================================================
- Tests executed in **Windows 10** x64 and x86 machines      .. image:: https://ci.appveyor.com/api/projects/status/uvkh9w4e474v5p23?svg=true
-                                                               :target: https://ci.appveyor.com/project/dcanoh/framework/branch/master
- Tests executed in **Ubuntu 14.04** Trusty x64 machine      .. image:: https://circleci.com/gh/lidesdk/commandline/tree/master.svg?style=svg
-                                                               :target: https://circleci.com/gh/lidesdk/commandline/tree/master
-========================================================= ==================================================================================
 
-.. image:: https://github.com/lidesdk/commandline/raw/master/screenshot.png
-   :height: 393px
-   :width: 677px
-   :scale: 90 %
-   :alt: alternate text
-   :align: center
-
-Usage
-*****
-
-Execute lua script:
-
-.. code-block:: bash
-
-	$ lide <input_file>
-
-Manage modules
-**************
-
-Search a package:
-
-.. code-block:: bash
-
-	$ lide search <package_name>
-
-Install a package:
-
-.. code-block:: bash
-
-	$ lide install <package_name>
-
-Remove a package:
-
-.. code-block:: bash
-
-	$ lide remove <package_name>
-
+========================================================= ====================================================================================
+   git branch: ``master``                                  build status ``0.1``
+========================================================= ====================================================================================
+ Tests executed with **Windows 10** x86 binaries		    .. image:: https://ci.appveyor.com/api/projects/status/uvkh9w4e474v5p23?svg=true
+                                                                     :target: https://ci.appveyor.com/project/dcanoh/shell/branch/master
+ Tests executed with **Ubuntu 14.04** x64 binaries     	    .. image:: https://circleci.com/gh/lidesdk/shell/tree/master.svg?style=svg
+                                                                     :target: https://circleci.com/gh/lidesdk/shell/tree/master
+========================================================= ====================================================================================
 
 Installation
 ============
 
-* Clone or `download <https://github.com/lidesdk/commandline/archive/master.zip>`_ this repository: ``https://github.com/lidesdk/commandline.git``
-* Create environment variables named ``LIDE_PATH`` and ``LIDE_FRAMEWORK``
-* Execute ``lide --help`` command
+First install lide shell from github:
 
-GNU/Linux Installation
-**********************
-
-- Install dependencies:
+**Note:**
+Lide shell is a command line interpreter that makes sure that you 
+have installed the correct versions of each library.
 
 .. code-block:: bash
 
-	# Ubuntu Xenial Xerus:
-	$ sudo apt-get install libwxgtk-media3.0-dev
+	$ mkdir lide && cd lide
+	$ git clone https://github.com/lidesdk/shell.git --recursive
+	$ export LIDE_PATH=$PWD
 
-- Install lide shell:
+Manual installation
+-------------------
+- `Please follow the instructions for Windows. <https://github.com/lidesdk/shell/tree/master#windows-installation>`_
+- `Or follow the instructions for GNU/Linux... <https://github.com/lidesdk/shell/tree/master#gnulinux-installation>`_
+
+Auto Installer
+--------------
+* If you prefer automatic install on your system you can download the
+  last stable version of lide shell installer: `from here <https://github.com/lidesdk/shell/releases>`_.
+
+
+How to use it
+=============
+
+* Create a file ``main.lua``.
+
+.. code-block:: lua
+	
+	lide = require 'lide.widgets.init'
+
+	local Form   = lide.classes.widgets.form
+	local Button = lide.classes.widgets.button
+
+	local MessageBox = lide.core.base.messagebox
+
+	form1 = Form:new { Name = 'form1',
+		Title = 'Window Caption'
+	};
+
+	button1 = Button:new { Name = 'button1', Parent = form1,
+		PosX = 10, PosY = 30, Text = 'Click me!',
+	};
+
+	button1.onClick : setHandler ( function ( event )
+		lide.widgets.messagebox 'Hello world!'
+	end );
+
+	form1:show(true);
+
+
+With the above code we are creating a new form and putting a button 
+inside it at position (10, 30), clicking inside the button a message 
+"Hello World" is displayed.
+
+* Run the file ``main.lua`` with the following command:
 
 .. code-block:: bash
-
-	# Create lidesdk install directory and go to it (~/.lidesdk):
-	$ mkdir ~/.lidesdk && cd ~/.lidesdk
-
-	# Clone git repository and submodules:
-	$ git clone https://github.com/lidesdk/commandline.git --recursive commandline
 	
-	# Add execution permissions:
-	$ cd commandline
-	$ chmod +x ./lide.sh
+	$ lide main.lua
 
-	# Create environment variable named LIDE_PATH
-	$ nano ~/.bashrc
-	    # add this line at the bottom of the file:
-        export LIDE_PATH=~/.lidesdk/commandline
+This is all you need to start building applications, **should be noted
+that these instructions work** similarly to Windows or GNU/Linux.
 
 
-Windows Installation
-********************
 
-.. code-block:: bash
-	
-	# Create lide install directory and go to it (C:\.lide):
-	$ mkdir C:\lide && cd C:\lide
+Help & Documentation
+====================
 
-	# Clone git repository and submodules:
-	$ git clone https://github.com/lidesdk/commandline.git --recursive commandline
+If you want to know more please read our official framework's 
+documentation:
 
-	# Create environment variable named LIDE_PATH:
-	
-	set LIDE_PATH=C:\lide\commandline
-	set LIDE_FRAMEWORK=C:\lide\commandline\libraries\lide
-
-You must declare the ``LIDE_PATH`` and ``LIDE_FRAMEWORK`` environment variable permanently, please check this article:
-`https://kb.wisc.edu/cae/page.php?id=24500 <https://kb.wisc.edu/cae/page.php?id=24500>`_
+`- Lide Framework 0.1 on Read the docs <http://lide-framework.readthedocs.io/en/0.1>`_
 
 
 Credits and Authors
 ===================
 
-Lide Commandline is part of (`Lide SDK <https://github.com/lidesdk/framework#lide-framework>`_) is currently active and developing, today is maintained by (`@dcanoh <https://github.com/dcanoh>`_)
+Lide was founded in 2014 by Hernán Darío Cano (`@dcanoh <https://github.com/dcanoh>`_) 
+and Jesús H. Cano (`@jhernancanom <https://github.com/jhernancanom>`_ ) 
+for private purposes, today is accessible to the public.
+
+Lide is currently active and mastering, today is maintained by (`@dcanoh <https://github.com/dcanoh>`_).
 
 
 License
 =======
 
-Lide is licensed under (`The GNU General Public License <https://github.com/lidesdk/commandline/blob/master/LICENSE>`_). 
-
-Copyright © 2016 Hernán Dario Cano.
+Lide is licensed under (`The GNU General Public License <https://github.com/lidesdk/commandline/blob/master/LICENSE>`_). Copyright © 2018 Hernán Dario Cano.
