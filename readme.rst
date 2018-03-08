@@ -17,6 +17,11 @@ controls in Windows.
                                                                      :target: https://circleci.com/gh/lidesdk/shell/tree/master
 ========================================================= ====================================================================================
 
+.. image:: https://github.com/lidesdk/commandline/raw/develop/screenshot.png
+   :scale: 90 %
+   :align: center
+
+
 Installation
 ============
 
