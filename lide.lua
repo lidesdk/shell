@@ -43,8 +43,6 @@ local function trim ( str )
 	return str
 end
 
-
-
 function lide.mktree ( src_file ) -- make only tree of dirs of this file
 	local sep,INIT = '\\', ''
 	
