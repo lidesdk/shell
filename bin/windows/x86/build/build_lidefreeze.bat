@@ -1,0 +1,1 @@
+%LIDE_PATH%\bin\windows\x86\lua5.1.exe wxluafreeze\wxluafreeze.lua wxluafreeze\wxluafreeze.exe lidefreeze.lua D:\proyectos\lidesdk\shell\bin\windows\x86\lidefreeze.exe
