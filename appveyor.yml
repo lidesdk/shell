@@ -23,9 +23,9 @@ install:
 
 build_script:
   #- luarocks install luafilesystem
-  - git clone https://github.com/lidesdk/framework.git $PWD/libraries/lide && cd $PWD/libraries/lide && git checkout %CURRENT_BRANCH%
   - set LIDE_PATH=%CD%
+  - git clone https://github.com/lidesdk/framework.git %LIDE_PATH%/libraries/lide && cd %LIDE_PATH%/libraries/lide && git checkout %CURRENT_BRANCH%
 
 test_script:
-  - cd $PWD
+  - cd %LIDE_PATH%
   - lua tests\windows_x86_shell_test.lua
