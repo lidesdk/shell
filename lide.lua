@@ -11,7 +11,11 @@ assert(os.getenv 'LIDE_PATH', '[lide commandline] Declare la variable de entorno
 local LIDE_PATH        = os.getenv('LIDE_PATH')
 local _LIDE_VERSION    = '0.1'
 
-package.path  = LIDE_PATH .. '/libraries/?.lua;' .. package.path
+package.path  = LIDE_PATH .. '/libraries/?.lua;' -- .. package.path
+
+--
+-- First load only lide.core to determine the current platform and set package.path and package.cpath
+--
 
 lide = require 'lide.core.init'
 
@@ -21,7 +25,7 @@ local CURRENT_PLATFORM = lide.platform.getOSName();
 local CURRENT_ARCH     = lide.platform.getOSArch();
 
 if CURRENT_PLATFORM == 'linux' then
-   	package.cpath = LIDE_PATH .. ('/clibs/linux/%s/?.so;'):format(CURRENT_ARCH) .. package.cpath;
+   	package.cpath = LIDE_PATH .. ('/clibs/linux/%s/?.so;'):format(CURRENT_ARCH) --.. package.cpath;
 	package.path  = LIDE_PATH .. ('/lua/linux/%s/?.lua;' ):format(CURRENT_ARCH) .. 
 					LIDE_PATH .. ('/lua/?.lua;') .. package.path
 
@@ -33,7 +37,9 @@ elseif CURRENT_PLATFORM == 'windows' then
 					LIDE_PATH .. ('/lua/?.lua;') .. package.path
 end
 
-package.path = "?.lua;".. package.path
+--
+-- Then load lide.base namespace to manage files and folders correctly
+--
 
 lide = require 'lide.base.init'
 
@@ -173,43 +179,12 @@ repository = {}
 
 repository.access_token = access_token
 
---[[local function ExtractZipAndCopyFiles(zipFilePath, destinationPath)
-    local zfile, err
-    
-    if lide.file.doesExists(zipFilePath) then
-    	zfile, err = zip.open(zipFilePath)
-    else
-    	return false
-    end
-	
-	lide.mktree(destinationPath)
-
-    -- iterate through each file insize the zip file
-    for file in zfile:files() do
-        --print(destinationPath .. file.filename)
-
-        local currFile, err = zfile:open(file.filename)
-        local currFileContents = currFile:read("*a") -- read entire contents of current file
-        local hBinaryOutput = io.open(normalize_path(destinationPath ..'\\'.. file.filename), "w+b")
-        
-        lide.mktree(normalize_path(destinationPath ..'\\'.. file.filename))
-
-        -- write current file inside zip to a file outside zip
-        if(hBinaryOutput)then
-            hBinaryOutput:write(currFileContents)
-            hBinaryOutput:close()
-            currFile:close()
-            print 'currFile:close()'
-        end
-    end
-    --zfile:close() !BLOQUEA EL PC
-end
-]]--
-
--- 
+--- 
+--- repositore.remove ( string _package_name ) 
+---  remove package from lide
+---
 function repository.remove ( _package_name )
 	local _package_version
-	--local _osarch = lide.platform.getArch():lower();
 	local _osname = lide.platform.getOSName():lower();
 
 	local _manifest_file = ('%s/%s/%s.manifest'):format(app.folders.libraries, _package_name, _package_name)
@@ -249,17 +224,21 @@ function repository.remove ( _package_name )
 	end
 end
 
----------------------------------------------------------------------------------------------------
-
---repository.libraries_stable = sqldatabase:new(app.folders.libraries..'/repos.db', 'sqlite3')
+--- 
+--- repositore.download_db ( string url_db_file, string dest_file_path, string access_token ) 
+---  download database file
+---
+--  repository.libraries_stable = sqldatabase:new(app.folders.libraries..'/repos.db', 'sqlite3')
 function repository.download_db ( url_db_file, dest_file_path, access_token ) -- repo update
 	local a,b = url_db_file:find 'github.com'
 	
 	github.download_file ( url_db_file:sub(b+2, # url_db_file), dest_file_path, file_ref, repository.access_token )
 end
 
----- Update all repos:
------ repository.update_repos ( lide_repos_config_file, work_download_folder )
+--- 
+--- repository.update_repos ( string lide_repos_config_file, string work_download_folder )
+---  update all repos
+---
 function repository.update_repos ( lide_repos, work_folder )
 	work_folder = normalize_path(work_folder)
 	lide_repos  = normalize_path(lide_repos) --:gsub(' ', '')
@@ -287,6 +266,10 @@ function repository.update_repos ( lide_repos, work_folder )
 	end
 end
 
+---
+--- repository.download_package ( string _package_name, string _package_file, string access_token )
+---   downloadk zip package of lide library
+---
 function repository.download_package ( _package_name, _package_file, access_token )
 	local rst = {}
 	local result_repo
@@ -310,14 +293,8 @@ function repository.download_package ( _package_name, _package_file, access_toke
 	end
 
 	if result_repo.package_url then
-		--app = lide.app	
-		--print(result_repo.package_url)
-
-		--https://raw.githubusercontent.com/dcano/repos/master/stable/cjson/cjson-2.1.0.zip
-
+		-- https://raw.githubusercontent.com/dcano/repos/master/stable/cjson/cjson-2.1.0.zip
 		http.download(result_repo.package_url, normalize_path(_package_file))
-
---		return true
 	else
 		local github_package_path = result_repo.package_url
 		local content = github.get_file ( github_package_path, ('package.lide'), repository.access_token )
@@ -338,6 +315,10 @@ function repository.download_package ( _package_name, _package_file, access_toke
 	repository.loaded_repos = loaded_repos
 end
 
+---
+--- install_package ( string _package_name, string _package_file, string _package_prefix)
+---   install package of library from databases
+---
 function repository.install_package ( _package_name, _package_file, _package_prefix)
 	_package_file = normalize_path(_package_file)
 
@@ -588,7 +569,7 @@ Examples:
   > lide search md5
 
 For bug reporting instructions, please see:
-<https://github.com/lidesdk/commandline/issues>.]]
+<https://github.com/lidesdk/shell/issues>.]]
 
 elseif ( arg[1] == '--test' ) then
     io.stdout:write '[lide test] all ok.\n'
