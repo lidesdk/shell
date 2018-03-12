@@ -27,5 +27,5 @@ build_script:
   - set LIDE_PATH=%CD%
 
 test_script:
-  - dir .
+  - cd $PWD
   - lua tests\windows_x86_shell_test.lua
