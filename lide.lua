@@ -6,27 +6,26 @@
 -- // License:     GNU GENERAL PUBLIC LICENSE
 -- ///////////////////////////////////////////////////////////////////////////////
 
-assert(os.getenv 'LIDE_PATH', '[lide commandline] Declare la variable de entorno LIDE_PATH');
+assert(os.getenv 'LIDE_PATH', '[lide shell] Please define `LIDE_PATH` variable.');
 
-local LIDE_PATH        = os.getenv('LIDE_PATH')
-local _LIDE_VERSION    = '0.1'
+local LIDE_PATH     = os.getenv('LIDE_PATH')
+local _LIDE_VERSION = '0.1'
 
-package.path  = LIDE_PATH .. '/libraries/?.lua;' -- .. package.path
+package.path  = LIDE_PATH .. '/libraries/?.lua;'; -- set package.path only to libraries folder
 
 --
 -- First load only lide.core to determine the current platform and set package.path and package.cpath
 --
 
-lide = require 'lide.core.init'
+local lide = require 'lide.core.init'
 
-normalize_path = lide.platform.normalize_path
-
-local CURRENT_PLATFORM = lide.platform.getOSName();
-local CURRENT_ARCH     = lide.platform.getOSArch();
+local normalize_path   = lide.platform.normalize_path;
+local CURRENT_PLATFORM = lide.platform.get_osname();
+local CURRENT_ARCH     = lide.platform.get_osarch();
 
 if CURRENT_PLATFORM == 'linux' then
-   	package.cpath = LIDE_PATH .. ('/clibs/linux/%s/?.so;'):format(CURRENT_ARCH) --.. package.cpath;
-	package.path  = LIDE_PATH .. ('/lua/linux/%s/?.lua;' ):format(CURRENT_ARCH) .. 
+   	package.cpath = LIDE_PATH .. ('/clibs/linux/%s/?.so;'):format(CURRENT_ARCH)
+	package.path  = LIDE_PATH .. ('/lua/linux/%s/?.lua;' ):format(CURRENT_ARCH) ..
 					LIDE_PATH .. ('/lua/?.lua;') .. package.path
 
 elseif CURRENT_PLATFORM == 'windows' then
@@ -43,6 +42,10 @@ end
 
 lide = require 'lide.base.init'
 
+--
+-- Define local functions that will be used on this app
+--
+
 local function trim ( str )
 	repeat str = str:gsub ('  ', '')
 	until not str:find ' '
@@ -52,7 +55,7 @@ end
 function lide.mktree ( src_file ) -- make only tree of dirs of this file
 	local sep,INIT = '\\', ''
 	
-	if lide.platform.getOSName() == 'linux' then 
+	if lide.platform.get_osname() == 'linux' then 
 		INIT = '/'
 		sep  = '/' 
 	end
@@ -160,32 +163,31 @@ local access_token  = os.getenv 'GITHUB_TOKEN'
 
 app.folders = { install, libraries, ourclibs, ourlibs }	
 
---app.folders.sourcefolder = arg[0]:sub(1, #arg[0] - 9, #arg[0])
 app.folders.sourcefolder = normalize_path( os.getenv 'LIDE_PATH' )
---app.folders.libraries =  normalize_path(app.folders.sourcefolder .. '/libraries')
-app.folders.libraries =  normalize_path( os.getenv 'LIDE_PATH' .. '/libraries')
+app.folders.libraries    = normalize_path( os.getenv 'LIDE_PATH' .. '/libraries')
 
+-- 
+-- load thirdparty libraries that'll be used on this app
+--
 
---local luasql  = require 'luasql.sqlite3'
-inifile 		  = require 'inifile'
---io.stdout : write (tostring(inifile)..'\n')
+lide.zip 		  = require 'lide_zip'
+
+local inifile 	  = require 'inifile'
 local sqldatabase = require 'sqldatabase.init'
 local github      = require 'github'
-lide.zip 		  = require 'lide_zip'
 local http        = require 'http.init'
 
---print('github:' .. tostring(github.get_file))
 repository = {}
 
 repository.access_token = access_token
 
 --- 
 --- repositore.remove ( string _package_name ) 
----  remove package from lide
+---  remove package from lide.
 ---
 function repository.remove ( _package_name )
 	local _package_version
-	local _osname = lide.platform.getOSName():lower();
+	local _osname = lide.platform.get_osname():lower();
 
 	local _manifest_file = ('%s/%s/%s.manifest'):format(app.folders.libraries, _package_name, _package_name)
 
