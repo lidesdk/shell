@@ -134,28 +134,6 @@ local function file_getline ( filename, nline )
 	return false
 end
 
-local function print_console ( str, arg2 )
-	if arg2 then error('Please give me only one argument', 2) end
-	str = str .. ' '
-	
-	local patt = '$%w.+[1-z][%a][%s]'
-	
-	if str:match (patt) then
-		local var_name  = str:match (patt) : sub (2, #str)-- var_name = var_name:gsub (' ', '')
-		local var_value = locals (1)  [var_name] or upvalues(1) [var_name]  or globals() [var_name]
-		
-		if not var_value then
-			assert( false, ('Variable "%s" is not declared.'):format (var_name) )
-		end
-
-		io.stdout:write( 
-			str:gsub('$'..var_name, var_value or '')
-		.. '\n')
-	else
-		io.stdout:write( str  .. '\n')
-	end
-end
-
 app = lide.app
 
 -- Define paths:
@@ -170,7 +148,7 @@ app.folders.libraries    = normalize_path( os.getenv 'LIDE_PATH' .. '/libraries'
 -- load thirdparty libraries that'll be used on this app
 --
 
-lide.zip 		  = require 'lide_zip'
+lide_zip 		  = require 'lide_zip'
 
 local inifile 	  = require 'inifile'
 local sqldatabase = require 'sqldatabase.init'
@@ -334,7 +312,7 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 		_package_prefix = _package_prefix ..'/'
 	end
 
-	if not lide.zip.extractFile(_package_file, (_package_prefix or '') .. _package_name .. '.manifest', _manifest_file) then
+	if not lide_zip.extractFile(_package_file, (_package_prefix or '') .. _package_name .. '.manifest', _manifest_file) then
 		return false, ('> ERROR: Manifest file "%s" doesn\'t exists into "%s" package'):format((_package_prefix or '') .. _package_name .. '.manifest', _package_file)
 	end
 	
@@ -422,7 +400,7 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 				lide.mktree(_foldernm)
 
 
-				lide.zip.extractFile(_package_file, (_package_prefix or '') .. int_path, file_dst)
+				lide_zip.extractFile(_package_file, (_package_prefix or '') .. int_path, file_dst)
 			end
 		end
 
@@ -530,8 +508,6 @@ elseif ( arg[1] == 'update' ) then
 
 	package_args = {} 
 	for i= 2, #arg do package_args[#package_args +1] = arg[i] end
-	-- emulate env sandbox:
-	--inifile = require 'inifile'
 
 	dofile ( app.folders.sourcefolder .. '/modules/update.lua' )
 
@@ -547,7 +523,7 @@ elseif ( arg[1] == 'remove' and arg[2] ) then
 
 elseif ( arg[1] == '--version' ) then
 
-    io.stdout:write (('Lide: %s\nLua: %s'):format(_LIDE_VERSION, _VERSION))
+    io.stdout:write (('Lide framework %s, %s'):format(_LIDE_VERSION, _VERSION))
 
 elseif ( arg[1] == '--help') then
 	print [[
