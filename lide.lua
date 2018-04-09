@@ -250,19 +250,25 @@ end
 --- repository.download_package ( string _package_name, string _package_file, string access_token )
 ---   downloadk zip package of lide library
 ---
-function repository.download_package ( _package_name, _package_file, access_token )
+function repository.download_package ( _package_name, _package_file, package_version, access_token )
 	local rst = {}
 	local result_repo
 	local loaded_repos = {}
-	local _query_install = 'select * from lua_packages where package_name like "%s" limit 1'
+	local _query_install
+
+	if package_version then
+		_query_install = 'select * from lua_packages where package_name like "%s" and package_version like "%s" ORDER BY package_version DESC LIMIT 1'
+	else
+		_query_install = 'select * from lua_packages where package_name like "%s" ORDER BY package_version DESC LIMIT 1'
+	end
 
 	for repo_name, repo in pairs(repository.repos) do
 	
 		loaded_repos[repo_name] = sqldatabase:new(repo.path, 'sqlite3')
 		
 		--- Si encuentra el paquete en el primer repositorio: ese es
-		if loaded_repos[repo_name]:select(_query_install:format(_package_name))[1] then
-			result_repo = loaded_repos[repo_name]:select(_query_install:format(_package_name))[1]
+		if loaded_repos[repo_name]:select(_query_install:format(_package_name, package_version))[1] then
+			result_repo = loaded_repos[repo_name]:select(_query_install:format(_package_name, package_version))[1]
 			--return first_repo
 			break
 		end
@@ -276,8 +282,9 @@ function repository.download_package ( _package_name, _package_file, access_toke
 		-- https://raw.githubusercontent.com/dcano/repos/master/stable/cjson/cjson-2.1.0.zip
 		http.download(result_repo.package_url, normalize_path(_package_file))
 	else
-		local github_package_path = result_repo.package_url
-		local content = github.get_file ( github_package_path, ('package.lide'), repository.access_token )
+		--[[local github_package_path = result_repo.package_url
+		local to_install_version  = (_ref_version) or ''; if to_install_version  ~= '' then to_install_version = to_install_version .. '-' end
+		local content = github.get_file ( github_package_path, ('package.lide') .. (to_install_version), repository.access_token )
 		
 		if not content then
 			print ('!Error: no se pudo descargar el paquete: ' .. github_package_path)
@@ -288,7 +295,7 @@ function repository.download_package ( _package_name, _package_file, access_toke
 
 		if zip_file:write(content) then
 			zip_file:close();
-		end
+		end]]
 	end
 
 
@@ -311,7 +318,7 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 	if _package_prefix and _package_prefix:gsub(' ', '') ~= '' then
 		_package_prefix = _package_prefix ..'/'
 	end
-
+	
 	if not lide_zip.extractFile(_package_file, (_package_prefix or '') .. _package_name .. '.manifest', _manifest_file) then
 		return false, ('> ERROR: Manifest file "%s" doesn\'t exists into "%s" package'):format((_package_prefix or '') .. _package_name .. '.manifest', _package_file)
 	end
@@ -321,7 +328,7 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 
 	local _lide_path = os.getenv 'LIDE_PATH'
 
-	local _runtimefolder = normalize_path(_lide_path ..'/bin')
+	local _runtimefolder = normalize_path(_lide_path .. ('/bin/%s/%s'):format(_osname, _osarch));
 	
 	function lide_file_copy ( src_file, dst_file )
 		local file_src     = io.open(src_file, 'rb')
@@ -353,18 +360,6 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 
 	------------------------------------------------------------
 	------------------------------------------------------------
-	-- Runtime Donwloads Folder: 
-
-	local _arch_runtime_downloads = normalize_path(app.folders.libraries..'/'.._osname..'/'.._osarch..'/runtime')
-	
-	if not lide.core.file.doesExists( _arch_runtime_downloads ) then
-		lide.mktree(_arch_runtime_downloads)
-	end
-
-	lide_folder_copy(_arch_runtime_downloads, _runtimefolder)
-
-	------------------------------------------------------------
-	------------------------------------------------------------
 	local package_manifest = inifile.parse_file(_manifest_file)[_package_name]
 		
 	if rawget(package_manifest, _osname) then
@@ -393,9 +388,10 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 			-- This step copy file to destination: libraries/windows/x64/luasql/sqlite3.dll
 			for _, int_path in pairs(_files) do -- internal_paths
 				local file_dst = normalize_path(app.folders.libraries ..'/'.. int_path)
+				
 				local a,b       = file_dst:gsub('\\', '/'):reverse():find '/'
 				local _filename = file_dst:reverse():sub(1, b) : reverse()
-				local _foldernm = file_dst:sub(1, file_dst:find(_filename) -1)
+				local _foldernm = file_dst:sub(1, (file_dst:find(_filename) or 0) -1)
 				
 				lide.mktree(_foldernm)
 
@@ -408,6 +404,15 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 	elseif not rawget(package_manifest, _osname) then
 		return false, '"' .. _package_name .. '" is not available on ' .. _osname .. '.'
 	end
+
+	---
+	-- Runtime Downloads Folder: This step copy runtime libraries to specific interpreter directory
+	---
+
+	local _arch_runtime_downloads = normalize_path(app.folders.libraries..'/'.._osname..'/'.._osarch..'/runtime')
+	
+	lide_folder_copy(_arch_runtime_downloads, _runtimefolder)
+
 
 	local function install_depends ( package_manifest, _package_name )
 		local depends = package_manifest.depends : delim ','
@@ -501,8 +506,8 @@ elseif ( arg[1] == 'install' and arg[2] ) then
 
 	package_args = {} 
 	for i= 2, #arg do package_args[#package_args +1] = arg[i] end
-	 
-	dofile ( app.folders.sourcefolder .. '/modules/install.lua' )
+	
+	dofile ( app.folders.sourcefolder ..   '/modules/install.lua' )
 
 elseif ( arg[1] == 'update' ) then
 

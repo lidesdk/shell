@@ -1,5 +1,5 @@
 [stable]
-url=http://github.com/lidesdk/repos/stable/libraries.db
+url=http://github.com/lidesdk/repos/stable.db
 
 [dcanoh]
 url=http://github.com/lidesdk/repos/dcanoh.db
