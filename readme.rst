@@ -9,12 +9,12 @@ controls in Windows.
 
 
 ========================================================= ====================================================================================
-   git branch: ``master``                                  build status ``0.1``
+   git branch: ``develop``                                  build status ``0.2-dev``
 ========================================================= ====================================================================================
- Tests executed with **Windows 10** x86 binaries		    .. image:: https://ci.appveyor.com/api/projects/status/tg8aq749c25jewg0/branch/master?svg=true
-                                                                     :target: https://ci.appveyor.com/project/dcanoh/shell/branch/master
- Tests executed with **Ubuntu 14.04** x64 binaries     	    .. image:: https://circleci.com/gh/lidesdk/shell/tree/master.svg?style=svg
-                                                                     :target: https://circleci.com/gh/lidesdk/shell/tree/master
+ Tests executed with **Windows 10** x86 binaries		    .. image:: https://ci.appveyor.com/api/projects/status/tg8aq749c25jewg0/branch/develop?svg=true
+                                                                     :target: https://ci.appveyor.com/project/dcanoh/shell/branch/develop
+ Tests executed with **Ubuntu 14.04** x64 binaries     	    .. image:: https://circleci.com/gh/lidesdk/shell/tree/develop.svg?style=svg
+                                                                     :target: https://circleci.com/gh/lidesdk/shell/tree/develop
 ========================================================= ====================================================================================
 
 .. image:: https://github.com/lidesdk/commandline/raw/develop/screenshot.png
