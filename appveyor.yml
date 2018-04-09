@@ -5,7 +5,7 @@ shallow_clone: true
 environment:
   LUAROCKS_VER: 2.4.1
   LUA_VER: 5.1.5
-  CURRENT_BRANCH: master
+  CURRENT_BRANCH: develop
 
 platform:
   - x86
