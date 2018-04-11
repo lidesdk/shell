@@ -160,7 +160,7 @@ repository = {}
 repository.access_token = access_token
 
 --- 
---- repositore.remove ( string _package_name ) 
+--- repositore.remove ( string _package_name ) 		
 ---  remove package from lide.
 ---
 function repository.remove ( _package_name )
@@ -173,6 +173,10 @@ function repository.remove ( _package_name )
 	and lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
 		
 		local package_manifest = inifile.parse_file(_manifest_file)[_package_name]
+
+			if not package_manifest[_osname] then
+				return false, ('Error: Package %s is not available on %s platform.'):format(_package_name, _osname)
+			end
 
 			for arch_line in package_manifest[_osname] : delimi '|' do -- architectures are delimited by |
 				local arch_line = arch_line:delim ':'
@@ -411,6 +415,8 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 
 	local _arch_runtime_downloads = normalize_path(app.folders.libraries..'/'.._osname..'/'.._osarch..'/runtime')
 	
+	lide.mktree(_arch_runtime_downloads)
+
 	lide_folder_copy(_arch_runtime_downloads, _runtimefolder)
 
 
