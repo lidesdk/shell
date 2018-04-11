@@ -173,8 +173,11 @@ function repository.remove ( _package_name )
 	and lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
 		
 		local package_manifest = inifile.parse_file(_manifest_file)[_package_name]
-			
-			for arch_line in package_manifest[_osname] : delimi '|' or {} do -- architectures are delimited by |
+
+		-- add check for package archictecture
+
+		for arch_line in package_manifest[_osname] : delimi '|' do -- architectures are delimited by |
+
 				local arch_line = arch_line:delim ':'
 				local _files    = trim(arch_line[2] or '') : delim ',' -- files are delimiteed by comma					
 				local todel_files = {}
@@ -471,7 +474,7 @@ function framework.run ( filename, env, req, ... )
 		
 		-- Ejecutar el interprete apropiado:
 		if ( CURRENT_PLATFORM == 'linux' ) then
-			local _exec_str  = '%s/bin/%s/%s/lua %s/bin/lide51_src.lua %s'
+			local _exec_str  = '%s/bin/%s/%s/lua %s/bin/lide51.lua %s'
 
 			os.execute ( 
 				_exec_str:format(LIDE_PATH, CURRENT_PLATFORM, CURRENT_ARCH, LIDE_PATH, filename)

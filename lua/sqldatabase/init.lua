@@ -1,7 +1,8 @@
 	if  not lide.luasql then
 		luasql = require 'luasql.sqlite3'
 	end
-	
+
+
 	local env = luasql.sqlite3()
 
 	local sqldatabase = class 'sqldatabase'
