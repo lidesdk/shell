@@ -173,8 +173,8 @@ function repository.remove ( _package_name )
 	and lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
 		
 		local package_manifest = inifile.parse_file(_manifest_file)[_package_name]
-
-			for arch_line in package_manifest[_osname] : delimi '|' do -- architectures are delimited by |
+			
+			for arch_line in package_manifest[_osname] : delimi '|' or {} do -- architectures are delimited by |
 				local arch_line = arch_line:delim ':'
 				local _files    = trim(arch_line[2] or '') : delim ',' -- files are delimiteed by comma					
 				local todel_files = {}
@@ -323,8 +323,8 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 		return false, ('> ERROR: Manifest file "%s" doesn\'t exists into "%s" package'):format((_package_prefix or '') .. _package_name .. '.manifest', _package_file)
 	end
 	
-	local _osname = lide.platform.getOS():lower()
-	local _osarch = lide.platform.getArch():lower()
+	local _osname = lide.platform.get_osname():lower()
+	local _osarch = lide.platform.get_osarch():lower()
 
 	local _lide_path = os.getenv 'LIDE_PATH'
 
