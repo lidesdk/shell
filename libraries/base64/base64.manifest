@@ -1,8 +1,0 @@
-[base64]
-author    = luiz henrique de figueiredo
-date      = 25/12/2016
-version   = 5.1
-windows   = x86:windows/x86/clibs/base64.dll
-linux     = x86:linux/x86/clibs/base64.so|x64:linux/x64/clibs/base64.so
-source    = http://webserver2.tecgraf.puc-rio.br/~lhf/ftp/lua/5.1/lbase64.tar.gz
-mantainer = lide team
