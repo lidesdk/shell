@@ -1,8 +1,12 @@
 	if  not lide.luasql then
 		luasql = require 'luasql.sqlite3'
 	end
+--<<<<<<< HEAD:lua/sqldatabase/init.lua
 
 
+--=======
+	
+-->>>>>>> feature/lua51-arm:lua/sqldatabase/init.lua
 	local env = luasql.sqlite3()
 
 	local sqldatabase = class 'sqldatabase'

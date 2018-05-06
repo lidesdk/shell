@@ -1,11 +1,8 @@
-Lide Framework
-==============
+Lide Shell 
+==========
 
-Lide Framework is a library that allows you to create multiplatform 
-graphical interfaces from Lua language.
-Lide uses wxWidgets to build controls and windows, this ensures the 
-integration of your applications with GTK+ on Linux and really native 
-controls in Windows.
+Lide Shell is a project that allow us to install libraries, 
+execute scripts and create or search repositories of lua libraries.
 
 
 ========================================================= ====================================================================================
