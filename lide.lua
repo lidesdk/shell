@@ -159,12 +159,13 @@ repository = {}
 
 repository.access_token = access_token
 
+
 --- 
 --- repositore.remove ( string _package_name ) 		
 ---  remove package from lide.
 ---
-function repository.remove ( _package_name )
-	local _package_version
+function repository.remove ( _package_name, _package_version )
+	--local _package_version
 	local _osname = lide.platform.get_osname():lower();
 
 	local _manifest_file = ('%s/%s/%s.manifest'):format(app.folders.libraries, _package_name, _package_name)
@@ -174,18 +175,11 @@ function repository.remove ( _package_name )
 		
 		local package_manifest = inifile.parse_file(_manifest_file)[_package_name]
 
---<<<<<<< HEAD
-		-- add check for package archictecture
-
-		for arch_line in package_manifest[_osname] : delimi '|' do -- architectures are delimited by |
-
---=======
 			if not package_manifest[_osname] then
-				return false, ('Error: Package %s is not available on %s platform.'):format(_package_name, _osname)
+				return false, ('Error: Package %s %s is not available on %s platform.'):format(_package_name, package_manifest ['version'], _osname)
 			end
 
---			for arch_line in package_manifest[_osname] : delimi '|' do -- architectures are delimited by |
--->>>>>>> feature/lua51-arm
+			for arch_line in package_manifest[_osname] : delimi '|' do -- architectures are delimited by |
 				local arch_line = arch_line:delim ':'
 				local _files    = trim(arch_line[2] or '') : delim ',' -- files are delimiteed by comma					
 				local todel_files = {}
@@ -372,7 +366,8 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 	------------------------------------------------------------
 	------------------------------------------------------------
 	local package_manifest = inifile.parse_file(_manifest_file)[_package_name]
-		
+	local _package_version  = inifile.parse_file(_manifest_file)['version']
+
 	if rawget(package_manifest, _osname) then
 		local compatible;
 		local architectures = package_manifest[_osname] : delim '|'
@@ -387,7 +382,7 @@ function repository.install_package ( _package_name, _package_file, _package_pre
 		end
 
 		if not compatible then
-			return false, '"' .. _package_name .. '" is not available on ' .. _osarch .. ' architecture.'
+			return false, '"' .. _package_name .. '" '.. _package_version..' is not available on ' .. _osarch .. ' architecture.'
 		end 
 
 		for arch_line in package_manifest[_osname] : delimi '|' do -- architectures are delimited by |

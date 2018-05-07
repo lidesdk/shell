@@ -1,37 +1,31 @@
---- Para los modulos se permiten las siguientes funciones especiales:
+-- Para los modulos se permiten las siguientes funciones especiales:
 --- print( 'Texto $var_name') || var_name es el nombre de una variable real.
 ---
 
 -- Update repos
-repository.update() 
+--repository.update() 
 
 -- download package
 --repository.remove  ('luasql', app.folders.libraries .. '/luasql.zip')
 --repository.download('luasql', app.folders.libraries .. '/luasql.zip')
 --repository.install ('luasql', app.folders.libraries .. '/luasql.zip')
 
-function compare_versions ( ver1, ver2 )
-	for i = 1, 3 do
-		if tonumber(ver1 : delim '%.' [i]) == tonumber(ver2 : delim '%.' [i]) then
-			if tonumber(ver1 : delim '%.' [2]) == tonumber(ver2 : delim '%.' [2]) then
-				if tonumber(ver1 : delim '%.' [3]) == tonumber(ver2 : delim '%.' [3]) then
-			--		print '0 Versions are the same'
-					return 0
-				end
-			end		
-		elseif tonumber(ver1 : delim '%.' [i]) > tonumber(ver2 : delim '%.' [i]) then
-			--print '1 Version1 is major'
-			return 1
-		elseif tonumber(ver1 : delim '%.' [i]) < tonumber(ver2 : delim '%.' [i]) then
-			--print '2 Version2 is major'
-			return 2
-		end
-	end
--- 0  ver1 == ver2
--- 1  ver1 > ver 2
--- 2  ver1 < ver 2
-end
+local _package_name    = arg[2]
+local _package_version = arg[3]
 
+local reposapi = require 'repos-api'
+local inifile  = require 'inifile'
+
+local _SourceFolder = app.folders.sourcefolder
+local _ReposFile    = _SourceFolder .. '/lide.repos'
+
+print('repos-api: ' .. tostring(_ReposFile));
+
+reposapi.update_repos ( _ReposFile, _SourceFolder .. '\\libraries' )
+
+reposapi.update_package ( _package_name, _package_version)
+
+--[[
 if not package_args[1] then
 	print '! Update all components.'
 elseif package_args[1] then
@@ -51,7 +45,7 @@ elseif package_args[1] then
 				
 				return false
 			else
-				local local_version = inifile.getvalues (app.folders.libraries ..'/'..package_name .. '/' .. package_name ..'.manifest', package_name ) ['version'] --file_getline ( app.folders.libraries ..'/'..package_name .. '/' .. package_name ..'.manifest', 1 )
+				local local_version = inifile.parse_file (app.folders.libraries ..'/'..package_name .. '/' .. package_name ..'.manifest', package_name ) ['version'] --file_getline ( app.folders.libraries ..'/'..package_name .. '/' .. package_name ..'.manifest', 1 )
 				local cloud_version = repository.libraries_stable:select(('select * from libraries_stable where package_name like "%s" limit 1'):format(package_name))[1].package_version
 				
 				print('> last version: ' .. cloud_version)
@@ -77,3 +71,4 @@ elseif package_args[1] then
 		end		
 	end
 end
+]]

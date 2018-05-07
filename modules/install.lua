@@ -58,9 +58,10 @@ local n = 0; for repo_name, repo in pairs( repository.repos ) do
 				if _install_package then
 					print('> OK: '.._package_name..' successful installed.')
 				else
+					lide.folder.remove_tree ( app.folders.libraries .. '/'.._package_name )
+
 					print('> [package.install] ERROR: ' .. lasterror)
-					--print('> ERROR: '.._package_name..' not installed.')
-					repository.remove(_package_name)
+					--repository.remove(_package_name)
 				end
 				break
 			end
