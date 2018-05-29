@@ -11,6 +11,9 @@ local function file_getline ( filename, nline )
 	return false
 end
 
+reposapi = require 'repos-api'
+
+
 local text_to_search = tostring(arg[2])
 reposapi.update_repos ( _ReposFile, _SourceFolder .. '\\libraries' )
 
