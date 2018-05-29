@@ -1,15 +1,17 @@
 local _package_name    = arg[2]
 local _package_version = arg[3]
 
-repository.repos = repository.repos or {}
+--reposapi.repos = reposapi.repos or {}
 
 local _SourceFolder = app.folders.sourcefolder
 local _ReposFile    = _SourceFolder .. '\\lide.repos'
 
+local reposapi = require 'repos-api'
 
-repository.update_repos ( _ReposFile, _SourceFolder .. '\\libraries' )
+reposapi.update_repos ( _ReposFile, _SourceFolder .. '\\libraries' )
+--reposapi.update_repos ( _ReposFile, _SourceFolder .. '\\libraries' )
 
-local n = 0; for repo_name, repo in pairs( repository.repos ) do
+local n = 0; for repo_name, repo in pairs( reposapi.repos ) do
 	local tbl;
 	if _package_version then
 		tbl = repo.sqldb : select('select * from lua_packages where package_name like "'.._package_name..'" and package_version like "'.._package_version..'" limit 1')
@@ -51,17 +53,22 @@ local n = 0; for repo_name, repo in pairs( repository.repos ) do
 
 				zip_package = app.folders.libraries .. '/'.._package_name .. '/'.._package_name .. '.zip'
 				
-				repository.download_package(_package_name, zip_package, _package_version, nil_access_token)
+				reposapi.download_package(_package_name, zip_package, _package_version, nil_access_token)
 				
-				local _install_package, lasterror = repository.install_package (_package_name, zip_package, package_prefix)
+				local _install_package, lasterror = reposapi.install_package (_package_name, zip_package, package_prefix)
 				
 				if _install_package then
+					--if 0 == #reposapi.installed:select (('select package_name, package_version from lua_packages where package_name like "%s" and package_version like "%s"'):format(_package_name, _package_version)) then
+					reposapi.installed:exec (('insert into lua_packages values ("%s", "%s", "%s")'):format(_package_name, _package_version, 'package files'))
+					--end
+
 					print('> OK: '.._package_name..' successful installed.')
+
 				else
 					lide.folder.remove_tree ( app.folders.libraries .. '/'.._package_name )
 
 					print('> [package.install] ERROR: ' .. lasterror)
-					--repository.remove(_package_name)
+					--reposapi.remove(_package_name)
 				end
 				break
 			end

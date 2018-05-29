@@ -18,8 +18,14 @@
 		}
 	end
 
-	function sqldatabase.exec( query )
+	function sqldatabase:exec( query )
+		local con = env:connect(self.database)
+		local cur = assert(con:execute(query))
 		
+		if type(cur) ~= 'number' then
+			cur:close()
+		end
+		con:close()	
 	end
 
 	local function select( dbConnection, tbName, rowNames, sCond )

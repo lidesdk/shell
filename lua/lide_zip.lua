@@ -39,8 +39,8 @@ function lide.zip.extract ( source, dest )
 				else
 
 					local zip_stored_file = zfile:open(file.filename, 'rb');
-					local dest_file_path = normalize_path(dest_folder .. '/' .. file.filename)
-					local dest_file      = io.open(dest_file_path, 'w+b')
+					local dest_file_path  = normalize_path(dest_folder .. '/' .. file.filename)
+					local dest_file       = io.open(dest_file_path, 'w+b')
 					
 					--mktree(dest_file_path)
 					
@@ -49,6 +49,7 @@ function lide.zip.extract ( source, dest )
 						dest_file:flush()
 						dest_file:close()
 					end
+
 					zip_stored_file:close()
 				end
 			end
@@ -86,8 +87,34 @@ function lide.zip.extractFile ( zipFilePath, internalPath, destinationPath)
     	end
     	currFile:close()
     end
+
     zfile:close();
     return true
+end
+
+function lide.zip.getInternalFileContent ( zipFilePath, internalPath )
+    local zfile, err, currFileContents
+    
+    if lide.file.doesExists(zipFilePath) then
+    	zfile, err = zip.open(zipFilePath);
+    else
+    	return false
+    end
+	
+    -- iterate through each file insize the zip file
+    --mktree(destinationPath:sub(1, #destinationPath - #internalPath -1));
+        
+    if internalPath:gsub(' ', '') ~= '' then
+    	local currFile, err = zfile:open(internalPath);
+    	if not currFile then return false, 'internalPath file does not exists.' end
+    	
+    	currFileContents = currFile:read("*a"); -- read entire contents of current file
+    	currFile:close();
+    end
+
+    zfile:close();
+
+    return currFileContents
 end
 
 return lide.zip

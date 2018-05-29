@@ -2,30 +2,31 @@
 --- print( 'Texto $var_name') || var_name es el nombre de una variable real.
 ---
 
--- Update repos
---repository.update() 
-
--- download package
---repository.remove  ('luasql', app.folders.libraries .. '/luasql.zip')
---repository.download('luasql', app.folders.libraries .. '/luasql.zip')
---repository.install ('luasql', app.folders.libraries .. '/luasql.zip')
-
 local _package_name    = arg[2]
 local _package_version = arg[3]
 
 local reposapi = require 'repos-api'
 local inifile  = require 'inifile'
+local compare_versions = reposapi.compare_versions
 
 local _SourceFolder = app.folders.sourcefolder
 local _ReposFile    = _SourceFolder .. '/lide.repos'
 
-print('repos-api: ' .. tostring(_ReposFile));
+
+if not _package_name then
+	print '[package.update] Error: please specify package name and version.'
+
+	return false;
+end
+
+if _package_version then
+	print (('> searching package: %s %s'):format(_package_name, _package_version))
+elseif _package_name then
+	print (('> checking package: %s'):format(_package_name))
+end
 
 reposapi.update_repos ( _ReposFile, _SourceFolder .. '\\libraries' )
 
-reposapi.update_package ( _package_name, _package_version)
-
---[[
 if not package_args[1] then
 	print '! Update all components.'
 elseif package_args[1] then
@@ -41,28 +42,61 @@ elseif package_args[1] then
 			print '--show all updates'
 		else
 			if not lide.folder.doesExists(app.folders.libraries ..'/'..package_name) then
-				print ('Module '..package_name..' is not installed.')
+				print ('> package "'..package_name..'" is not installed.')
 				
 				return false
 			else
-				local local_version = inifile.parse_file (app.folders.libraries ..'/'..package_name .. '/' .. package_name ..'.manifest', package_name ) ['version'] --file_getline ( app.folders.libraries ..'/'..package_name .. '/' .. package_name ..'.manifest', 1 )
-				local cloud_version = repository.libraries_stable:select(('select * from libraries_stable where package_name like "%s" limit 1'):format(package_name))[1].package_version
+				local local_package = reposapi.installed:select(('select * from lua_packages where package_name like "%s" limit 1'):format(package_name))[1]
+				local local_version = local_package.package_version
 				
-				print('> last version: ' .. cloud_version)
-				print('> local version: ' .. local_version)
+				local cloud_package = reposapi.repos.stable.sqldb:select(('select * from lua_packages where package_name like "%s" order by package_version desc'):format(package_name))[1]
+
+				local cloud_version = cloud_package.package_version
+
+				if _package_version then
+					cloud_package = reposapi.repos.stable.sqldb:select(('select * from lua_packages where package_name like "%s" and package_version like "%s" order by package_version desc'):format(package_name, _package_version))
+					--print(cloud_package[1].package_version)
+					if #cloud_package == 0 then
+						print (('> package %s %s doesn\'t exist.'):format(package_name, _package_version))
+						error()
+					end
+				end
+
+				if cloud_package.package_compat then
+					for _, compat_arch in pairs(cloud_package.package_compat:gsub('%[', ''):gsub('%]', ''):gsub(' ', '') : delim ',' ) do
+						if lide.platform.get_osname() == compat_arch then
+							compatible = true
+						end
+					end
+				end
+				
+
+				--print('> last version: ' .. cloud_version)
+				--print('> local version: ' .. local_version)
 
 				if compare_versions(local_version, cloud_version) == 0 then -- up to date
-					print('\npackage is up to date.')
+					print('> package is up to date.')
 				elseif compare_versions(local_version, cloud_version) == 2 then
-					repository.remove  (package_name)
+					
+					print (
+						('> %s package: new version %s'):format(_package_name, cloud_version)
+					)
+					
+					if not compatible then
+						print('> not compatible with ' ..  lide.platform.get_osname())
+						os.exit()
+					end
 
-					print('\n> downloading package '..cloud_version)
-					repository.download(package_name, app.folders.libraries..'/'..package_name..'.zip')
-					print('> installing package '..cloud_version)
-					repository.install (package_name, app.folders.libraries..'/'..package_name..'.zip')
-					print('> all done. ')
+					print '> installing updates'
 
-					print('\nNew library installed '..package_name .. ' '.. cloud_version)
+					reposapi.update_package ( _package_name, _package_version)
+					--print('\n> downloading package '..cloud_version)
+					--repository.download(package_name, app.folders.libraries..'/'..package_name..'.zip')
+					--print('> installing package '..cloud_version)
+					--repository.install (package_name, app.folders.libraries..'/'..package_name..'.zip')
+					--print('> all done. ')
+
+					--print('\nNew library installed '..package_name .. ' '.. cloud_version)
 
 				elseif compare_versions(local_version, cloud_version) == 1 then
 					print 'Por que tu version es mayor que la de los repositorios de Lide?'
@@ -71,4 +105,3 @@ elseif package_args[1] then
 		end		
 	end
 end
-]]

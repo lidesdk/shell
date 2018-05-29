@@ -30,6 +30,7 @@ local function compare_versions ( ver1, ver2 )
 				if tonumber(ver1 : delim '%.' [3]) == tonumber(ver2 : delim '%.' [3]) then
 					return 0;
 				end
+
 			end
 		elseif tonumber(ver1 : delim '%.' [i]) > tonumber(ver2 : delim '%.' [i]) then
 			return 1;
@@ -38,6 +39,14 @@ local function compare_versions ( ver1, ver2 )
 		end
 	end
 	-- 0  ver1 == ver2, -- 1  ver1 > ver 2, -- 2  ver1 < ver 2
+end
+
+reposapi.compare_versions = compare_versions
+
+local function trim ( str )
+	repeat str = str:gsub ('  ', '')
+	until not str:find ' '
+	return str
 end
 
 --
@@ -49,6 +58,56 @@ function reposapi.download_db ( url_db_file, dest_file_path, access_token ) -- r
 	
 	github.download_file ( url_db_file:sub(b+2, # url_db_file), dest_file_path, file_ref, reposapi.access_token )
 end
+
+--- 
+--- reposapi.remove ( string _package_name ) 		
+---  remove package from lide.
+---
+function reposapi.remove_package ( _package_name, _depend_version )
+	--local _depend_version
+	local _osname = lide.platform.get_osname():lower();
+
+	local _manifest_file = ('%s/%s/%s.manifest'):format(app.folders.libraries, _package_name, _package_name)
+
+	if lide.file.doesExists(_manifest_file)
+	and lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
+		
+		local package_manifest = inifile.parse_file(_manifest_file)[_package_name]
+
+			if not package_manifest[_osname] then
+				return false, ('Error: Package %s %s is not available on %s platform.'):format(_package_name, package_manifest ['version'], _osname)
+			end
+
+			for arch_line in package_manifest[_osname] : delimi '|' do -- architectures are delimited by |
+				local arch_line = arch_line:delim ':'
+				local _files    = trim(arch_line[2] or '') : delim ',' -- files are delimiteed by comma					
+				local todel_files = {}
+
+				-- copy file to destination: libraries/windows/x64/luasql/sqlite3.dll
+				for _, int_path in pairs(_files) do -- internal_paths
+					local file_dst = normalize_path(app.folders.libraries ..'/'.. int_path);
+					
+					if lide.file.doesExists(file_dst) then
+						lide.file.remove(file_dst)
+						todel_files[#todel_files] = file_dst
+					end
+				end
+
+				for _, file in pairs(todel_files) do
+					if lide.file.doesExists(file) then
+						return false, ('File %s wasn\'t removed'):format(file)
+					end
+				end
+			end
+		
+		lide.core.folder.delete(normalize_path(app.folders.libraries .. '/' .. _package_name));	
+
+		return true
+	else
+		return false, ('Error: Package %s is not installed.'):format(_package_name)
+	end
+end
+
 
 --- 
 --- reposapi.update_repos ( string lide_repos_config_file, string work_download_folder )
@@ -77,6 +136,18 @@ function reposapi.update_repos ( lide_repos, work_folder )
 				print ('[lide]: '.. repo_name .. ' ' .. tostring(repo.url))
 			end	
 		end
+		
+		local installed_db_path = normalize_path((app.folders.libraries .. '/%s/%s/installed.db'):format(lide.platform.get_osname(), lide.platform.get_osarch()))
+		
+		lide.mktree(installed_db_path:gsub('installed.db', ''))		
+
+		--here
+		reposapi.installed = sqldatabase:new(installed_db_path, 'sqlite3')
+		
+		if 0 == #reposapi.installed:select "SELECT name FROM sqlite_master WHERE type='table' AND name='lua_packages';" then
+			reposapi.installed:exec 'CREATE TABLE "lua_packages" ("package_name" Text, "package_version" Text, "package_files" Text );'
+		end
+
 		return parsed
 	end
 end
@@ -138,21 +209,21 @@ end
 ---   install package of library from databases
 ---
 function reposapi.install_package ( _package_name, _package_file, _package_prefix)
-	_package_file = normalize_path(_package_file)
+	local _package_file = normalize_path(_package_file)
+
+	local _manifest_file = normalize_path(app.folders.libraries ..'/'.._package_name..'/'.. _package_name ..'.manifest')
+	
+	if _package_prefix and _package_prefix:sub(#_package_prefix,#_package_prefix) ~= '/' then 
+		_package_prefix = (_package_prefix .. '/'):gsub('//', '/')
+	end
 
 	if not lide.file.doesExists(_package_file) then
 		return false, '! Error: The package: ' .. tostring(_package_file) .. ' is not downloaded now.'
 	end
 
-	local _manifest_file = normalize_path(app.folders.libraries ..'/'.._package_name..'/'.. _package_name ..'.manifest')
-	
-	if _package_prefix and _package_prefix:gsub(' ', '') ~= '' then
-		_package_prefix = _package_prefix ..'/'
-	end
-	
-	if not lide_zip.extractFile(_package_file, (_package_prefix or '') .. _package_name .. '.manifest', _manifest_file) then
-		return false, ('> ERROR: Manifest file "%s" doesn\'t exists into "%s" package'):format((_package_prefix or '') .. _package_name .. '.manifest', _package_file)
-	end
+--	if not lide_zip.extractFile(_package_file, (_package_prefix or '') .. _package_name .. '.manifest', _manifest_file) then
+--		return false, ('> ERROR: Manifest file "%s" doesn\'t exists into "%s" package'):format((_package_prefix or '') .. _package_name .. '.manifest', _package_file)
+--	end
 	
 	local _osname = lide.platform.get_osname():lower()
 	local _osarch = lide.platform.get_osarch():lower()
@@ -169,11 +240,12 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 		if not lide.core.file.doesExists( dst_file ) then
 			local file_dst = io.open(dst_file, 'w+b')
 			file_dst:write(file_content)
-			file_dst:flush()
-			file_src:close()
+			file_dst:flush()			
 
 			file_dst:close()
 		end
+
+		file_src:close()
 		--lide.lfs.unlock(file_src)
 	end
 
@@ -191,8 +263,10 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 
 	------------------------------------------------------------
 	------------------------------------------------------------
-	local package_manifest = inifile.parse_file(_manifest_file)[_package_name]
-	local _package_version  = inifile.parse_file(_manifest_file)['version']
+	local _manifest_contents = lide.zip.getInternalFileContent ( _package_file, (_package_prefix or '') .. _package_name .. '.manifest' );
+
+	local package_manifest  = inifile.parse (_manifest_contents)[_package_name]
+	local _package_version  = inifile.parse (_manifest_contents)[_package_name]['version']
 
 	if rawget(package_manifest, _osname) then
 		local compatible;
@@ -208,7 +282,7 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 		end
 
 		if not compatible then
-			return false, '"' .. _package_name .. '" '.. _package_version..' is not available on ' .. _osarch .. ' architecture.'
+			return false, '"' .. _package_name .. '" '.. _depend_version..' is not available on ' .. _osarch .. ' architecture.'
 		end 
 
 		for arch_line in package_manifest[_osname] : delimi '|' do -- architectures are delimited by |
@@ -250,26 +324,54 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 
 	local function install_depends ( package_manifest, _package_name )
 		local depends = package_manifest.depends : delim ','
-				
+		
 		printl '  > installing dependencies for $_package_name$:'
 	
-		for _, _package_name in pairs( depends ) do
+		for _, _depend_string in pairs( depends ) do
+			local _depend_name, _depend_version
+			local a,b = _depend_string:find ' '
 
-			if lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
+			if a or b then
+				_depend_name     = _depend_string:sub(1, b) :gsub (' ', '');
+				_depend_version  = _depend_string:sub(_depend_string:find ' ', #_depend_string):gsub(' ', '');
+			else
+				_depend_name     = _depend_string :gsub (' ', '');
+				_depend_version  = ''
+			end
+
+			if lide.folder.doesExists(app.folders.libraries ..'/'.._depend_name) then
 				printl '  > $_package_name$ is installed now.'
 			else
-				printl '  > installing $_package_name$' 
+				printl '  > installing $_depend_name$' 
+
+				local _package_prefix = reposapi.repos[package_manifest.repository] . sqldb : select('select * from lua_packages where package_name like "'.._depend_name..'" ORDER BY package_version DESC LIMIT 1;')
 				
-				local package_zip_file = normalize_path(app.folders.libraries .. '\\'.._package_name .. '\\'.._package_name .. '.zip' ):gsub(' ', '')
+				if _package_prefix and _package_prefix[1] then
+					_package_prefix = _package_prefix[1].package_prefix
+				end
+
+				--print('> installing...'..)	
+								
+				lide.folder.create ( app.folders.libraries .. '/'.._depend_name )
+
+				local zip_package = normalize_path(app.folders.libraries .. '/'.._depend_name .. '/'.._depend_name .. '.zip')
 				
-				lide.mktree (normalize_path(app.folders.libraries .. '\\'.._package_name):gsub(' ', ''))
+				reposapi.download_package(_depend_name, zip_package, _depend_version, nil_access_token)
 				
-				reposapi.download_package(_package_name, package_zip_file)			
+				local _install_package, lasterror = reposapi.install_package (_depend_name, zip_package, _package_prefix)
 				
-				local install_depend, last_error = reposapi.install_package (_package_name, package_zip_file)
-				
-				if not install_depend then
-					return false, last_error or 'Dependencies not satisfied: ' .. _package_name
+				if _install_package then
+					--if 0 == #reposapi.installed:select (('select package_name, package_version from lua_packages where package_name like "%s" and package_version like "%s"'):format(_package_name, _depend_version)) then
+					--sreposapi.installed:exec (('insert into lua_packages values ("%s", "%s", "%s")'):format(_depend_name, _depend_version, 'package files'))
+					--end
+
+					--print('> OK: '.._depend_name..' successful installed.')
+
+				else
+					--lide.folder.remove_tree ( app.folders.libraries .. '/'.._depend_name )
+
+					--print('> [package.install] ERROR: ' .. lasterror)
+					return false, last_error or 'Dependencies not satisfied: ' .. _depend_name
 				end
 			end
 		end
@@ -285,6 +387,8 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 			return false, last_error
 		end
 	end
+	
+	reposapi.installed:exec (('insert into lua_packages values ("%s", "%s", "%s")'):format(_package_name, _package_version or '', 'package files'))
 
 	return true;
 end
@@ -298,11 +402,18 @@ function reposapi.update_package ( _packagename, _packagever )
 	-- Download the latest version
 	-- Apply the patch.	
 	
-	local _manifest_file = normalize_path(app.folders.libraries ..'/'.._packagename..'/'.. _packagename ..'.manifest')
---[[
-	lide.folder.create ( app.folders.libraries .. '/'.._packagename )
+	local IS_COMPATIBLE;
 
-	zip_package = app.folders.libraries .. '/'.._packagename .. '/'.._packagename .. '.zip'
+	if not lide.folder.exists(app.folders.libraries .. '/'.._packagename) then
+		lide.folder.create ( app.folders.libraries .. '/'.._packagename );
+	end
+
+	local zip_package = app.folders.libraries .. '/'.._packagename .. '/'.._packagename .. '.zip'
+	
+	--print('a' .. tostring(lide.file.exists(zip_package)))
+
+	--reposapi.download_package(_packagename, zip_package, _packagever, nil_access_token)
+	--[[
 	
 	reposapi.download_package(_packagename, zip_package, _packagever, nil_access_token)
 	
@@ -311,25 +422,20 @@ function reposapi.update_package ( _packagename, _packagever )
 	if not (lide_zip.extractFile(zip_package, _packagename ..'-'.. package_prefix ..'/'.. _packagename .. '.manifest', _manifest_file)) then
 		print (('> ERROR: Manifest file "%s" doesn\'t exists into "%s" package'):format(_packagename ..'/'.. package_prefix ..'/'.. _packagename .. '.manifest', zip_package) )
 	end
-]]
+	]]
 	if package_version then
 		_query_install = 'select * from lua_packages where package_name like "%s" and package_version like "%s" ORDER BY package_version DESC LIMIT 1'
 	else
 		_query_install = 'select * from lua_packages where package_name like "%s" ORDER BY package_version DESC LIMIT 1'
 	end
 
-	local installed_db = sqldatabase:new(app.folders.libraries .. '/linux/x64/installed.db', 'sqlite3')
+	local installed_db = sqldatabase:new((app.folders.libraries .. '/%s/%s/installed.db'):format(lide.platform.get_osname(), lide.platform.get_osarch()), 'sqlite3')
 	local lualibs = installed_db : select('select * from lua_packages where package_name like "'.._packagename..'" limit 1');
-
-	for bcompat_ver in inifile.parse_file(_manifest_file)[_packagename]['compatibility']:delimi ',' do
-		if (bcompat_ver == lualibs[1]['package_version']) then
-			IS_COMPATIBLE = true
-			break;
-		end
-	end
 	
-	if (IS_COMPATIBLE) then
-		local loaded_repos = {};
+	local loaded_repos = {};
+
+	--reposapi.download_package(_packagename, zip_package, _packagever, nil_access_token)
+
 		for repo_name, repo in pairs(reposapi.repos) do
 		
 			loaded_repos[repo_name] = sqldatabase:new(repo.path, 'sqlite3')
@@ -339,27 +445,65 @@ function reposapi.update_package ( _packagename, _packagever )
 				result_repo = loaded_repos[repo_name]:select(_query_install:format(_packagename, _packagever))[1]
 				break
 			end
-		end
+		end	
+	
+	---
+	--- package_prefix ends with '/'
+	---
 
-		lide.folder.create ( app.folders.libraries .. '/'.._packagename )
+	local package_prefix = result_repo.package_prefix 
+
+	if package_prefix and package_prefix:sub(#package_prefix,#package_prefix) ~= '/' then 
+		package_prefix = (package_prefix .. '/'):gsub('//', '/')
+	end
+
+	local _internal_path = (package_prefix or '') .. _packagename .. '.manifest'
+
+	reposapi.download_package(_packagename, zip_package..'-temp', _packagever, nil_access_token)
+	
+	local _manifest_file_content = lide_zip.getInternalFileContent(zip_package..'-temp', _internal_path);
+	
+	if (_manifest_file_content) then
+		if inifile.parse(_manifest_file_content)[_packagename]['compatibility'] then
+			for bcompat_ver in inifile.parse(_manifest_file_content)[_packagename]['compatibility']:delimi ',' do
+				if (bcompat_ver == lualibs[1]['package_version']) then
+					IS_COMPATIBLE = true
+					break;
+				end
+			end
+		else
+			IS_COMPATIBLE = false;
+		end
+	
+		lide.file.remove(zip_package..'-temp')
+	end
+
+	if (IS_COMPATIBLE) then
+		-- remove last version:
+		reposapi.remove_package (_packagename)
+		--lide.folder.remove_tree ( app.folders.libraries .. '/'.._packagename )
+
+		local zip_package = app.folders.libraries .. '/'.. _packagename ..'/'.._packagename .. '.zip'
 		
-		zip_package = app.folders.libraries .. '/'.._packagename .. '/'.._packagename .. '.zip'
+		-- install new version
+		--lide.folder.create ( app.folders.libraries .. '/temp' )
+		
+		if not lide.folder.exists ( app.folders.libraries .. '/' .. _packagename ) then
+			lide.mktree ( app.folders.libraries .. '/' .. _packagename )
+		end		
 		
 		reposapi.download_package(_packagename, zip_package, _packagever, nil_access_token)
-
-		local package_prefix = result_repo.package_prefix
-
-		reposapi.remove 'package_name'
 
 		local _install_package, lasterror = reposapi.install_package ( _packagename, zip_package, package_prefix)
 		
 		if _install_package then
 			print('> OK: '.._packagename..' successful installed.')
 		else
-			lide.folder.remove_tree ( app.folders.libraries .. '/'.._packagename )
+			if lide.folder.exists (app.folders.libraries .. '/'.._packagename) then
+				lide.folder.remove_tree ( app.folders.libraries .. '/'.._packagename )
+			end
 
 			print('> [package.install] ERROR: ' .. lasterror)
-			--reposapi.remove(_packagename)
 		end
 
 	else
