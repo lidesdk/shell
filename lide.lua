@@ -8,6 +8,8 @@
 
 assert(os.getenv 'LIDE_PATH', '[lide shell] Please define `LIDE_PATH` variable.');
 
+io.stdout:setvbuf('no')
+
 local LIDE_PATH     = os.getenv('LIDE_PATH')
 local _LIDE_VERSION = '0.1'
 

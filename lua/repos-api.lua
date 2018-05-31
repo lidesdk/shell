@@ -295,11 +295,10 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 			for _, int_path in pairs(_files) do -- internal_paths
 				local file_dst = normalize_path(app.folders.libraries ..'/'.. int_path)
 				
-				local a,b       = file_dst:gsub('\\', '/'):reverse():find '/'
-				local _filename = file_dst:reverse():sub(1, b) : reverse()
-				local _foldernm = file_dst:sub(1, (file_dst:find(_filename) or 0) -1)
+				--local a,b       = file_dst:gsub('\\', '/'):reverse():find '/'
+				--local _filename = file_dst:reverse():sub(1, b) : reverse() : gsub ('\\', ''):gsub(' ', '')
+				--local _foldernm = file_dst:sub(1, (file_dst:find(_filename) -1 or (#file_dst - #_filename) -1))
 				
-				lide.mktree(_foldernm)
 
 
 				lide_zip.extractFile(_package_file, (_package_prefix or '') .. int_path, file_dst)
