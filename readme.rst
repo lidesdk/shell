@@ -34,10 +34,6 @@ have installed the correct versions of each library.
 	$ git clone https://github.com/lidesdk/shell.git --recursive
 	$ export LIDE_PATH=$PWD
 
-Manual installation
--------------------
-- `Please follow the instructions for Windows. <https://github.com/lidesdk/shell/tree/master#windows-installation>`_
-- `Or follow the instructions for GNU/Linux... <https://github.com/lidesdk/shell/tree/master#gnulinux-installation>`_
 
 Auto Installer
 --------------
@@ -57,7 +53,7 @@ How to use it
 	local Form   = lide.classes.widgets.form
 	local Button = lide.classes.widgets.button
 
-	local MessageBox = lide.core.base.messagebox
+	local MessageBox = lide.widgets.messagebox
 
 	form1 = Form:new { Name = 'form1',
 		Title = 'Window Caption'
@@ -101,11 +97,10 @@ documentation:
 Credits and Authors
 ===================
 
-Lide was founded in 2014 by Hernán Darío Cano (`@dcanoh <https://github.com/dcanoh>`_) 
-and Jesús H. Cano (`@jhernancanom <https://github.com/jhernancanom>`_ ) 
+Lide Shell is a project founded in 2016 by Hernán Darío Cano (`@dcanoh <https://github.com/dcanoh>`_) 
 for private purposes, today is accessible to the public.
 
-Lide is currently active and developing, today is maintained by (`@dcanoh <https://github.com/dcanoh>`_).
+Lide Shell is currently active and developing, today is maintained by (`@dcanoh <https://github.com/dcanoh>`_).
 
 
 License
