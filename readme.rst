@@ -105,7 +105,7 @@ Lide was founded in 2014 by Hernán Darío Cano (`@dcanoh <https://github.com/dc
 and Jesús H. Cano (`@jhernancanom <https://github.com/jhernancanom>`_ ) 
 for private purposes, today is accessible to the public.
 
-Lide is currently active and mastering, today is maintained by (`@dcanoh <https://github.com/dcanoh>`_).
+Lide is currently active and developing, today is maintained by (`@dcanoh <https://github.com/dcanoh>`_).
 
 
 License
