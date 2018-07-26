@@ -296,7 +296,8 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 		end
 
 		if not compatible then
-			return false, '"' .. _package_name .. '" '.. _depend_version..' is not available on ' .. _osarch .. ' architecture.'
+			--return false, '"' .. _package_name .. '" '.. _depend_version..' is not available on ' .. _osarch .. ' architecture.'
+			return false, '"' .. _package_name .. '" '.. _package_version ..' is not available on ' .. _osarch .. ' architecture.'
 		end 
 
 		for arch_line in package_manifest[_osname] : delimi '|' do -- architectures are delimited by |
