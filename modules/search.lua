@@ -41,7 +41,7 @@ local n = 0; for repo_name, repo in pairs( reposapi.repos ) do
 		if printed then		
 			for tblname, tblcontent in pairs(printed) do
 				print(
-					(repo_name..'/%s %s %s %s\n    %s'):format(tblcontent.package_name, tblcontent.package_version, (tblcontent.package_compat or ''), str_tag or '', tblcontent.package_description:sub(1, 70)..'..')
+					(repo_name..'/%s %s %s %s\n  %s'):format(tblcontent.package_name, tblcontent.package_version, (tblcontent.package_compat or ''), str_tag or '', tblcontent.package_description:sub(1, 70)..'')
 				)
 				
 				if tblcontent.versions[1] then

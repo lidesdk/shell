@@ -113,19 +113,6 @@ function globals( ... )
 	return _G
 end
 
-function printl ( str )
-	local pr1, pr2  = str:find('%$');
-	local pr3, pr4  = str:find('%$', pr1+2);
-	local var_name  = str:sub(pr1 +1, pr3 -1);
-	local var_value = locals (1)  [var_name] or upvalues(1) [var_name]  or globals() [var_name]
-	
-	if not var_value then
-		assert( false, ('La variable "%s" no existe.'):format (var_name) )
-	end
-	
-	print( str:sub(1, pr1-1) .. var_value .. str:sub(pr4 +1, #str))
-end
-
 local function file_getline ( filename, nline )
 	local n = 0; for line in io.lines(filename) do
 		n = n+1; 
@@ -220,7 +207,7 @@ elseif ( arg[1] == 'update' ) then
 
 elseif ( arg[1] == 'remove' and arg[2] ) then
 	local _package_name = arg[2]
-	local repo_rem, last_error = repository.remove(_package_name)
+	local repo_rem, last_error = repository.remove_package(_package_name)
 	
 	if repo_rem then
 		print 'Library is successfully removed.'
@@ -247,8 +234,8 @@ Possible options:
   --test		Execute commandline tests
 
 Examples:
- To install luasql package:
-  > lide install luasql
+ To install lfs package:
+  > lide install lfs
 	
  To search for md5 package:
   > lide search md5

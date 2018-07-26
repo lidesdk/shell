@@ -1,18 +1,19 @@
-local _package_name    = arg[2]
-local _package_version = arg[3]
+local _package_name    = package_args[1]
+local _package_version = package_args[2]
 
 --reposapi.repos = reposapi.repos or {}
 
 local _SourceFolder = app.folders.sourcefolder
-local _ReposFile    = _SourceFolder .. '\\lide.repos'
+local _ReposFile    = _SourceFolder .. '/lide.repos'
 
 local reposapi = require 'repos-api'
 
-reposapi.update_repos ( _ReposFile, _SourceFolder .. '\\libraries' )
+reposapi.update_repos ( _ReposFile, _SourceFolder .. '/libraries' )
 --reposapi.update_repos ( _ReposFile, _SourceFolder .. '\\libraries' )
 
 local n = 0; for repo_name, repo in pairs( reposapi.repos ) do
 	local tbl;
+
 	if _package_version then
 		tbl = repo.sqldb : select('select * from lua_packages where package_name like "'.._package_name..'" and package_version like "'.._package_version..'" limit 1')
 	else

@@ -22,8 +22,8 @@ io.stdout : write '\t[OK]\n'
 --
 
 io.stdout : write '[lide commandline] package install: '
-	install_package = io.popen (LIDE_PATH .. '/lide.sh install lanes') :read '*a'
-    assert(type(io.open(LIDE_PATH .. '/libraries/linux/x64/clibs/lanes/core.so', 'rb')) == 'userdata')
+	install_package = io.popen (LIDE_PATH .. '/lide.sh install lfs') :read '*a'
+    assert(type(io.open(LIDE_PATH .. '/libraries/linux/x64/clibs/lfs.so', 'rb')) == 'userdata')
 
 io.stdout : write '\t[OK]\n'
 

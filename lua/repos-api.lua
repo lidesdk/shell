@@ -17,6 +17,20 @@ lide_zip    = require 'lide_zip'
 local normalize_path   = lide.platform.normalize_path;
 
 app.folders.libraries = app.folders.libraries
+
+function printl ( str )
+	local pr1, pr2  = str:find('%$');
+	local pr3, pr4  = str:find('%$', pr1+2);
+	local var_name  = str:sub(pr1 +1, pr3 -1);
+	local var_value = locals (1)  [var_name] or upvalues(1) [var_name]  or globals() [var_name]
+	
+	if not var_value then
+		assert( false, ('La variable "%s" no existe.'):format (var_name) )
+	end
+	
+	print( str:sub(1, pr1-1) .. var_value .. str:sub(pr4 +1, #str))
+end
+
 --
 --- local compare_versions ('1.0.0', '2.0.0')
 ---   Compare versions using semver.
