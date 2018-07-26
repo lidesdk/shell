@@ -6,7 +6,7 @@ execute scripts and create or search repositories of lua libraries.
 
 
 ========================================================= ====================================================================================
-   git branch: ``master``                                  build status ``0.1.12``
+   git branch: ``develop``                                  build status ``0.1.13-dev``
 ========================================================= ====================================================================================
  Tests executed with **Windows 10** x86 binaries		    .. image:: https://ci.appveyor.com/api/projects/status/tg8aq749c25jewg0/branch/develop?svg=true
                                                                      :target: https://ci.appveyor.com/project/dcanoh/shell/branch/develop
