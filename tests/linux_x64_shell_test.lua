@@ -23,7 +23,7 @@ io.stdout : write '\t[OK]\n'
 
 -- Test installation of lfs (1.7.0 for linux):
 io.stdout : write '[lide shell] package install: '
-	install_package = io.popen (LIDE_PATH .. '/lide.sh install lfs 1.7.0') :read '*a'   
+	install_package = io.popen ('./lide.sh install lfs 1.7.0') :read '*a'   
 	assert(type(io.open(LIDE_PATH .. '/libraries/linux/x64/clibs/lfs.so', 'rb')) == 'userdata')
 
 io.stdout : write '\t[OK]\n'
