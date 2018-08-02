@@ -8,7 +8,7 @@
 
 assert(os.getenv 'LIDE_PATH', '[lide shell] Please define `LIDE_PATH` variable.');
 
-io.stdout:setvbuf('no')
+io.stdout:setvbuf 'no'
 
 local LIDE_PATH     = os.getenv('LIDE_PATH')
 local _LIDE_VERSION = '0.1'
@@ -18,7 +18,6 @@ package.path  = LIDE_PATH .. '/libraries/?.lua;'; -- set package.path only to li
 --
 -- First load only lide.core to determine the current platform and set package.path and package.cpath
 --
-
 local lide = require 'lide.core.init'
 
 local normalize_path   = lide.platform.normalize_path;
@@ -137,8 +136,7 @@ app.folders.libraries    = normalize_path( os.getenv 'LIDE_PATH' .. '/libraries'
 -- load thirdparty libraries that'll be used on this app
 --
 
-lide_zip 		  = require 'lide_zip'
-
+local lide_zip    = require 'lide_zip'
 local inifile 	  = require 'inifile'
 local sqldatabase = require 'sqldatabase.init'
 local github      = require 'github'
@@ -206,14 +204,11 @@ elseif ( arg[1] == 'update' ) then
 	dofile ( app.folders.sourcefolder .. '/modules/update.lua' )
 
 elseif ( arg[1] == 'remove' and arg[2] ) then
-	local _package_name = arg[2]
-	local repo_rem, last_error = repository.remove_package(_package_name)
-	
-	if repo_rem then
-		print 'Library is successfully removed.'
-	else
-		print(last_error)
-	end
+
+	package_args = {} 
+	for i= 2, #arg do package_args[#package_args +1] = arg[i] end
+
+	dofile ( app.folders.sourcefolder .. '/modules/remove.lua' )
 
 elseif ( arg[1] == '--version' ) then
 

@@ -60,7 +60,7 @@ local n = 0; for repo_name, repo in pairs( reposapi.repos ) do
 				
 				if _install_package then
 					--if 0 == #reposapi.installed:select (('select package_name, package_version from lua_packages where package_name like "%s" and package_version like "%s"'):format(_package_name, _package_version)) then
-					reposapi.installed:exec (('insert into lua_packages values ("%s", "%s", "%s")'):format(_package_name, _package_version, 'package files'))
+					--reposapi.installed:exec (('insert into lua_packages values ("%s", "%s", "%s", "%s")'):format(_package_name, _package_version, 'package files', package_prefix))
 					--end
 
 					print('> OK: '.._package_name..' successful installed.')

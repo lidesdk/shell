@@ -18,6 +18,13 @@ local normalize_path   = lide.platform.normalize_path;
 
 app.folders.libraries = app.folders.libraries
 
+local installed_db_path = normalize_path((app.folders.libraries .. '/%s/%s/installed.db'):format(lide.platform.get_osname(), lide.platform.get_osarch()))
+
+lide.mktree(installed_db_path:gsub('installed.db', ''))		
+
+--here
+reposapi.installed = sqldatabase:new(installed_db_path, 'sqlite3')
+
 function printl ( str )
 	local pr1, pr2  = str:find('%$');
 	local pr3, pr4  = str:find('%$', pr1+2);
@@ -77,14 +84,22 @@ end
 --- reposapi.remove ( string _package_name ) 		
 ---  remove package from lide.
 ---
-function reposapi.remove_package ( _package_name, _depend_version )
-	--local _depend_version
+function reposapi.remove_package ( _package_name )
+	-- 
 	local _osname = lide.platform.get_osname():lower();
 
-	local _manifest_file = ('%s/%s/%s.manifest'):format(app.folders.libraries, _package_name, _package_name)
+	--local _manifest_file = normalize_path('%s/%s/%s.manifest'):format(app.folders.libraries, _package_name, _package_name)
+	--local _package_file  = normalize_path('%s/%s/%s.zip'):format(app.folders.libraries, _package_name, _package_name)
+
+	--local _manifest_contents, errmsg = lide.zip.getInternalFileContent ( _package_file, (_package_prefix or 'lfs-package.lide/') .. _package_name .. '.manifest' );
+
+--[[	local package_manifest  = inifile.parse (_manifest_contents)[_package_name]
+	local _package_version  = inifile.parse (_manifest_contents)[_package_name]['version']
+
 
 	if lide.file.doesExists(_manifest_file)
-	and lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
+	and 
+	lide.folder.doesExists(app.folders.libraries ..'/'.._package_name) then
 		
 		local package_manifest = inifile.parse_file(_manifest_file)[_package_name]
 
@@ -94,7 +109,12 @@ function reposapi.remove_package ( _package_name, _depend_version )
 
 			for arch_line in package_manifest[_osname] : delimi '|' do -- architectures are delimited by |
 				local arch_line = arch_line:delim ':'
+
 				local _files    = trim(arch_line[2] or '') : delim ',' -- files are delimiteed by comma					
+				]]
+
+				local _files_line = reposapi.installed : select (('select package_files from lua_packages where package_name like "%s"') : format (_package_name) ) [1] . package_files
+				local _files      = trim(_files_line or '') : delim ','
 				local todel_files = {}
 
 				-- copy file to destination: libraries/windows/x64/luasql/sqlite3.dll
@@ -112,15 +132,18 @@ function reposapi.remove_package ( _package_name, _depend_version )
 						return false, ('File %s wasn\'t removed'):format(file)
 					end
 				end
-			end
+		--	end
 		
 		lide.core.folder.delete(normalize_path(app.folders.libraries .. '/' .. _package_name));	
+		
+		reposapi.installed: exec (('DELETE FROM lua_packages WHERE package_name LIKE "%s"'):format (_package_name))
 
-		return true
-	else
-		return false, ('Error: Package %s is not installed.'):format(_package_name)
-	end
+	--	return true
+	--else
+	--	return false, ('Error: Package %s is not installed.'):format(_package_name)
+	--end
 end
+
 
 
 --- 
@@ -159,7 +182,7 @@ function reposapi.update_repos ( lide_repos, work_folder )
 		reposapi.installed = sqldatabase:new(installed_db_path, 'sqlite3')
 		
 		if 0 == #reposapi.installed:select "SELECT name FROM sqlite_master WHERE type='table' AND name='lua_packages';" then
-			reposapi.installed:exec 'CREATE TABLE "lua_packages" ("package_name" Text, "package_version" Text, "package_files" Text );'
+			reposapi.installed:exec 'CREATE TABLE "lua_packages" ("package_name" Text, "package_version" Text, "package_files" Text, "package_prefix" Text);'
 		end
 
 		return parsed
@@ -281,6 +304,8 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 
 	local package_manifest  = inifile.parse (_manifest_contents)[_package_name]
 	local _package_version  = inifile.parse (_manifest_contents)[_package_name]['version']
+	local _package_files    = ''
+
 
 	if rawget(package_manifest, _osname) then
 		local compatible;
@@ -305,6 +330,7 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 			--local _osname = _osname
 			--local _arch   = (arch_line[1] or ''):gsub(' ', '')
 			local _files  = (arch_line[2] or ''):gsub(' ', '') : delim ',' -- files are delimiteed by comma					
+			_package_files = arch_line[2]
 
 			-- This step copy file to destination: libraries/windows/x64/luasql/sqlite3.dll
 			for _, int_path in pairs(_files) do -- internal_paths
@@ -405,9 +431,9 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 			return false, last_error
 		end
 	end
-	
-	reposapi.installed:exec (('insert into lua_packages values ("%s", "%s", "%s")'):format(_package_name, _package_version or '', 'package files'))
 
+	reposapi.installed:exec (('insert into lua_packages values ("%s", "%s", "%s", "%s")'):format(_package_name, _package_version or '', _package_files, _package_prefix))
+	
 	return true;
 end
 
