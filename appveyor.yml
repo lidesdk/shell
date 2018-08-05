@@ -24,7 +24,7 @@ install:
 build_script:
   #- luarocks install luafilesystem
   - set LIDE_PATH=%CD%
-  - git clone https://github.com/lidesdk/framework.git %LIDE_PATH%/libraries/lide && cd %LIDE_PATH%/libraries/lide && git checkout %CURRENT_BRANCH%
+  - git clone https://github.com/lidesdk/framework.git %LIDE_PATH%/libraries/lide && cd %LIDE_PATH%/libraries/lide && git pull origin %CURRENT_BRANCH% && git checkout %CURRENT_BRANCH%
 
 test_script:
   - cd %LIDE_PATH%
