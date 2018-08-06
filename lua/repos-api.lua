@@ -193,12 +193,31 @@ end
 --- reposapi.get_installed_package ( 'lanes' )
 ---  Returns a representation of package using lua tables.
 --
-function reposapi.get_installed_package ( _packagename )
-	local _manifest_file   = ('%s/%s/%s.manifest'):format(app.folders.libraries, _packagename, _packagename);
-	local package_manifest = inifile.parse_file(_manifest_file)[_packagename]
+--function reposapi.get_installed_package ( _packagename )
+--	local _manifest_file   = ('%s/%s/%s.manifest'):format(app.folders.libraries, _packagename, _packagename);
+--	local package_manifest = inifile.parse_file(_manifest_file)[_packagename]
+--
+--	return package_manifest
+--end
 
-	return package_manifest
+function reposapi.get_installed_package ( _package_name )
+	local installed_db_path = normalize_path((app.folders.libraries .. '/%s/%s/installed.db'):format(lide.platform.get_osname(), lide.platform.get_osarch()))
+	
+	---lide.mktree(installed_db_path:gsub('installed.db', ''))		
+
+	--here
+	reposapi.installed = sqldatabase:new(installed_db_path, 'sqlite3')
+
+
+	local result = reposapi.installed : select (('select package_name, package_version from lua_packages where package_name like "%s"') : format ( _package_name) )
+
+	if (# result == 0) then
+		return false, ('%s is not installed'):format(_package_name)
+	else
+		return result[1]
+	end
 end
+
 
 ---
 --- reposapi.download_package ( string _package_name, string _package_file, string access_token )
@@ -251,12 +270,14 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 	local _manifest_file = normalize_path(app.folders.libraries ..'/'.._package_name..'/'.. _package_name ..'.manifest')
 	
 	if _package_prefix and _package_prefix:sub(#_package_prefix,#_package_prefix) ~= '/' then 
-		--_package_prefix = (_package_prefix .. '/'):gsub('//', '/')
+		_package_prefix = (_package_prefix .. '/'):gsub('//', '/')
 	else
-		_package_prefix = (_package_name .. '-package.lide')
+		--_package_prefix = (_package_name .. '-package.lide')
 	end
 	
-	print('1' .. _package_prefix)
+	if _package_prefix == '/' then
+		_package_prefix = ''
+	end
 
 	if not lide.file.doesExists(_package_file) then
 		return false, '! Error: The package: ' .. tostring(_package_file) .. ' is not downloaded now.'
@@ -305,15 +326,28 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 	------------------------------------------------------------
 	------------------------------------------------------------
 	local _manifest_contents, errmsg = lide.zip.getInternalFileContent ( _package_file, (_package_prefix or '') .. _package_name .. '.manifest' );
+
+	local package_manifest   = inifile.parse (_manifest_contents)[_package_name]
+	local _package_version   = package_manifest ['version']
+	local _cur_osname_archs  = package_manifest [_osname]:delim '|' -- osname table of architectures
 	
-	local package_manifest  = inifile.parse (_manifest_contents)[_package_name]
-	local _package_version  = package_manifest ['version']
---	local _windows_files    = package_manifest ['windows']
---	local _windows_files    = package_manifest ['linux']
-	local _package_files    = ''
+	local files_list = {}
+
+	for _, str_files in pairs(_cur_osname_archs) do
+		local arch_str  = str_files : delim ':' [1]
+		local files_str = str_files : delim ':' [2]
+
+		files_list[arch_str] = files_str; -- 1 = x86:sdasda/dsads/fsdf.txt = 2
+	end
+
+	if not package_manifest[_osname] then
+		if not compatible then
+			return false, '"' .. _package_name .. '" '.. _package_version ..' is not available on ' .. _osarch .. ' architecture.'
+		end 
+	end
 
 	if not package_manifest or not _package_version then
-		return false, 'wrong manifest file.'
+		return false, '[package.install] Wrong manifest file.'
 	end
 
 	if rawget(package_manifest, _osname) then
@@ -334,7 +368,7 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 			return false, '"' .. _package_name .. '" '.. _package_version ..' is not available on ' .. _osarch .. ' architecture.'
 		end 
 
-		for arch_line in package_manifest[_osname] : delimi '|' do -- architectures are delimited by |
+		local _package_files ; for arch_line in package_manifest[_osname] : delimi '|' do -- architectures are delimited by |
 			arch_line = arch_line:delim ':' 
 			--local _osname = _osname
 			--local _arch   = (arch_line[1] or ''):gsub(' ', '')
@@ -359,7 +393,9 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 			end
 		end
 
-		
+		reposapi.installed:exec (('insert into lua_packages values ("%s", "%s", "%s", "%s")'):format(_package_name, tostring(_package_version), tostring(files_list[_osarch]), tostring(_package_prefix)))
+
+
 	elseif not rawget(package_manifest, _osname) then
 		return false, '"' .. _package_name .. '" is not available on ' .. _osname .. '.'
 	end
@@ -392,8 +428,9 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 				_depend_version  = ''
 			end
 
-			if lide.folder.doesExists(app.folders.libraries ..'/'.._depend_name) then
-				printl '  > $_package_name$ is installed now.'
+			--if lide.folder.exists(app.folders.libraries ..'/'.._depend_name) then
+			if reposapi.get_installed_package(_depend_name) then
+				printl '  > $_depend_name$ is installed now.'
 			else
 				printl '  > installing $_depend_name$' 
 
@@ -402,7 +439,7 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 				if _package_prefix and _package_prefix[1] then
 					_package_prefix = _package_prefix[1].package_prefix
 				end
-
+				
 				--print('> installing...'..)	
 								
 				lide.folder.create ( app.folders.libraries .. '/'.._depend_name )
@@ -411,7 +448,7 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 				
 				reposapi.download_package(_depend_name, zip_package, _depend_version, nil_access_token)
 				
-				local _install_package, lasterror = reposapi.install_package (_depend_name, zip_package, _package_prefix)
+				local _install_package, lasterror = reposapi.install_package (_depend_name, zip_package, _package_prefix or '')
 				
 				if _install_package then
 					--if 0 == #reposapi.installed:select (('select package_name, package_version from lua_packages where package_name like "%s" and package_version like "%s"'):format(_package_name, _depend_version)) then
@@ -419,7 +456,8 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 					--end
 
 					--print('> OK: '.._depend_name..' successful installed.')
-
+					--reposapi.installed:exec (('insert into lua_packages values ("%s", "%s", "%s", "%s")'):format(_package_name, tostring(_package_version), tostring(_package_files), tostring(_package_prefix)))
+--					reposapi.installed:exec (('insert into lua_packages values ("%s", "%s", "%s", "%s")'):format(_package_name, tostring(_package_version), tostring(_package_files), tostring(_package_prefix)))
 				else
 					--lide.folder.remove_tree ( app.folders.libraries .. '/'.._depend_name )
 
@@ -440,8 +478,6 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 			return false, last_error
 		end
 	end
-
-	reposapi.installed:exec (('insert into lua_packages values ("%s", "%s", "%s", "%s")'):format(_package_name, _package_version or '', _package_files, _package_prefix))
 	
 	return true;
 end
