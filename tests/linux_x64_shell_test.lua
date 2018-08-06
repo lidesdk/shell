@@ -28,7 +28,7 @@ io.stdout : write '[lide shell] package install: '
 	io.stdout : write ('\n' .. install_package)
 	
 	print(LIDE_PATH .. '/libraries/linux/x64/clibs/lfs.so')
-	os.execute ('ls ' ..LIDE_PATH .. '/libraries/linux/x64/clibs/lfs.so')
+	os.execute ('ls -ah ' ..LIDE_PATH .. '/libraries/linux/x64/clibs')
 
 	assert(type(io.open(LIDE_PATH .. '/libraries/linux/x64/clibs/lfs.so', 'rb')) == 'userdata')
 
