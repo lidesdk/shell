@@ -8,6 +8,12 @@ local _ReposFile    = _SourceFolder .. '/lide.repos'
 
 local reposapi = require 'repos-api'
 
+if not http.test_connection 'http://httpbin.org/response-headers' then
+	print '[package.lide] No network connection.'
+	
+	return false;
+end
+
 reposapi.update_repos ( _ReposFile, app.folders.libraries )
 
 local n = 0; for repo_name, repo in pairs( reposapi.repos ) do
@@ -43,12 +49,12 @@ local n = 0; for repo_name, repo in pairs( reposapi.repos ) do
 				end
 
 				if # tbl > 0 then
-					print(('> Found! %s %s'):format(_package_name, _package_version));
+					io.stdout:write(('> Found: %s %s'):format(_package_name, _package_version));
 				end
 
 				n = n + 1
 				
-				print('> installing...')	
+				--io.stdout:write '> Installing...'
 								
 				lide.folder.create ( app.folders.libraries .. '/'.._package_name )
 
@@ -63,7 +69,7 @@ local n = 0; for repo_name, repo in pairs( reposapi.repos ) do
 					--reposapi.installed:exec (('insert into lua_packages values ("%s", "%s", "%s", "%s")'):format(_package_name, _package_version, 'package files', package_prefix))
 					--end
 
-					print('> OK: '.._package_name..' successful installed.')
+					print('\n> OK: '.._package_name..' '.._package_version..' successful installed.')
 
 				else
 					lide.folder.remove_tree ( app.folders.libraries .. '/'.._package_name )

@@ -22,6 +22,7 @@ local installed_db_path = normalize_path((app.folders.libraries .. '/%s/%s/insta
 
 lide.mktree(installed_db_path:gsub('installed.db', ''))		
 
+
 --here
 reposapi.installed = sqldatabase:new(installed_db_path, 'sqlite3')
 
@@ -413,9 +414,7 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 
 	local function install_depends ( package_manifest, _package_name )
 		local depends = package_manifest.depends : delim ','
-		
-		printl '  > installing dependencies for $_package_name$:'
-	
+
 		for _, _depend_string in pairs( depends ) do
 			local _depend_name, _depend_version
 			local a,b = _depend_string:find ' '
@@ -427,21 +426,24 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 				_depend_name     = _depend_string :gsub (' ', '');
 				_depend_version  = ''
 			end
+			
+			if not reposapi.get_installed_package(_depend_name) then
+				io.stdout:write (('\n > installing dependencies for %s: '):format(_package_name));
+			end
 
-			--if lide.folder.exists(app.folders.libraries ..'/'.._depend_name) then
 			if reposapi.get_installed_package(_depend_name) then
-				printl '  > $_depend_name$ is installed now.'
+				--printl '  > $_depend_name$ is installed now.'
+				--io.stdout:write (('%s %s '):format(_depend_name, _depend_version));
 			else
-				printl '  > installing $_depend_name$' 
+				--- print only current installing:
+				io.stdout:write (('%s %s '):format(_depend_name, _depend_version));
 
 				local _package_prefix = reposapi.repos[package_manifest.repository] . sqldb : select('select * from lua_packages where package_name like "'.._depend_name..'" ORDER BY package_version DESC LIMIT 1;')
 				
 				if _package_prefix and _package_prefix[1] then
 					_package_prefix = _package_prefix[1].package_prefix
 				end
-				
-				--print('> installing...'..)	
-								
+											
 				lide.folder.create ( app.folders.libraries .. '/'.._depend_name )
 
 				local zip_package = normalize_path(app.folders.libraries .. '/'.._depend_name .. '/'.._depend_name .. '.zip')
@@ -454,7 +456,6 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 					--if 0 == #reposapi.installed:select (('select package_name, package_version from lua_packages where package_name like "%s" and package_version like "%s"'):format(_package_name, _depend_version)) then
 					--sreposapi.installed:exec (('insert into lua_packages values ("%s", "%s", "%s")'):format(_depend_name, _depend_version, 'package files'))
 					--end
-
 					--print('> OK: '.._depend_name..' successful installed.')
 					--reposapi.installed:exec (('insert into lua_packages values ("%s", "%s", "%s", "%s")'):format(_package_name, tostring(_package_version), tostring(_package_files), tostring(_package_prefix)))
 --					reposapi.installed:exec (('insert into lua_packages values ("%s", "%s", "%s", "%s")'):format(_package_name, tostring(_package_version), tostring(_package_files), tostring(_package_prefix)))

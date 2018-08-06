@@ -12,6 +12,11 @@ local compare_versions = reposapi.compare_versions
 local _SourceFolder = app.folders.sourcefolder
 local _ReposFile    = _SourceFolder .. '/lide.repos'
 
+if not http.test_connection 'http://httpbin.org/response-headers' then
+	print '[package.lide] No network connection.'
+	
+	return false;
+end
 
 if not _package_name then
 	print '[package.update] Error: please specify package name and version.'

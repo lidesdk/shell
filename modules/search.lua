@@ -13,6 +13,11 @@ end
 
 reposapi = require 'repos-api'
 
+if not http.test_connection 'http://httpbin.org/response-headers' then
+	print '[package.lide] No network connection.'
+
+	return false;
+end
 
 local text_to_search = tostring(arg[2])
 reposapi.update_repos ( _ReposFile, _SourceFolder .. '\\libraries' )

@@ -24,7 +24,7 @@ function http.test_connection ( url )
 	if not exec or errm.status_code ~= 200 then
 		return false, errm.status
 	else
-		return errm
+		return true;
 	end	
 end
 
