@@ -252,6 +252,8 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 	
 	if _package_prefix and _package_prefix:sub(#_package_prefix,#_package_prefix) ~= '/' then 
 		_package_prefix = (_package_prefix .. '/'):gsub('//', '/')
+	else
+		_package_prefix = (_package_name .. '-package.lide')
 	end
 
 	if not lide.file.doesExists(_package_file) then
@@ -300,12 +302,17 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 
 	------------------------------------------------------------
 	------------------------------------------------------------
-	local _manifest_contents = lide.zip.getInternalFileContent ( _package_file, (_package_prefix or '') .. _package_name .. '.manifest' );
+	local _manifest_contents, errmsg = lide.zip.getInternalFileContent ( _package_file, (_package_prefix or '') .. _package_name .. '.manifest' );
 
 	local package_manifest  = inifile.parse (_manifest_contents)[_package_name]
-	local _package_version  = inifile.parse (_manifest_contents)[_package_name]['version']
+	local _package_version  = package_manifest ['version']
+--	local _windows_files    = package_manifest ['windows']
+--	local _windows_files    = package_manifest ['linux']
 	local _package_files    = ''
 
+	if not package_manifest or not _package_version then
+		return false, 'wrong manifest file.'
+	end
 
 	if rawget(package_manifest, _osname) then
 		local compatible;

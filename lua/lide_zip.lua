@@ -95,7 +95,7 @@ end
 function lide.zip.getInternalFileContent ( zipFilePath, internalPath )
     local zfile, err, currFileContents
     
-    if lide.file.doesExists(zipFilePath) then
+    if lide.file.exists(zipFilePath) then
     	zfile, err = zip.open(zipFilePath);
     else
     	return false
@@ -106,7 +106,7 @@ function lide.zip.getInternalFileContent ( zipFilePath, internalPath )
         
     if internalPath:gsub(' ', '') ~= '' then
     	local currFile, err = zfile:open(internalPath);
-    	if not currFile then return false, 'internalPath file does not exists.' end
+    	if not currFile then return false, ('internalPath %s does not exists.'):format(internalPath) end
     	
     	currFileContents = currFile:read("*a"); -- read entire contents of current file
     	currFile:close();

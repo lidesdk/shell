@@ -55,7 +55,7 @@ local n = 0; for repo_name, repo in pairs( reposapi.repos ) do
 				zip_package = app.folders.libraries .. '/'.._package_name .. '/'.._package_name .. '.zip'
 				
 				reposapi.download_package(_package_name, zip_package, _package_version, nil_access_token)
-				
+				print('package_prefix' .. package_prefix)
 				local _install_package, lasterror = reposapi.install_package (_package_name, zip_package, package_prefix)
 				
 				if _install_package then
