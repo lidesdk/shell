@@ -34,7 +34,7 @@ local n = 0; for repo_name, repo in pairs( reposapi.repos ) do
 				
 				--local package_name    = repo.sqldb:select(_query_install:format(_package_name))[1].package_name
 				local _package_version = (_package_version or tbl[1].package_version)
-				local package_prefix   = tbl[1].package_prefix
+				local package_prefix   = tbl[1].package_prefix or ''
 				
 				if lide.folder.doesExists(app.folders.libraries ..'/'.. _package_name) then
 					print (('The package %s is already installed.'):format(_package_name))
@@ -56,6 +56,8 @@ local n = 0; for repo_name, repo in pairs( reposapi.repos ) do
 				
 				reposapi.download_package(_package_name, zip_package, _package_version, nil_access_token)
 				
+				print('package_prefix: ' .. package_prefix)
+
 				local _install_package, lasterror = reposapi.install_package (_package_name, zip_package, package_prefix)
 				
 				if _install_package then

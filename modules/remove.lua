@@ -7,22 +7,27 @@ local _ReposFile    = _SourceFolder .. '/lide.repos'
 local reposapi = require 'repos-api'
 
 function reposapi_get_package ( name )
-	local result = reposapi.installed : select (('select package_name from lua_packages where package_name like "%s"') : format (name) )
+	local result = reposapi.installed : select (('select package_name, package_version from lua_packages where package_name like "%s"') : format (name) )
 
 	if (# result == 0) then
 		return false, ('%s is not installed'):format(name)
 	else
-		return true, result
+		return result[1]
 	end
 end
 
-if not reposapi_get_package ( _package_name ) then
-	print (('%s is not installed'):format(_package_name))
+local package_data = reposapi_get_package ( _package_name );
+
+if not package_data then
+	print (('> %s is not installed.'):format(_package_name))
 else
-	print '> installed lfs 1.4.20'
+	_package_version = package_data.package_version;
+	
+	print (('> installed %s %s'):format(_package_name, _package_version))
 	print '> removing files...'
 	
 	-- remove package:
 	reposapi.remove_package (_package_name);
-	print '> OK: lfs successfully removed.'
+	
+	print (('> OK: %s successfully removed.'):format(_package_name))
 end

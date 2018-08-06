@@ -251,10 +251,12 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 	local _manifest_file = normalize_path(app.folders.libraries ..'/'.._package_name..'/'.. _package_name ..'.manifest')
 	
 	if _package_prefix and _package_prefix:sub(#_package_prefix,#_package_prefix) ~= '/' then 
-		_package_prefix = (_package_prefix .. '/'):gsub('//', '/')
+		--_package_prefix = (_package_prefix .. '/'):gsub('//', '/')
 	else
 		_package_prefix = (_package_name .. '-package.lide')
 	end
+	
+	print('1' .. _package_prefix)
 
 	if not lide.file.doesExists(_package_file) then
 		return false, '! Error: The package: ' .. tostring(_package_file) .. ' is not downloaded now.'
@@ -303,7 +305,7 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 	------------------------------------------------------------
 	------------------------------------------------------------
 	local _manifest_contents, errmsg = lide.zip.getInternalFileContent ( _package_file, (_package_prefix or '') .. _package_name .. '.manifest' );
-
+	
 	local package_manifest  = inifile.parse (_manifest_contents)[_package_name]
 	local _package_version  = package_manifest ['version']
 --	local _windows_files    = package_manifest ['windows']
