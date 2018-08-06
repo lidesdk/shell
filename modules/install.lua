@@ -56,8 +56,6 @@ local n = 0; for repo_name, repo in pairs( reposapi.repos ) do
 				
 				reposapi.download_package(_package_name, zip_package, _package_version, nil_access_token)
 				
-				io.stdout:write('package_prefix: ' .. package_prefix .. '\n')
-
 				local _install_package, lasterror = reposapi.install_package (_package_name, zip_package, package_prefix)
 				
 				if _install_package then
