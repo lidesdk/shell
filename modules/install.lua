@@ -8,11 +8,15 @@ local _ReposFile    = _SourceFolder .. '/lide.repos'
 
 local reposapi = require 'repos-api'
 
+print 'package.install: test connection' -- log or printlog
+
 if not http.test_connection 'http://httpbin.org/response-headers' then
 	print '[package.lide] No network connection.'
 	
 	return false;
 end
+
+print 'package.install: Network: connected.'
 
 reposapi.update_repos ( _ReposFile, app.folders.libraries )
 

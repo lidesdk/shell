@@ -168,9 +168,11 @@ function reposapi.update_repos ( lide_repos, work_folder )
 				reposapi.repos[repo_name] = repo
 				reposapi.repos[repo_name].path = normalize_path(work_folder .. '/'..repo_name..'.db')
 				reposapi.repos[repo_name].sqldb = sqldatabase:new(repo.path, 'sqlite3')
-				reposapi.download_db (repo.url, normalize_path(work_folder .. '/'..repo_name..'.db'))
-			else
-				print 'There\'s a problem with repo url.\n'
+				if not lide.file.exists (work_folder..'/'..repo_name .. '.db') then
+					reposapi.download_db (repo.url, normalize_path(work_folder .. '/'..repo_name..'.db'))
+				end
+			elseif not repo.url then
+				print 'package.update: There\'s a problem with repo url.\n'
 				print ('[lide]: '.. repo_name .. ' ' .. tostring(repo.url))
 			end	
 		end
