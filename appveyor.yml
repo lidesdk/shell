@@ -28,4 +28,5 @@ build_script:
 
 test_script:
   - cd %LIDE_PATH%
+  - .\lide.bat tests\windows_x86_shell_test.lua
   - lua tests\windows_x86_shell_test.lua
