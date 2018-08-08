@@ -29,11 +29,11 @@ io.stdout : write '\t[OK]\n'
 
 io.stdout : write '[lide shell] package install: '
 -- Test installation of lfs (1.7.0 for linux):	
-	install_package = io.popen ('./lide.sh install lfs 1.7.0') :read '*a'
+	install_package = io.popen (LIDE_PATH .. '/lide.sh install lfs 1.7.0') :read '*a'
 	io.stdout : write ('\n' .. install_package)
 	
 	print(LIDE_PATH .. '/libraries/linux/x64/clibs/lfs.so')
-	os.execute ('ls -ah ' ..LIDE_PATH .. '/libraries/linux/x64/clibs')
+	os.execute ('ls -ah ' .. LIDE_PATH .. '/libraries/linux/x64/clibs')
 
 	assert(type(io.open(LIDE_PATH .. '/libraries/linux/x64/clibs/lfs.so', 'rb')) == 'userdata')
 
