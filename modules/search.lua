@@ -14,7 +14,7 @@ end
 reposapi = require 'repos-api'
 
 if not http.test_connection 'http://httpbin.org/response-headers' then
-	print '[package.lide] No network connection.'
+	lide.log '[package.lide] No network connection.'
 
 	return false;
 end

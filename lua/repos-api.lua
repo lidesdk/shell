@@ -169,7 +169,7 @@ function reposapi.update_repos ( lide_repos, work_folder )
 				reposapi.repos[repo_name].path = normalize_path(work_folder .. '/'..repo_name..'.db')
 				reposapi.repos[repo_name].sqldb = sqldatabase:new(repo.path, 'sqlite3')
 				if not lide.file.exists (work_folder..'/'..repo_name .. '.db') then
-					print (('package.lide: Downloading %s db'):format(repo_name))
+					lide.log ('[package.lide] Downloading %s db', repo_name)
 
 					reposapi.download_db (repo.url, normalize_path(work_folder .. '/'..repo_name..'.db'))
 				end
