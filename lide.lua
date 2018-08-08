@@ -142,6 +142,8 @@ local sqldatabase = require 'sqldatabase.init'
 local github      = require 'github'
 local http        = require 'http.init'
 
+require 'lide-log'
+
 ---------------------------------------------------------------------------------------------
 
 local framework = {}

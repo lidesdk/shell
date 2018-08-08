@@ -8,15 +8,19 @@ local _ReposFile    = _SourceFolder .. '/lide.repos'
 
 local reposapi = require 'repos-api'
 
-print 'package.install: test connection' -- log or printlog
+lide.log.printlog = false;
+
+lide.log '[package.lide] Test connection'
 
 if not http.test_connection 'http://httpbin.org/response-headers' then
-	print '[package.lide] No network connection.'
+	lide.log '[package.lide] No network connection.'
 	
 	return false;
+else 
+	lide.log '[package.lide] Network: Connected.'
 end
 
-print 'package.install: Network: connected.'
+lide.log '[package.lide] Updating repos'
 
 reposapi.update_repos ( _ReposFile, app.folders.libraries )
 
@@ -41,7 +45,6 @@ local n = 0; for repo_name, repo in pairs( reposapi.repos ) do
 					return false
 				end
 				
-				--local package_name    = repo.sqldb:select(_query_install:format(_package_name))[1].package_name
 				local _package_version = (_package_version or tbl[1].package_version)
 				local package_prefix   = tbl[1].package_prefix or ''
 				
@@ -53,33 +56,29 @@ local n = 0; for repo_name, repo in pairs( reposapi.repos ) do
 				end
 
 				if # tbl > 0 then
-					io.stdout:write(('> Found: %s %s'):format(_package_name, _package_version));
+					print(('> Found: %s %s'):format(_package_name, _package_version));
 				end
 
 				n = n + 1
 				
-				--io.stdout:write '> Installing...'
-								
 				lide.folder.create ( app.folders.libraries .. '/'.._package_name )
-
-				zip_package = app.folders.libraries .. '/'.._package_name .. '/'.._package_name .. '.zip'
 				
+				local zip_package = app.folders.libraries .. '/'.._package_name .. '/'.._package_name .. '.zip'
+				
+				lide.log ('[package.lide] Downloading package %s %s', _package_name, _package_version)
+
 				reposapi.download_package(_package_name, zip_package, _package_version, nil_access_token)
 				
+				lide.log ('[package.lide] Installing package %s %s', _package_name, _package_version)
+
 				local _install_package, lasterror = reposapi.install_package (_package_name, zip_package, package_prefix or '')
 				
 				if _install_package then
-					--if 0 == #reposapi.installed:select (('select package_name, package_version from lua_packages where package_name like "%s" and package_version like "%s"'):format(_package_name, _package_version)) then
-					--reposapi.installed:exec (('insert into lua_packages values ("%s", "%s", "%s", "%s")'):format(_package_name, _package_version, 'package files', package_prefix))
-					--end
-
-					print('\n> OK: '.._package_name..' '.._package_version..' successful installed.')
-
+					print('> OK: '.._package_name..' '.._package_version..' successful installed.')
 				else
 					lide.folder.remove_tree ( app.folders.libraries .. '/'.._package_name )
 
 					print('\n> ' .. lasterror)
-					--reposapi.remove(_package_name)
 				end
 				break
 			end
