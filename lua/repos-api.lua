@@ -390,7 +390,11 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 				--local a,b       = file_dst:gsub('\\', '/'):reverse():find '/'
 				--local _filename = file_dst:reverse():sub(1, b) : reverse() : gsub ('\\', ''):gsub(' ', '')
 				--local _foldernm = file_dst:sub(1, (file_dst:find(_filename) -1 or (#file_dst - #_filename) -1))
-				local folder, file, ext = string.match(file_dst, "(.-)([^\\]-([^%.]+))$")
+				if lide.platform.get_osname == 'windows' then
+					local folder, file, ext = string.match(file_dst, "(.-)([^\\]-([^%.]+))$")
+				elseif lide.platform.get_osname == 'linux' then
+					local folder, file, ext = string.match(file_dst, "(.-)([^/]-([^%.]+))$")
+				end
 				
 				local _folder_name = folder:sub(1, #folder -1)
 
