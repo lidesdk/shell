@@ -18,6 +18,8 @@ io.stdout : write '\t[OK]\n'
 io.stdout : write '[lide shell] package search: '
 	
 	 searchline = io.popen (LIDE_PATH .. '/lide.sh search luasql') :read '*l'
+	 print(searchline)
+	 print(searchline:sub (1, searchline : find '/' ))
 	 assert( searchline:sub (1, searchline : find '/' ) == 'stable/')
 	 searchline = io.popen (LIDE_PATH .. '/lide.sh search lfs') :read '*l'
 	 assert( searchline:sub (1, searchline : find '/' ) == 'stable/')
