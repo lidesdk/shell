@@ -78,7 +78,7 @@ local n = 0; for repo_name, repo in pairs( reposapi.repos ) do
 				else
 					lide.folder.remove_tree ( app.folders.libraries .. '/'.._package_name )
 
-					print('> [package.install] ERROR: ' .. lasterror)
+					print('\n> ' .. lasterror)
 					--reposapi.remove(_package_name)
 				end
 				break

@@ -169,6 +169,8 @@ function reposapi.update_repos ( lide_repos, work_folder )
 				reposapi.repos[repo_name].path = normalize_path(work_folder .. '/'..repo_name..'.db')
 				reposapi.repos[repo_name].sqldb = sqldatabase:new(repo.path, 'sqlite3')
 				if not lide.file.exists (work_folder..'/'..repo_name .. '.db') then
+					print (('package.lide: Downloading %s db'):format(repo_name))
+
 					reposapi.download_db (repo.url, normalize_path(work_folder .. '/'..repo_name..'.db'))
 				end
 			elseif not repo.url then
@@ -332,10 +334,13 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 
 	local package_manifest   = inifile.parse (_manifest_contents)[_package_name]
 	local _package_version   = package_manifest ['version']
+	if not package_manifest[_osname] then
+	   return false, (('This package isn\'t compatible with %s'):format(_osname))
+	   
+	end
 	local _cur_osname_archs  = package_manifest [_osname]:delim '|' -- osname table of architectures
 	
 	local files_list = {}
-
 	for _, str_files in pairs(_cur_osname_archs) do
 		local arch_str  = str_files : delim ':' [1]
 		local files_str = str_files : delim ':' [2]
@@ -345,7 +350,7 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 
 	if not package_manifest[_osname] then
 		if not compatible then
-			return false, '"' .. _package_name .. '" '.. _package_version ..' is not available on ' .. _osarch .. ' architecture.'
+			return false, '' .. _package_name .. ' '.. _package_version ..' is not available on ' .. _osarch .. ' architecture.'
 		end 
 	end
 
@@ -368,7 +373,7 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 
 		if not compatible then
 			--return false, '"' .. _package_name .. '" '.. _depend_version..' is not available on ' .. _osarch .. ' architecture.'
-			return false, '"' .. _package_name .. '" '.. _package_version ..' is not available on ' .. _osarch .. ' architecture.'
+			return false, '' .. _package_name .. ' '.. _package_version ..' is not available on ' .. _osarch .. ' architecture.'
 		end 
 
 		local _package_files ; for arch_line in package_manifest[_osname] : delimi '|' do -- architectures are delimited by |
