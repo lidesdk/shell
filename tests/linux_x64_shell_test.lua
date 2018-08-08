@@ -27,7 +27,7 @@ io.stdout : write '[lide shell] package search: '
 io.stdout : write '\t[OK]\n'
 
 
---[[io.stdout : write '[lide shell] package install: '
+io.stdout : write '[lide shell] package install: '
 -- Test installation of lfs (1.7.0 for linux):	
 	install_package = io.popen ('./lide.sh install lfs 1.7.0') :read '*a'
 	io.stdout : write ('\n' .. install_package)
@@ -37,5 +37,4 @@ io.stdout : write '\t[OK]\n'
 
 	assert(type(io.open(LIDE_PATH .. '/libraries/linux/x64/clibs/lfs.so', 'rb')) == 'userdata')
 
-io.stdout : write '\t[NO TEST]\n'
-]]--
+io.stdout : write '\t[OK]\n'
