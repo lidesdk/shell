@@ -16,7 +16,7 @@ end
 --    string 'x86', 'x64', 'arm'
 ---
 function lide_platform_get_osarch ()
-	local _osname = lide.platform.get_osname():lower()
+	local _osname = lide_platform_get_osname():lower()
 
 	if (_osname == 'windows') then
 		return tostring(os.getenv 'PROCESSOR_ARCHITECTURE' : gsub ('AMD64', 'x64')):sub(1,3);
@@ -64,9 +64,9 @@ do
 					LIDE_PATH .. ('/libraries/%s/%s/lua/?/init.lua;'):format(_current_osname, _current_osarch) .. 
 					package.path;
 
-	package.cpath = LIDE_PATH .. ('/clibs/%s/%s/?.%s;'):format(_current_osname, _current_osarch, _current_osext) ..
-					LIDE_PATH .. ('/libraries/%s/%s/clibs/?.%s;'):format(_current_osname, _current_osarch, _current_osext) ..
-					LIDE_PATH .. ('/libraries/%s/%s/clibs/?/core.%s;'):format(_current_osname, _current_osarch, _current_osext) ..
+	package.cpath = LIDE_PATH .. ('/clibs/%s/%s/?%s;'):format(_current_osname, _current_osarch, _current_osext) ..
+					LIDE_PATH .. ('/libraries/%s/%s/clibs/?%s;'):format(_current_osname, _current_osarch, _current_osext) ..
+					LIDE_PATH .. ('/libraries/%s/%s/clibs/?/core%s;'):format(_current_osname, _current_osarch, _current_osext) ..
 					package.cpath;
 
 	package.path  = normalize_path(package.path);
@@ -79,6 +79,6 @@ do
 	local x, e = pcall(dofile, file)
 	
 	if not x then
-		print(e)
+		error(e)
 	end
 end
