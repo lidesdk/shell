@@ -59,6 +59,7 @@ do
 	package.path  = LIDE_PATH .. '/libraries/lua/?.lua;' ..
 					LIDE_PATH .. '/libraries/lua/?/init.lua;' ..
 					LIDE_PATH .. '/libraries/?.lua;' ..
+					'?.lua;'  ..
 
 					LIDE_PATH .. ('/libraries/%s/%s/lua/?.lua;'):format(_current_osname, _current_osarch) .. 
 					LIDE_PATH .. ('/libraries/%s/%s/lua/?/init.lua;'):format(_current_osname, _current_osarch) .. 
@@ -76,9 +77,10 @@ do
 	----------------------------------------------------------------------------------------
 	----------------------------------------------------------------------------------------
 
-	local x, e = pcall(dofile, file)
+	--local x, e = 
+	assert(pcall(dofile, file))
 	
-	if not x then
-		error(e)
-	end
+	--if not x then
+	--	error(e)
+	--end
 end
