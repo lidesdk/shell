@@ -1,8 +1,7 @@
 --- Get the name of the operating system.
----		Returns one string: OS Name like "Linux"
+---		Returns one lowercase string: OS Name like "linux"
 ---
---- string getOSVersion( nil )
-function lide_platform_getOSName( ... )
+function lide_platform_get_osname ()
 	if (package.config:sub(1,1) == '\\') and os.getenv 'OS' == 'Windows_NT' then
 		return 'windows';
 	elseif (package.config:sub(1,1) == '/') and io.popen 'uname -s':read '*l' == 'Linux' then
@@ -12,21 +11,31 @@ function lide_platform_getOSName( ... )
 	end
 end
 
--- Get architecture of current OS
--- string 'x86', 'x64'
-function lide_platform_getArch ()
-	local _osname = lide_platform_getOSName():lower()
+---
+-- Get the architecture of current binaries (OS)
+--    string 'x86', 'x64', 'arm'
+---
+function lide_platform_get_osarch ()
+	local _osname = lide.platform.get_osname():lower()
+
 	if (_osname == 'windows') then
 		return tostring(os.getenv 'PROCESSOR_ARCHITECTURE' : gsub ('AMD64', 'x64')):sub(1,3);
 	elseif (_osname == 'linux') then
-		return io.popen 'uname -m' : read '*a' : gsub ('x86_64', 'x64') : gsub ( 'i686', 'x86' ):sub(1,3);
+		--- 
+		-- Linux support contains: "x86", "x64" and "arm" architectures:
+		---
+
+		return io.popen 'uname -m' : read '*a'
+			   : gsub ('x86_64' , 'x64')
+			   : gsub ('i686'   , 'x86')
+			   : gsub ('aarch64', 'arm'):sub(1,3);
 	end
 end
 
 local function normalize_path ( path )
-	if lide_platform_getOSName() == 'windows' then
+	if lide_platform_get_osname() == 'windows' then
 		return (path:gsub('/', '\\'));
-	elseif lide_platform_getOSName() == 'linux' then
+	elseif lide_platform_get_osname() == 'linux' then
 		return tostring(path:gsub('\\', '/'):gsub('//', '/'));
 	end
 end
@@ -35,37 +44,34 @@ end
 local file = arg[1]
 
 do
-	local _currentOSName = lide_platform_getOSName():lower();
-	local _currentArch   = lide_platform_getArch():lower();
+	local _current_osname = lide_platform_get_osname():lower();
+	local _current_osarch = lide_platform_get_osarch():lower();
+	local _current_osext  = '?'
 
-	local lide_path = os.getenv 'LIDE_PATH'
+	local LIDE_PATH = os.getenv 'LIDE_PATH'
 
-	package.path  = lide_path .. '\\libraries\\lua\\?.lua;' ..
-	lide_path .. '\\libraries\\lua\\?\\init.lua;' ..
-	lide_path .. '\\libraries\\?.lua;' ..
-
-	lide_path .. '\\libraries\\'.._currentOSName..'\\'.._currentArch..'\\lua\\?.lua;' .. 
-	lide_path .. '\\libraries\\'.._currentOSName..'\\'.._currentArch..'\\lua\\?\\init.lua;'
-	
-	if _currentOSName == 'linux' then
-		local LIDE_PATH = os.getenv 'LIDE_PATH'
-
-		package.cpath = LIDE_PATH .. '/clibs/linux/x64/?.so;' .. 
-						LIDE_PATH .. '\\libraries\\'.._currentOSName.. '\\'.._currentArch..'\\clibs\\?.so;' .. 
-						LIDE_PATH .. '\\libraries\\'.._currentOSName..'\\'.._currentArch..'\\clibs\\?\\core.so;' .. package.cpath 
-	else
-		--	package.cpath  = lide_path .. '\\libraries\\' .._currentOSName.. '\\'.._currentArch..'\\clibs\\?.dll;'
-		local LIDE_PATH = os.getenv 'LIDE_PATH'
-
-		package.cpath = LIDE_PATH .. '\\libs\\linux\\x64\\?.dll;' .. 
-						LIDE_PATH .. '\\libraries\\'.._currentOSName.. '\\'.._currentArch..'\\clibs\\?.dll;' .. 
-						LIDE_PATH .. '\\libraries\\'.._currentOSName..'\\'.._currentArch..'\\clibs\\?\\core.dll;' .. package.cpath
+	if _current_osname == 'linux' then
+		_current_osext = '.so';
+	elseif _current_osname == 'windows' then
+		_current_osext = '.dll';
 	end
+
+	package.path  = LIDE_PATH .. '/libraries/lua/?.lua;' ..
+					LIDE_PATH .. '/libraries/lua/?/init.lua;' ..
+					LIDE_PATH .. '/libraries/?.lua;' ..
+
+					LIDE_PATH .. ('/libraries/%s/%s/lua/?.lua;'):format(_current_osname, _current_osarch) .. 
+					LIDE_PATH .. ('/libraries/%s/%s/lua/?/init.lua;'):format(_current_osname, _current_osarch) .. 
+					package.path;
+
+	package.cpath = LIDE_PATH .. ('/clibs/%s/%s/?.%s;'):format(_current_osname, _current_osarch, _current_osext) ..
+					LIDE_PATH .. ('/libraries/%s/%s/clibs/?.%s;'):format(_current_osname, _current_osarch, _current_osext) ..
+					LIDE_PATH .. ('/libraries/%s/%s/clibs/?/core.%s;'):format(_current_osname, _current_osarch, _current_osext) ..
+					package.cpath;
 
 	package.path  = normalize_path(package.path);
 	package.cpath = normalize_path(package.cpath);
 
-	--print('a')
 	--lide = require 'lide.base.init'
 	----------------------------------------------------------------------------------------
 	----------------------------------------------------------------------------------------
