@@ -1,3 +1,13 @@
+--////////////////////////////////////////////////////////////////////
+--// Name:        lide.lua
+--// Purpose:     Lua interpreter with lide framework integrated
+--// Created:     2018/08/22
+--// Copyright:   (c) 2018 Hernan Dario Cano [dcanohdev@gmail.com]
+--// License:     GNU GENERAL PUBLIC LICENSE
+--///////////////////////////////////////////////////////////////////
+
+
+
 --- Get the name of the operating system.
 ---		Returns one lowercase string: OS Name like "linux"
 ---
@@ -19,12 +29,16 @@ function lide_platform_get_osarch ()
 	local _osname = lide_platform_get_osname():lower()
 
 	if (_osname == 'windows') then
-		return tostring(os.getenv 'PROCESSOR_ARCHITECTURE' : gsub ('AMD64', 'x64')):sub(1,3);
+		--- 
+		-- Windows support contains: "x86" architectures:
+		---		
+		return tostring ( os.getenv 'PROCESSOR_ARCHITECTURE' 
+			: gsub ('AMD64', 'x64')):sub(1,3);
+
 	elseif (_osname == 'linux') then
 		--- 
 		-- Linux support contains: "x86", "x64" and "arm" architectures:
 		---
-
 		return io.popen 'uname -m' : read '*a'
 			   : gsub ('x86_64' , 'x64')
 			   : gsub ('i686'   , 'x86')
@@ -33,9 +47,9 @@ function lide_platform_get_osarch ()
 end
 
 local function normalize_path ( path )
-	if lide_platform_get_osname() == 'windows' then
+	if ( lide_platform_get_osname() == 'windows' ) then
 		return (path:gsub('/', '\\'));
-	elseif lide_platform_get_osname() == 'linux' then
+	elseif ( lide_platform_get_osname() == 'linux' ) then
 		return tostring(path:gsub('\\', '/'):gsub('//', '/'));
 	end
 end
@@ -72,15 +86,6 @@ do
 
 	package.path  = normalize_path(package.path);
 	package.cpath = normalize_path(package.cpath);
-
-	--lide = require 'lide.base.init'
 	----------------------------------------------------------------------------------------
-	----------------------------------------------------------------------------------------
-
-	--local x, e = 
-	assert(pcall(dofile, file))
-	
-	--if not x then
-	--	error(e)
-	--end
+	assert(pcall(dofile, file));
 end

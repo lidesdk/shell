@@ -6,7 +6,7 @@
 -- // License:     GNU GENERAL PUBLIC LICENSE
 -- ///////////////////////////////////////////////////////////////////////////////
 
-reposapi    = { repos = {} }
+reposapi    = { repos = { } };
 luasql      = require 'luasql.sqlite3'
 github      = require 'github'
 inifile     = require 'inifile'

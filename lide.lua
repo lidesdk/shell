@@ -1,10 +1,10 @@
--- ///////////////////////////////////////////////////////////////////////////////
--- // Name:        lide.lua
--- // Purpose:     Lua interpreter with lide framework integrated
--- // Created:     2017/09/24
--- // Copyright:   (c) 2017 Hernan Dario Cano [dcanohdev@gmail.com]
--- // License:     GNU GENERAL PUBLIC LICENSE
--- ///////////////////////////////////////////////////////////////////////////////
+--////////////////////////////////////////////////////////////////////
+--// Name:        lide.lua
+--// Purpose:     Lua interpreter with lide framework integrated
+--// Created:     2017/09/24
+--// Copyright:   (c) 2017 Hernan Dario Cano [dcanohdev@gmail.com]
+--// License:     GNU GENERAL PUBLIC LICENSE
+--////////////////////////////////////////////////////////////////////
 
 assert(os.getenv 'LIDE_PATH', '[lide shell] Please define `LIDE_PATH` variable.');
 

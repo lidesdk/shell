@@ -1,0 +1,2 @@
+sudo apt-get install libzzip-0-13
+sudo apt install libgtk2.0-0

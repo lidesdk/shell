@@ -29,7 +29,7 @@ function http.test_connection ( url )
 end
 
 function http.download ( url, dest )
-	isString(url); isString(dest)
+	isString(url); isString(dest);
 	
 	-- check tempfile path
 	local file, errm = io.open ( dest, 'w+b');
@@ -41,28 +41,52 @@ function http.download ( url, dest )
 	local connection, errm = http.test_connection(url);
 
 	if connection then
-		local response = requests.get(url)
+		local response = requests.get(url);
 		local file_content = response.text
 		local temp_file = dest
 		
 		file:write(file_content); file:flush();
-		file:close()
+		file:close();
 	else
 		local msg_error = '[lide.http] No connection ' .. (  ':' and errm or 'there is a problem in the url.')
-		error (msg_error, 2)
+		error (msg_error, 2);
 	end
 end
 
-function http.get( ... )
-	return requests.get(...)
+function http.get ( ... )
+	return requests.get(...);
 end
 
-function http.post( ... )
-	return requests.post(...)
+function http.head ( ... )
+	return requests.head(...);
 end
 
-function http.put( ... )
-	return requests.put(...)
+function http.post ( ... )
+	return requests.post(...);
+end
+
+function http.put ( ... )
+	return requests.put(...);
+end
+
+function http.delete ( ... )
+	return requests.delete(...);
+end
+
+function http.connect ( ... )
+	return requests.connect(...);
+end
+
+function http.options ( ... )
+	return requests.options (...);
+end
+
+function http.trace ( ... )
+	return requests.trace (...);
+end
+
+function http.patch ( ... )
+	return requests.patch (...);
 end
 
 return http

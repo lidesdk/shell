@@ -1,3 +1,11 @@
+# ////////////////////////////////////////////////////////////////////
+# // Name:        lide.lua
+# // Purpose:     Appveyor test on Windows
+# // Created:     2018/08/22
+# // Copyright:   (c) 2018 Hernan Dario Cano [dcanohdev@gmail.com]
+# // License:     GNU GENERAL PUBLIC LICENSE
+# ////////////////////////////////////////////////////////////////////
+
 version: 0.1-{build}
 
 shallow_clone: true

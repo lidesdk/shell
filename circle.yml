@@ -1,9 +1,17 @@
+# ////////////////////////////////////////////////////////////////////
+# // Name:        lide.lua
+# // Purpose:     CircleCI test on Linux
+# // Created:     2018/08/22
+# // Copyright:   (c) 2017 Hernan Dario Cano [dcanohdev@gmail.com]
+# // License:     GNU GENERAL PUBLIC LICENSE
+# ////////////////////////////////////////////////////////////////////
+
 dependencies:
   pre:
-    # install lua interpreter and luarocks
+    # Install lua 5.1.4 interpreter and luarocks
     - sudo apt-get install lua5.1 luarocks
 
-    # las siguientes  librerias del repositorio stable:
+    # Las siguientes  librerias del repositorio stable:
     # xml necesita libstdc++6 (- sudo apt-get install libstdc++6)
     # zip necesita libzzip-0.so.13
     - sudo cp $PWD/clibs/linux/x64/pcaf_libstdc++.so.6 /usr/lib/x86_64-linux-gnu/libstdc++.so.6
@@ -22,7 +30,7 @@ test:
     # Executing tests:
 
         # executing the tests with default lua interpreter:
+        
         # set Lide environment vars
-        #- export LIDE_PATH=$PWD && lua5.1 tests/linux_x64_shell_test.lua
         - export LIDE_PATH=$PWD && ./lide.sh tests/linux_x64_shell_test.lua
         - export LIDE_PATH=$PWD && ./lide.sh --test
