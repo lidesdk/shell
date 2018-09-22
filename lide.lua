@@ -178,7 +178,8 @@ function framework.run ( filename, env, req, ... )
 			local _exec_str  = '%s/bin/%s/%s/lua %s/bin/lide51.lua %s'
 
 			assert(io.popen ( 
-				_exec_str:format(LIDE_PATH, CURRENT_PLATFORM, CURRENT_ARCH, filename)
+				--_exec_str:format(LIDE_PATH, CURRENT_PLATFORM, CURRENT_ARCH, filename)
+				_exec_str:format(LIDE_PATH, CURRENT_PLATFORM, CURRENT_ARCH, LIDE_PATH, filename)
 				
 			));
 		end
