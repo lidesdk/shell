@@ -175,7 +175,7 @@ function framework.run ( filename, env, req, ... )
 			--- componentes graficos compatibles con wxLua y Lua.
 
 			--local _exec_str  = '%s/bin/%s/%s/lidefreeze.exe %s'
-			local _exec_str  = '%s/bin/%s/%s/lua %s/bin/lide51.lua %s'
+			local _exec_str  = '%s/bin/%s/%s/lua5.1 %s/bin/lide51.lua %s'
 
 			assert(io.popen ( 
 				--_exec_str:format(LIDE_PATH, CURRENT_PLATFORM, CURRENT_ARCH, filename)
