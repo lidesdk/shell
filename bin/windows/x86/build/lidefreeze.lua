@@ -13,7 +13,7 @@
 --			.. os.getenv 'LIDE_PATH' .. '/libraries/?.lua;' 
 
 --package.cpath = os.getenv 'LIDE_PATH' .. '/libraries/windows/x86/clibs/?.dll;' 
-dofile 'D:/proyectos/lidesdk/shell/bin/lide51.lua'
+assert( pcall(dofile, 'D:/proyectos/lidesdk/shell/bin/lide51.lua') );
 
 --if file then
 --	assert( pcall(dofile, file) )
