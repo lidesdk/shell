@@ -162,10 +162,10 @@ function framework.run ( filename, env, req, ... )
 		if ( CURRENT_PLATFORM == 'linux' ) then
 			local _exec_str  = '%s/bin/%s/%s/lua %s/bin/lide51.lua %s'
 
-			os.execute ( 
+			assert(io.popen ( 
 				_exec_str:format(LIDE_PATH, CURRENT_PLATFORM, CURRENT_ARCH, LIDE_PATH, filename)
 				
-			);
+			));
 
 		elseif ( CURRENT_PLATFORM == 'windows' ) then
 			--- Ejecutamos el interprete de lua basado en wxluafreeze:
@@ -176,10 +176,10 @@ function framework.run ( filename, env, req, ... )
 
 			local _exec_str  = '%s/bin/%s/%s/lidefreeze.exe %s'
 
-			os.execute ( 
+			assert(io.popen ( 
 				_exec_str:format(LIDE_PATH, CURRENT_PLATFORM, CURRENT_ARCH, filename)
 				
-			);
+			));
 		end
 	end
 end
