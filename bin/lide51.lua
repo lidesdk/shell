@@ -87,5 +87,8 @@ do
 	package.path  = normalize_path(package.path);
 	package.cpath = normalize_path(package.cpath);
 	----------------------------------------------------------------------------------------
-	assert(pcall(dofile, file));
+	local yeee, eqq = pcall(dofile, file)
+	if not (yeee) then
+		error(eqq)
+	end
 end

@@ -174,12 +174,10 @@ function framework.run ( filename, env, req, ... )
 			--- Este ejecutable contiene todas las librerias necesarias para una correcta ejecucion de
 			--- componentes graficos compatibles con wxLua y Lua.
 
-			--local _exec_str  = '%s/bin/%s/%s/lidefreeze.exe %s'
-			local _exec_str  = '%s/bin/%s/%s/lua5.1 %s/bin/lide51.lua %s'
+			local _exec_str  = '%s/bin/%s/%s/lidefreeze.exe %s'
 
 			assert(io.popen ( 
-				--_exec_str:format(LIDE_PATH, CURRENT_PLATFORM, CURRENT_ARCH, filename)
-				_exec_str:format(LIDE_PATH, CURRENT_PLATFORM, CURRENT_ARCH, LIDE_PATH, filename)
+				_exec_str:format(LIDE_PATH, CURRENT_PLATFORM, CURRENT_ARCH, filename)
 				
 			));
 		end
