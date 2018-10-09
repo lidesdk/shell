@@ -1,103 +1,96 @@
--- Copyright (c) 2015 Laurent Zubiaur
+-- ///////////////////////////////////////////////////////////////////
+-- // Name:      inifile.lua
+-- // Purpose:   Inifile parser 1.0
+-- // Created:   2018/10/09
+-- // Copyright: (c) 2018 Hernan Dario Cano [dcanohdev[at]gmail.com]
+-- // License:   GNU GENERAL PUBLIC LICENSE
+-- ///////////////////////////////////////////////////////////////////
 
--- Permission is hereby granted, free of charge, to any person obtaining a copy
--- of this software and associated documentation files (the "Software"), to deal
--- in the Software without restriction, including without limitation the rights
--- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
--- copies of the Software, and to permit persons to whom the Software is
--- furnished to do so, subject to the following conditions:
+local inifile = {}
 
--- The above copyright notice and this permission notice shall be included in
--- all copies or substantial portions of the Software.
-
--- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
--- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
--- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
--- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
--- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
--- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
--- THE SOFTWARE.
-
--- See README.md for the documentation and examples
-
-local lpeg = require 'lpeg'
-lpeg.locale(lpeg)   -- adds locale entries into 'lpeg' table
-
--- The module
-local ini = {}
-
-ini.config = function(t)
-  -- Config parameters
-  local sc = t.separator or '=' -- Separator character
-  local cc = t.comment or ';#' -- Comment characters
-  local trim = t.trim == nil and true or t.trim -- Should capture or trim white spaces
-  local lc = t.lowercase == nil and false or t.lowercase -- Should keys be lowercase?
-  local escape = t.escape == nil and true or t.escape -- Should string literals used escape sequences?
-
-  -- LPeg shortcut
-  local P = lpeg.P    -- Pattern
-  local R = lpeg.R    -- Range
-  local S = lpeg.S    -- String
-  local V = lpeg.V    -- Variable
-  local C = lpeg.C    -- Capture
-  local Cf = lpeg.Cf  -- Capture floding
-  local Cc = lpeg.Cc  -- Constant capture
-  local Ct = lpeg.Ct  -- Table capture
-  local Cg = lpeg.Cg  -- Group capture
-  local Cs = lpeg.Cs  -- Capture String (replace)
-  local space = lpeg.space -- include tab and new line (\n)
-  local alpha = lpeg.alpha
-  local digit = lpeg.digit
-  local any = P(1)
-
-  local _alpha = P('_') + alpha -- underscore or alpha character
-  local keyid = _alpha^1 * (_alpha + digit)^0
-  -- Lua escape sequences (http://www.lua.org/pil/2.4.html)
-  if escape then
-    any = any
-      - P'\\a' + P'\\a'/'\a' -- bell
-      - P'\\n' + P'\\n'/'\n' -- newline
-      - P'\\r' + P'\\r'/'\r' -- carriage return
-      - P'\\t' + P'\\t'/'\t' -- horizontal tab
-      - P'\\f' + P'\\f'/'\f' -- form feed
-      - P'\\b' + P'\\b'/'\b' -- back space
-      - P'\\v' + P'\\v'/'\v' -- vertical tab
-      - P'\\\\' + P'\\\\'/'\\' -- backslash
-  end
-
-  ini.grammar = P{
-    'all';
-    key = not lc and C(keyid) * space^0 or Cs(keyid / function(s) return s:lower() end) * space^0,
-    sep = P(sc),
-    cr = P'\n' + P'\r\n',
-    comment = S(cc)^1 * lpeg.print^0,
-    string = space^0 * P'"' * Cs((any - P'"' + P'""'/'"')^0) * P'"' * space^0,
-    value = trim and space^0 * C(((space - '\n')^0 * (any - space)^1)^1) * space^0 or C((any - P'\n') ^1),
-    set = Cg(V'key' * V'sep' * (V'string' + V'value')),
-    line = space^0 * (V'comment' + V'set'),
-    body = Cf(Ct'' * (V'cr' + V'line')^0, rawset),
-    label = P'[' * space^0 * V'key' * space^0 * P']' * space^0, -- the section label
-    section = space^0 * Cg(V'label' * V'body'),
-    sections = V'section' * (V'cr' + V'section')^0,
-    all = Cf(Ct'' * ((V'cr' + V'line')^0 * V'sections'^0), rawset) * (V'cr' + -1), -- lines followed by a line return or end of string
-  }
+-- Delimit string to table: 
+function string.delim(str, d)
+   local a,t,c,b = 0, {}
+   
+   repeat
+      b = str:find(d or '|', a)
+      if b then
+         c = str:sub(a, b-1)
+         a = b +1
+      else
+         c = str:sub(a, #str)
+      end
+      t[#t+1] = c
+   until b == nil 
+   return t
+   ---------------------------------------
+   -- usage: 
+   -- t = string.delim "thedary|thd" 
+   -- t = string.delim("thedary, dario, cano",',')
+   ---------------------------------------
 end
 
-ini.parse = function(data)
-  if type(data) == 'string' then
-    return lpeg.match(ini.grammar, data)
-  end
-  return {}
+local function trim2(s)
+	return s:match "^%s*(.-)%s*$"
 end
 
-ini.parse_file = function(filename)
-  local f = assert(io.open(filename, "r"))
-  local t = ini.parse(f:read('*all'))
-  f:close()
-  return t
+function inifile.parse ( inistring )
+	
+	local h_list, h1, h2, h_name = {}; 
+	repeat
+		--- Extract headers:
+		h1 = inistring:find ('%[', h2);
+		h2 = inistring:find ('%]', h1);
+		
+		if h1 and h2 then
+			h_name = inistring:sub(h1+1, h2-1);
+			h_list[#h_list+1] = '%['.. h_name .. '%]'
+		end
+	until not h1
+
+	local _initable = {};
+
+	for k,v in pairs(h_list) do
+		if h_list[k] then
+			local si1, se1, si2, se2;
+			local section_str;
+
+			si1, se1 = inistring:find ( h_list[k] );       -- SectionEnd1
+			if h_list[k+1] then
+				si2, se2 = inistring:find ( h_list[k+1] ); --SectionInit2, SectionEnd2
+			else
+				se2 = #inistring
+				si2 = se2
+			end
+
+			--- Si es el ultimo:
+			if (si2 == #inistring) then
+				section_str = (inistring:sub(se1+1, si2));
+			else
+				section_str = (inistring:sub(se1+1, si2-1));
+			end
+				--lide.log('section_str' .. section_str..':::')
+			--for _, line in pairs(section_str:delim '\n') do
+			for line in section_str:gmatch("[^\r\n]+") do
+				if line:gsub(' ', '') ~= '' then
+					local line_del = line:delim '=';
+
+					local section_name = h_list[k]:sub(3, #h_list[k]-2);
+					local skey_name = trim2(line_del[1]:gsub(' ', ''));
+					_initable[section_name] = _initable[section_name] or {}
+					_initable[section_name][skey_name] = trim2(line_del[2])
+				end
+			end
+		end
+	end
+
+	return _initable
 end
 
--- Use default settings
-ini.config{}
+function inifile.parse_file ( file )
+	local thefile =  io.open(file, 'r');
+	local file_content = thefile:read '*a';
+	return inifile.parse(file_content);
+end
 
-return ini
+return inifile

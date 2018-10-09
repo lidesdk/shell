@@ -87,5 +87,7 @@ do
 	package.path  = normalize_path(package.path);
 	package.cpath = normalize_path(package.cpath);
 	----------------------------------------------------------------------------------------
+	require 'lide.base.init'
+	
 	assert(pcall(dofile, file));
 end

@@ -22,6 +22,7 @@ local installed_db_path = normalize_path((app.folders.libraries .. '/%s/%s/insta
 
 lide.mktree(installed_db_path:gsub('installed.db', ''))		
 
+reposapi.access_token = '8dd5e4bcf2440bfad374a37d91d54576be9be695'
 
 --here
 reposapi.installed = sqldatabase:new(installed_db_path, 'sqlite3')
@@ -69,6 +70,10 @@ local function trim ( str )
 	repeat str = str:gsub ('  ', '')
 	until not str:find ' '
 	return str
+end
+
+local function trim2(s)
+	return s:match "^%s*(.-)%s*$"
 end
 
 --
@@ -274,14 +279,16 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 
 	local _manifest_file = normalize_path(app.folders.libraries ..'/'.._package_name..'/'.. _package_name ..'.manifest')
 	
-	if _package_prefix and _package_prefix:sub(#_package_prefix,#_package_prefix) ~= '/' then 
-		_package_prefix = (_package_prefix .. '/'):gsub('//', '/')
-	else
-		--_package_prefix = (_package_name .. '-package.lide')
-	end
+	if type(_package_prefix) == 'string' then
+		if _package_prefix and _package_prefix:sub(#_package_prefix,#_package_prefix) ~= '/' then 
+			_package_prefix = (_package_prefix .. '/'):gsub('//', '/')
+		else
+			--_package_prefix = (_package_name .. '-package.lide')
+		end
 	
-	if _package_prefix == '/' then
-		_package_prefix = ''
+		if _package_prefix == '/' then
+			_package_prefix = ''
+		end
 	end
 
 	if not lide.file.doesExists(_package_file) then
@@ -330,9 +337,25 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 
 	------------------------------------------------------------
 	------------------------------------------------------------
-	local _manifest_contents, errmsg = lide.zip.getInternalFileContent ( _package_file, (_package_prefix or '') .. _package_name .. '.manifest' );
+	--lide.log('[lide.zip] _prefix: ' .. _package_prefix);
+	--lide.log('[lide.zip] getInternalFileContent: '.. _package_file );
 
-	local package_manifest   = inifile.parse (_manifest_contents)[_package_name]
+	local _manifest_contents, errmsg = lide.zip.getInternalFileContent ( _package_file, (_package_prefix or '') .. _package_name .. '.manifest' );
+	lide.log(_manifest_contents)
+---	lide.log(tostring(('1.22')))
+	--lide.log(tostring(inifile.parse (_manifest_contents, 'memory')))
+
+	local package_manifest = inifile.parse (_manifest_contents, 'memory') [_package_name];
+
+
+--	os.exit())
+
+	--lide.log('[repos-api] package_manifest.repo$: '.. package_manifest);
+
+	--table.foreach(package_manifest, print)
+
+	--lide.log('[repos-api] package_manifest.repo$: '.. package_manifest.repository);	
+
 	local _package_version   = package_manifest ['version']
 	if not package_manifest[_osname] then
 	   return false, (('This package isn\'t compatible with %s'):format(_osname))
@@ -424,7 +447,6 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 
 	lide_folder_copy(_arch_runtime_downloads, _runtimefolder)
 
-
 	local function install_depends ( package_manifest, _package_name )
 		local depends = package_manifest.depends : delim ','
 
@@ -432,16 +454,14 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 			local _depend_name, _depend_version
 			local a,b = _depend_string:find ' '
 
-			if a or b then
-				_depend_name     = _depend_string:sub(1, b) :gsub (' ', '');
-				_depend_version  = _depend_string:sub(_depend_string:find ' ', #_depend_string):gsub(' ', '');
-			else
-				_depend_name     = _depend_string :gsub (' ', '');
-				_depend_version  = ''
-			end
+			_depend_name    = _depend_string:delim ' '[1]
+			_depend_version = _depend_string:delim ' '[2]
 			
+			lide.log('[repos-api] _depend_name: '   .. _depend_name)
+			lide.log('[repos-api] _depend_version:' .. _depend_version)
+
 			if not reposapi.get_installed_package(_depend_name) then
-				io.stdout:write (('\n > installing dependencies for %s: '):format(_package_name));
+				print (('> installing dependencies for %s: '):format(_package_name));
 			end
 
 			if reposapi.get_installed_package(_depend_name) then
@@ -449,9 +469,13 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 				--io.stdout:write (('%s %s '):format(_depend_name, _depend_version));
 			else
 				--- print only current installing:
-				io.stdout:write (('%s %s '):format(_depend_name, _depend_version));
+				print (('> %s %s ...'):format(_depend_name, _depend_version));
 
-				local _package_prefix = reposapi.repos[package_manifest.repository] . sqldb : select('select * from lua_packages where package_name like "'.._depend_name..'" ORDER BY package_version DESC LIMIT 1;')
+				local __packag_repo = trim2(package_manifest.repository);
+				
+				lide.log('__packag_repo: ' .. __packag_repo)
+
+				local _package_prefix = reposapi.repos[__packag_repo] . sqldb : select('select * from lua_packages where package_name like "'.._depend_name..'" ORDER BY package_version DESC LIMIT 1;')
 				
 				if _package_prefix and _package_prefix[1] then
 					_package_prefix = _package_prefix[1].package_prefix
@@ -567,8 +591,8 @@ function reposapi.update_package ( _packagename, _packagever )
 	local _manifest_file_content = lide_zip.getInternalFileContent(zip_package..'-temp', _internal_path);
 	
 	if (_manifest_file_content) then
-		if inifile.parse(_manifest_file_content)[_packagename]['compatibility'] then
-			for bcompat_ver in inifile.parse(_manifest_file_content)[_packagename]['compatibility']:delimi ',' do
+		if inifile.parse(_manifest_file_content, 'memory')[_packagename]['compatibility'] then
+			for bcompat_ver in inifile.parse(_manifest_file_content, 'memory')[_packagename]['compatibility']:delimi ',' do
 				if (bcompat_ver == lualibs[1]['package_version']) then
 					IS_COMPATIBLE = true
 					break;

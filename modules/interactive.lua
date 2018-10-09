@@ -307,6 +307,9 @@ end
 
 
 local function handle_luainit()
+  --- Put here code to initialize:
+  require 'lide.base.init'
+
   local init = os_getenv(LUA_INIT)
   if init == nil then
     return  -- status OK
