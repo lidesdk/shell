@@ -1,3 +1,11 @@
+--////////////////////////////////////////////////////////////////////
+--// Name:        lide.lua
+--// Purpose:     Lua interpreter with lide framework integrated
+--// Created:     2018/10/10
+--// Copyright:   (c) 2018 Hernan Dario Cano [dcanohdev@gmail.com]
+--// License:     GNU GENERAL PUBLIC LICENSE
+--////////////////////////////////////////////////////////////////////
+
 local LIDE_PATH
 
 if os.getenv 'LIDE_PATH' then
