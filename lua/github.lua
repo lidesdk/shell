@@ -59,9 +59,13 @@ function github.download_file ( cloud_file_path, dest_file_path, ref, access_tok
 	local _github_file   = cloud_file_path:sub(x2+1, #cloud_file_path );
 	local _github_branch = 'master'
 	
+
 	local github_full_url = tostring(('https://raw.githubusercontent.com/%s/%s/%s/%s'):format(_github_user, _github_repo, _github_branch, _github_file));
+	--https://api.github.com/repos/%s/%s/contents/path
 	
-	http.download(github_full_url, dest_file_path)
+	http.download(github_full_url, dest_file_path, function ( ... )
+		-- body
+	end)
 end
 
 return github
