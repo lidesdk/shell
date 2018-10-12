@@ -1,0 +1,6 @@
+rock_manifest = {
+  lib={
+    ['luacurl.dll']='c92860dbded21bd7d7d7d0aa77d3b5c0'
+  },
+  ['luacurl-1.1-3.rockspec']='74282fe5458d02ca0d65a4c35d05bb79'
+}

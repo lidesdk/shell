@@ -262,7 +262,12 @@ function reposapi.download_package ( _package_name, _package_file, package_versi
 
 	if result_repo.package_url then
 		-- https://raw.githubusercontent.com/dcano/repos/master/stable/cjson/cjson-2.1.0.zip
-		http.download(result_repo.package_url, normalize_path(_package_file))
+		lide.log.printlog = true
+		lide.log ('[repos-api] result_repo.package_url: ' .. result_repo.package_url)
+
+		http.download(result_repo.package_url, normalize_path(_package_file), function ( ... )
+			print(...)
+		end)
 	else
 		-- Handle error
 	end
