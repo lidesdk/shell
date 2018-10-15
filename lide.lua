@@ -43,6 +43,10 @@ end
 
 lide = require 'lide.base.init'
 
+-- normalize paths:
+package.path  = lide.platform.normalize_path(package.path);
+package.cpath = lide.platform.normalize_path(package.cpath);
+
 --
 -- Define local functions that will be used on this app
 --
@@ -262,3 +266,4 @@ else
 		framework.run ( app.folders.sourcefolder .. '/modules/interactive.lua' )
 	end
 end
+

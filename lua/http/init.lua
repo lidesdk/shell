@@ -1,12 +1,13 @@
--- /////////////////////////////////////////////////////////////////////////////////////////////////
+-- ///////////////////////////////////////////////////////////////////
 -- // Name:        lide/http/init.lua
--- // Purpose:     HTTP facilities for Lua / Lide framework
+-- // Purpose:     lide.http 0.2 / HTTP facilities for Lua / Lide SDK
 -- // Author:      Hernan Dario Cano [dcanohdev@gmail.com]
--- // Created:     2016/10/16
--- // Copyright:   (c) 2016 Hernan Dario Cano
+-- // Created:     2018/10/14
+-- // Copyright:   (c) 2018 Hernan Dario Cano
 -- // License:     MIT License/X11 license
--- /////////////////////////////////////////////////////////////////////////////////////////////////
---
+-- ///////////////////////////////////////////////////////////////////
+-- lide.http 0.1 (2016/10/16)
+-- lide.http 0.2 (2018/10/14)
 
 local isString   = lide.core.base.isstring
 local isTable    = lide.core.base.istable

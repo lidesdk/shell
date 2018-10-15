@@ -261,12 +261,10 @@ function reposapi.download_package ( _package_name, _package_file, package_versi
 	end
 
 	if result_repo.package_url then
-		-- https://raw.githubusercontent.com/dcano/repos/master/stable/cjson/cjson-2.1.0.zip
-		lide.log.printlog = true
 		lide.log ('[repos-api] result_repo.package_url: ' .. result_repo.package_url)
 
 		http.download(result_repo.package_url, normalize_path(_package_file), function ( ... )
-			print(...)
+			-- lide.log (...)
 		end)
 	else
 		-- Handle error
@@ -464,10 +462,6 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 			
 			lide.log('[repos-api] _depend_name: '   .. _depend_name)
 			lide.log('[repos-api] _depend_version:' .. _depend_version)
-
-			if not reposapi.get_installed_package(_depend_name) then
-				print (('> installing dependencies for %s: '):format(_package_name));
-			end
 
 			if reposapi.get_installed_package(_depend_name) then
 				--printl '  > $_depend_name$ is installed now.'
