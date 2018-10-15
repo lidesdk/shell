@@ -1,2 +1,4 @@
+- http functions
 sudo apt-get install libzzip-0-13
+- widgets and gui?
 sudo apt install libgtk2.0-0
