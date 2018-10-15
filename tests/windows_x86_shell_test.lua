@@ -31,7 +31,7 @@ io.stdout : write '\t[OK]\n'
 
 -- Test installation of lfs (1.4.20 for windows):
 io.stdout : write '[lide shell] package install: '
-	install_package = io.popen (LIDE_PATH .. '/lide.bat install lfs 1.4.20') :read '*a'   
+	install_package = io.popen (LIDE_PATH .. '/lide.bat install lide.http 0.2.1') :read '*a'   
 	assert(type(io.open(LIDE_PATH .. '/libraries/windows/x86/clibs/lfs.dll', 'rb')) == 'userdata')
 
 io.stdout : write '\t[OK]\n'
