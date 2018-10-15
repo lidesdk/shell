@@ -392,7 +392,7 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 			
 			arch_line = arch_line:gsub(' ', '');
 
-			if not compatible and (tostring(arch_line:sub(1,3)) == _osarch) then 
+			if not compatible and (tostring(arch_line:sub(1,3)) == _osarch)
 			or	not compatible and (tostring(arch_line:sub(1,5)) == _osarch) then
 				compatible = true;
 			end
