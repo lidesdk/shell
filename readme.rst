@@ -6,15 +6,15 @@ execute scripts and create or search repositories of lua libraries.
 
 
 ========================================================= ====================================================================================
-   git branch: ``develop``                                  build status ``0.1.13-dev``
+   git branch: ``master``                                  build status ``0.1.13``
 ========================================================= ====================================================================================
- Tests executed with **Windows 10** x86 binaries		    .. image:: https://ci.appveyor.com/api/projects/status/tg8aq749c25jewg0/branch/develop?svg=true
-                                                                     :target: https://ci.appveyor.com/project/dcanoh/shell/develop/develop
- Tests executed with **Ubuntu 14.04** x64 binaries     	    .. image:: https://circleci.com/gh/lidesdk/shell/tree/develop.svg?style=svg
-                                                                     :target: https://circleci.com/gh/lidesdk/shell/tree/develop
+ Tests executed with **Windows 10** x86 binaries		    .. image:: https://ci.appveyor.com/api/projects/status/tg8aq749c25jewg0/branch/master?svg=true
+                                                                     :target: https://ci.appveyor.com/project/dcanoh/shell/master
+ Tests executed with **Ubuntu 14.04** x64 binaries     	    .. image:: https://circleci.com/gh/lidesdk/shell/tree/master.svg?style=svg
+                                                                     :target: https://circleci.com/gh/lidesdk/shell/tree/master
 ========================================================= ====================================================================================
 
-.. image:: https://github.com/lidesdk/commandline/raw/develop/screenshot.png
+.. image:: https://github.com/lidesdk/shell/raw/master/screenshot.png
    :scale: 90 %
    :align: center
 
