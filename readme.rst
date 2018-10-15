@@ -10,7 +10,7 @@ execute scripts and create or search repositories of lua libraries.
 ========================================================= ====================================================================================
  Tests executed with **Windows 10** x86 binaries		    .. image:: https://ci.appveyor.com/api/projects/status/tg8aq749c25jewg0/branch/master?svg=true
                                                                      :target: https://ci.appveyor.com/project/dcanoh/shell/master
- Tests executed with **Ubuntu 14.04** x64 binaries     	    .. image:: https://circleci.com/gh/lidesdk/shell/tree/master.svg?style=svg
+ Tests executed with **Ubuntu 14.04** x64 binaries     	    .. image:: https://circleci.com/gh/lidesdk/shell.svg?style=svg
                                                                      :target: https://circleci.com/gh/lidesdk/shell/tree/master
 ========================================================= ====================================================================================
 
