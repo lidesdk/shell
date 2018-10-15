@@ -453,8 +453,6 @@ function reposapi.install_package ( _package_name, _package_file, _package_prefi
 	local function install_depends ( package_manifest, _package_name )
 		local depends = package_manifest.depends : delim ','
 
-		print (('> Checking dependencies for %s: '):format(_package_name));
-
 		for _, _depend_string in pairs( depends ) do
 			local _depend_name, _depend_version
 			local a,b = _depend_string:find ' '
