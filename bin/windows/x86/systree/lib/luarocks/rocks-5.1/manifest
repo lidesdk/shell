@@ -1,41 +1,4 @@
 commands = {}
-dependencies = {
-   lanes = {
-      ["3.10.1-1"] = {
-         {
-            constraints = {
-               {
-                  op = ">=",
-                  version = {
-                     5, 1, string = "5.1"
-                  }
-               }
-            },
-            name = "lua"
-         }
-      }
-   }
-}
-modules = {
-   lanes = {
-      "lanes/3.10.1-1"
-   },
-   ["lanes.core"] = {
-      "lanes/3.10.1-1"
-   }
-}
-repository = {
-   lanes = {
-      ["3.10.1-1"] = {
-         {
-            arch = "installed",
-            commands = {},
-            dependencies = {},
-            modules = {
-               lanes = "lanes.lua",
-               ["lanes.core"] = "lanes/core.dll"
-            }
-         }
-      }
-   }
-}
+dependencies = {}
+modules = {}
+repository = {}
