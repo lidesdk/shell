@@ -6,7 +6,7 @@ execute scripts and create or search repositories of lua libraries.
 
 
 ========================================================= ====================================================================================
-   git branch: ``master``                                  build status ``0.1.13``
+   git branch: ``master``                                  build status ``0.2.0``
 ========================================================= ====================================================================================
  Tests executed with **Windows 10** x86 binaries		    .. image:: https://ci.appveyor.com/api/projects/status/tg8aq749c25jewg0/branch/master?svg=true
                                                                      :target: https://ci.appveyor.com/project/dcanoh/shell/master
@@ -91,7 +91,7 @@ Help & Documentation
 If you want to know more please read our official framework's 
 documentation:
 
-`- Lide Framework 0.1 on Read the docs <http://lide-framework.readthedocs.io/en/0.1>`_
+`- Lide Framework 0.2 on Read the docs <http://lide-framework.readthedocs.io/en/0.2>`_
 
 
 Credits and Authors
