@@ -39,14 +39,17 @@ function lide_platform_get_osarch ()
 		--- 
 		-- Linux support contains: "x86", "x64" and "arm" architectures:
 		---
-
-		return io.popen 'uname -m' : read '*a'
-			   : gsub ('x86_64' , 'x64')
-			   : gsub ('i686'   , 'x86')
-			   : gsub ('aarch64', 'arm64')
-			   : gsub ('armv7l' , 'arm32')
-			   : gsub ('\n', '') 
-			   : gsub (' ' , '') : sub(1,5);
+		local uname_a = io.popen 'uname -m' : read '*a';
+			
+		if uname_a: find 'x86_64' then
+			return 'x64';
+		elseif uname_a: find 'i686' then
+			return 'x86';
+		elseif uname_a: find 'aarch64' then
+			return 'arm64'
+		elseif uname_a: find 'armv7l' then
+			return 'arm32'			
+		end
 	end
 end
 
