@@ -106,4 +106,6 @@ Lide Shell is currently active and developing, today is maintained by (`@dcanoh 
 License
 =======
 
-Lide is licensed under (`The GNU General Public License <https://github.com/lidesdk/commandline/blob/master/LICENSE>`_). Copyright © 2018 Hernán Dario Cano.
+Lide is licensed under (`The GNU General Public License <https://github.com/lidesdk/commandline/blob/master/LICENSE>`_). 
+
+Copyright © 2018 Hernán Dario Cano.
