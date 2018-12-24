@@ -45,7 +45,8 @@ function lide_platform_get_osarch ()
 			   : gsub ('i686'   , 'x86')
 			   : gsub ('aarch64', 'arm64')
 			   : gsub ('armv7l' , 'arm32')
-			   : gsub (' ', '') : sub(1,5);
+			   : gsub ('\n', '') 
+			   : gsub (' ' , '') : sub(1,5);
 	end
 end
 
