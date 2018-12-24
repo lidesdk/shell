@@ -43,8 +43,9 @@ function lide_platform_get_osarch ()
 		return io.popen 'uname -m' : read '*a'
 			   : gsub ('x86_64' , 'x64')
 			   : gsub ('i686'   , 'x86')
-			   : gsub ('aarch64', 'arm64'):sub(1,5)
-			   : gsub ('armv7l' , 'arm32'):sub(1,5);
+			   : gsub ('aarch64', 'arm64')
+			   : gsub ('armv7l' , 'arm32')
+			   : gsub (' ', '') : sub(1,5);
 	end
 end
 
