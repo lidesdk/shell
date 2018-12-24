@@ -45,6 +45,7 @@ function lide_platform_get_osarch ()
 			   : gsub ('i686'   , 'x86')
 			   : gsub ('aarch64', 'arm64'):sub(1,5)
 			   : gsub ('armv7l' , 'arm32'):sub(1,5);
+	end
 end
 
 local function normalize_path ( path )
