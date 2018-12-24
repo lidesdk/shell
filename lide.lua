@@ -11,7 +11,7 @@ assert(os.getenv 'LIDE_PATH', '[lide shell] Please define `LIDE_PATH` variable.'
 io.stdout:setvbuf 'no'
 
 local LIDE_PATH     = os.getenv('LIDE_PATH')
-local _LIDE_VERSION = '0.1'
+local _LIDE_VERSION = '0.2'
 
 package.path  = LIDE_PATH .. '/libraries/?.lua;'; -- set package.path only to libraries folder
 
@@ -156,8 +156,8 @@ function framework.run ( filename, env, req, ... )
 	local chunk = loadfile(filename)
 	
 	if not chunk then	
-		print 'syntax error'
-		os.exit()
+		print (('[lide shell] Syntax error (%s)'):format(filename));
+		os.exit();
 	end
 
 	do  -- Usar una copia separada del Lide que se est?ejecutando:
@@ -166,7 +166,7 @@ function framework.run ( filename, env, req, ... )
 		if ( CURRENT_PLATFORM == 'linux' ) then
 			local _exec_str  = '%s/bin/%s/%s/lua %s/bin/lide51.lua %s'
 
-			assert(io.popen ( 
+			assert(os.execute ( 
 				_exec_str:format(LIDE_PATH, CURRENT_PLATFORM, CURRENT_ARCH, LIDE_PATH, filename)
 				
 			));

@@ -1,4 +1,4 @@
---////////////////////////////////////////////////////////////////////
+	--////////////////////////////////////////////////////////////////////
 --// Name:        lide.lua
 --// Purpose:     Lua interpreter with lide framework integrated
 --// Created:     2018/10/10
@@ -14,17 +14,16 @@ end
 
 -- Run standard internal tests:
 io.stdout : write '[lide shell] execution tests: '
-
-	assert(io.popen '.\\lide.bat --test' :read '*a' == '[lide test] all ok.\n')
-
+	assert(io.popen (LIDE_PATH ..'/lide --test') 
+	:read '*a' == '[lide test] all ok.\n')
+	
 io.stdout : write '\t[OK]\n'
 
 -- Test if luasql, lfs are on stable repo with search:
 io.stdout : write '[lide shell] package search: '
-	
-	 searchline = io.popen '.\\lide.bat search luasql' :read '*l'
+	 searchline = io.popen (LIDE_PATH .. '/lide search luasql') :read '*l'
 	 assert( searchline:sub (1, searchline : find '/' ) == 'stable/')
-	 searchline = io.popen '.\\lide.bat search lfs' :read '*l'
+	 searchline = io.popen (LIDE_PATH .. '/lide search lfs') :read '*l'
 	 assert( searchline:sub (1, searchline : find '/' ) == 'stable/')
 
 io.stdout : write '\t[OK]\n'
