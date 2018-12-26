@@ -73,7 +73,7 @@ do
 	package.path  = LIDE_PATH .. '/libraries/lua/?.lua;' ..
 					LIDE_PATH .. '/libraries/lua/?/init.lua;' ..
 					LIDE_PATH .. '/libraries/?.lua;' ..
-					'?.lua;'  ..
+					';?.lua;?\\init.lua;?.lua;' ..
 
 					LIDE_PATH .. ('/libraries/%s/%s/lua/?.lua;'):format(_current_osname, _current_osarch) .. 
 					LIDE_PATH .. ('/libraries/%s/%s/lua/?/init.lua;'):format(_current_osname, _current_osarch) .. 
@@ -82,6 +82,7 @@ do
 	package.cpath = LIDE_PATH .. ('/clibs/%s/%s/?%s;'):format(_current_osname, _current_osarch, _current_osext) ..
 					LIDE_PATH .. ('/libraries/%s/%s/clibs/?%s;'):format(_current_osname, _current_osarch, _current_osext) ..
 					LIDE_PATH .. ('/libraries/%s/%s/clibs/?/core%s;'):format(_current_osname, _current_osarch, _current_osext) ..
+					(';?.%s;'):format(_current_osext) ..
 					package.cpath;
 
 	package.path  = normalize_path(package.path);
